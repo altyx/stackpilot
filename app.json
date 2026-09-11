@@ -31,7 +31,8 @@
         {
           "color": "#0ba5ec"
         }
-      ]
+      ],
+      "./plugins/withAndroidReleaseSigning"
     ],
     "scheme": "stackpilot",
     "newArchEnabled": true,
