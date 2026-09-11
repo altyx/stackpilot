@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "StackPilot",
+    "slug": "stackpilot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.stackpilot"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "app.stackpilot"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#0ba5ec"
+        }
+      ]
+    ],
+    "scheme": "stackpilot",
+    "newArchEnabled": true,
+    "backgroundColor": "#0d1117",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "837ab21c-e789-40b6-b77a-91a3e0276ad4"
+      }
+    },
+    "owner": "altyx-lab"
+  }
+}

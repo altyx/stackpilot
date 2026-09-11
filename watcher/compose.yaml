@@ -1,0 +1,26 @@
+services:
+  portainer-watcher:
+    # Construction sur place. Pour deployer une image publiee, remplacez cette
+    # ligne par : image: ghcr.io/VOTRE_COMPTE/portainer-watcher:1.0.0
+    build: .
+    container_name: portainer-watcher
+    restart: unless-stopped
+    networks:
+      - portainer
+    environment:
+      PORTAINER_URL: ${PORTAINER_URL:?URL de l instance Portainer requise}
+      PORTAINER_TOKEN: ${PORTAINER_TOKEN:?jeton Portainer requis}
+      ENDPOINT_ID: ${ENDPOINT_ID:-1}
+      EXPO_PUSH_TOKENS: ${EXPO_PUSH_TOKENS:?jeton de l appareil requis}
+      IGNORE_CONTAINERS: ${IGNORE_CONTAINERS:-}
+      DEDUPE_SECONDS: ${DEDUPE_SECONDS:-120}
+      # N assouplit la verification TLS que pour le flux Portainer ; l envoi
+      # vers Expo reste verifie dans tous les cas.
+      PORTAINER_INSECURE_TLS: ${PORTAINER_INSECURE_TLS:-0}
+
+# Le service rejoint le reseau ou vit deja Portainer, pour l appeler par son nom
+# de conteneur sans exposer de port supplementaire.
+networks:
+  portainer:
+    external: true
+    name: ${PORTAINER_NETWORK:?nom du reseau Docker de Portainer requis}
