@@ -1,28 +1,20 @@
 name: Mobile release
 
-# Deux déclencheurs, un seul fichier : le numéro de build est `run_number`, que
-# les stores exigent strictement croissant. Deux workflows auraient deux
-# compteurs indépendants, et un envoi de production pourrait porter un numéro
-# inférieur à celui d'un envoi de test.
+# Test sur chaque fusion dans main, production sur un tag `vX.Y.Z`. Un seul
+# fichier pour les deux : le numéro de build est `run_number`, que les stores
+# exigent strictement croissant, et deux workflows auraient deux compteurs.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
-    inputs:
-      track:
-        description: Destination des builds
-        type: choice
-        options:
-          - beta
-          - production
-        default: beta
+
+permissions:
+  contents: read
 
 concurrency:
   group: mobile-release
   cancel-in-progress: false
-
-permissions:
-  contents: read
 
 jobs:
   prepare:
@@ -34,12 +26,29 @@ jobs:
       ios: ${{ steps.plan.outputs.ios }}
       android: ${{ steps.plan.outputs.android }}
     steps:
+      - uses: actions/checkout@v5
+
+      # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
+      # Vérifié ici, avant vingt minutes de compilation : sinon Apple refuserait
+      # l'envoi, ou pire, l'accepterait sous une version qu'on ne voulait pas.
+      - name: Vérifier que le tag correspond à la version
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(jq -r .expo.version app.json)
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Le tag $TAG ne correspond pas à la version $version de app.json. Bumpez la version, fusionnez, puis retaguez."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       # Les secrets ne sont pas lisibles dans un `if` de job : ce job les
       # traduit en sorties, et chaque plateforme est ignorée tant que les
       # siens manquent, sans faire échouer le workflow.
       - id: plan
         env:
-          TRACK: ${{ github.event_name == 'workflow_dispatch' && inputs.track || 'beta' }}
+          TRACK: ${{ github.ref_type == 'tag' && 'production' || 'beta' }}
           BUILD_NUMBER: ${{ github.run_number }}
           HAS_IOS: ${{ secrets.APPLE_TEAM_ID != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_API_KEY_P8_BASE64 != '' }}
           HAS_ANDROID: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && secrets.ANDROID_UPLOAD_KEY_ALIAS != '' && secrets.ANDROID_UPLOAD_KEY_PASSWORD != '' && secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
@@ -217,3 +226,41 @@ jobs:
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: ${{ needs.prepare.outputs.track == 'production' && 'production' || 'internal' }}
           status: ${{ needs.prepare.outputs.track == 'production' && 'draft' || 'completed' }}
+
+  release:
+    # Une GitHub Release par tag, créée seulement une fois les envois faits :
+    # elle atteste ce qui est parti aux stores, pas ce qu'on comptait envoyer.
+    # `!cancelled()` la laisse s'évaluer même si une plateforme a été ignorée.
+    name: GitHub Release
+    needs: [prepare, ios, android]
+    if: ${{ !cancelled() && !failure() && needs.prepare.outputs.track == 'production' && (needs.ios.result == 'success' || needs.android.result == 'success') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Récupérer le bundle Android
+        if: needs.android.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aab-${{ needs.prepare.outputs.build_number }}
+          path: dist
+
+      - name: Créer la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+          IOS: ${{ needs.ios.result }}
+          ANDROID: ${{ needs.android.result }}
+        run: |
+          notes="Build ${BUILD_NUMBER} · commit ${GITHUB_SHA::7}"
+          notes="$notes"$'\n'"iOS : ${IOS} · Android : ${ANDROID}"
+          assets=()
+          [ -f dist/app-release.aab ] && assets+=("dist/app-release.aab#StackPilot-${TAG}-${BUILD_NUMBER}.aab")
+          gh release create "$TAG" "${assets[@]}" \
+            --title "StackPilot ${TAG#v}" \
+            --notes "$notes" \
+            --generate-notes \
+            --verify-tag

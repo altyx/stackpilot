@@ -11,8 +11,8 @@ runner Linux, et les envois passent par les API d'Apple et de Google.
 | Événement | Destination |
 | --- | --- |
 | Fusion sur `main` | **Test** : TestFlight et piste interne Google Play |
-| *Run workflow* manuel, choix `beta` | idem |
-| *Run workflow* manuel, choix `production` | **Production** : App Store Connect et piste production Google Play, en brouillon |
+| *Run workflow* manuel | idem |
+| Tag `vX.Y.Z` poussé | **Production** : App Store Connect et piste production Google Play en brouillon, puis GitHub Release |
 
 Pour iOS, test et production sont **le même envoi** : un build arrive dans
 App Store Connect, apparaît dans TestFlight, et c'est depuis la console Apple
@@ -27,6 +27,40 @@ et rien n'est publié sans un lancement depuis la console.
 Tant que les secrets d'une plateforme manquent, son job est **ignoré avec un
 avertissement**, sans faire échouer le workflow. On peut donc fusionner sur
 `main` avant d'avoir les comptes.
+
+## Publier une version
+
+Le tag est le déclencheur de la production, et il doit correspondre à la
+version de `app.json` — le workflow le vérifie avant de compiler.
+
+1. Mettre `expo.version` à jour dans `app.json`, fusionner sur `main`. Cette
+   fusion produit un dernier build de test, à vérifier.
+2. Taguer ce commit et pousser le tag :
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+3. Le workflow envoie aux stores, puis crée la **GitHub Release** `v1.0.0` avec
+   les notes générées depuis les commits et le bundle Android en pièce jointe.
+   Sa description rappelle le numéro de build et le commit.
+4. Terminer dans les consoles : soumettre le build à l'App Store, lancer le
+   déploiement du brouillon Google Play.
+
+Le tag atteste ce qui a été **envoyé**, pas ce qui est en ligne : la revue
+Apple et le déploiement progressif Google se suivent dans leurs consoles.
+
+Si la production échoue après le tag, supprimez le tag (`git push --delete
+origin v1.0.0`), corrigez, retaguez. Ne relancez pas le run : un *Re-run*
+garde le même numéro de build, que les stores refuseront.
+
+## Retrouver le commit d'un build
+
+L'application affiche, sous la liste des environnements, une ligne du type
+`StackPilot 1.0.0 (57) · a1d8e36` : version et numéro de build lus dans le
+binaire, commit gravé à la compilation par [`app.config.ts`](../app.config.ts).
+C'est la ligne à demander à un testeur. Les builds de test n'ont pas de tag ;
+cette ligne suffit à les retrouver.
 
 ## Numéro de build
 
@@ -142,4 +176,7 @@ quand le job iOS échoue.
 - **`Package not found`** à l'envoi Google Play : le premier envoi manuel n'a
   pas été fait, ou le compte de service n'a pas accès à l'application.
 - **Numéro de build déjà utilisé** : un run a été relancé (*Re-run*), ce qui
-  réutilise le même `run_number`. Déclencher un nouveau run à la place.
+  réutilise le même `run_number`. Pour un test, refaire une fusion ; pour une
+  production, supprimer le tag et retaguer.
+- **`Le tag vX.Y.Z ne correspond pas à la version`** : `app.json` n'a pas été
+  bumpé avant le tag. Supprimer le tag, bumper, fusionner, retaguer.

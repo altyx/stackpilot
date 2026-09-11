@@ -120,10 +120,10 @@ s'appliquent donc telles quelles.
 
 ## Publication
 
-Un workflow GitHub Actions construit et envoie l'application : fusion sur
-`main` vers TestFlight et la piste interne Google Play, déclenchement manuel
-pour la production. Sans service de build tiers. Prérequis, secrets et premier
-envoi : [docs/release.md](docs/release.md).
+Un workflow GitHub Actions construit et envoie l'application : chaque fusion
+sur `main` part en test (TestFlight, piste interne Google Play), chaque tag
+`vX.Y.Z` part en production et crée la GitHub Release. Sans service de build
+tiers. Prérequis, secrets et premier envoi : [docs/release.md](docs/release.md).
 
 ## Licence
 

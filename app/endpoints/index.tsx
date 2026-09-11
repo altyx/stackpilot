@@ -4,6 +4,7 @@ import { Link, Stack, useRouter } from 'expo-router';
 import { useEndpoints } from '../../src/api/hooks';
 import { EndpointType, type Endpoint } from '../../src/api/types';
 import { useAuth } from '../../src/auth/AuthContext';
+import { BuildInfo } from '../../src/components/BuildInfo';
 import { Card, EmptyState, ErrorView, Loader } from '../../src/components/ui';
 import { theme } from '../../src/theme';
 
@@ -74,6 +75,7 @@ export default function EndpointsScreen() {
           />
         }
         renderItem={({ item }) => <EndpointCard endpoint={item} />}
+        ListFooterComponent={<BuildInfo />}
       />
     </>
   );
