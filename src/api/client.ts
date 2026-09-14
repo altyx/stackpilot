@@ -50,6 +50,22 @@ function buildUrl(baseUrl: string, path: string, query?: RequestOptions['query']
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
+type UnauthorizedListener = (token: string) => void;
+
+let unauthorizedListener: UnauthorizedListener | null = null;
+
+/**
+ * Prévient d'un 401 sur une requête authentifiée, avec le token refusé.
+ * Détecté ici plutôt que dans React Query : certaines mutations (actions de
+ * stack) interceptent leurs erreurs et ne les laisseraient jamais remonter.
+ */
+export function setUnauthorizedListener(listener: UnauthorizedListener): () => void {
+  unauthorizedListener = listener;
+  return () => {
+    if (unauthorizedListener === listener) unauthorizedListener = null;
+  };
+}
+
 async function rawRequest(
   session: Pick<Session, 'baseUrl'> & Partial<Pick<Session, 'mode' | 'token'>>,
   opts: RequestOptions,
@@ -71,7 +87,10 @@ async function rawRequest(
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       signal: controller.signal,
     });
-    if (!response.ok && !opts.accept?.includes(response.status)) throw await toError(response);
+    if (!response.ok && !opts.accept?.includes(response.status)) {
+      if (response.status === 401 && session.token) unauthorizedListener?.(session.token);
+      throw await toError(response);
+    }
     return response;
   } catch (error) {
     if (error instanceof PortainerError) throw error;

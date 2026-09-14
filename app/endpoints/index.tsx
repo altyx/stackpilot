@@ -18,41 +18,61 @@ export default function EndpointsScreen() {
   const { signOut, session } = useAuth();
   const router = useRouter();
 
-  if (isPending) return <Loader label="Chargement des environnements…" />;
-  if (error) return <ErrorView error={error} onRetry={refetch} />;
+  // L'en-tête porte la déconnexion : il doit être rendu dans tous les états,
+  // sinon une erreur d'authentification laisse l'écran sans issue.
+  const header = (
+    <Stack.Screen
+      options={{
+        title: '',
+        headerRight: () => (
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+              hitSlop={12}
+              onPress={() => router.push('/notifications')}
+              style={({ pressed }) => pressed && styles.pressed}>
+              <Ionicons
+                name="notifications-outline"
+                size={22}
+                color={theme.colors.accent}
+              />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => {
+                void signOut().then(() => router.replace('/login'));
+              }}
+              style={({ pressed }) => pressed && styles.pressed}>
+              <Text style={styles.headerAction}>Déconnexion</Text>
+            </Pressable>
+          </View>
+        ),
+      }}
+    />
+  );
+
+  if (isPending) {
+    return (
+      <>
+        {header}
+        <Loader label="Chargement des environnements…" />
+      </>
+    );
+  }
+  if (error) {
+    return (
+      <>
+        {header}
+        <ErrorView error={error} onRetry={refetch} />
+      </>
+    );
+  }
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: '',
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Notifications"
-                hitSlop={12}
-                onPress={() => router.push('/notifications')}
-                style={({ pressed }) => pressed && styles.pressed}>
-                <Ionicons
-                  name="notifications-outline"
-                  size={22}
-                  color={theme.colors.accent}
-                />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={() => {
-                  void signOut().then(() => router.replace('/login'));
-                }}
-                style={({ pressed }) => pressed && styles.pressed}>
-                <Text style={styles.headerAction}>Déconnexion</Text>
-              </Pressable>
-            </View>
-          ),
-        }}
-      />
+      {header}
       <FlatList
         data={data}
         keyExtractor={(item) => String(item.Id)}
