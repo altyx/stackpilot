@@ -17,13 +17,13 @@ import { Button, Card } from '../src/components/ui';
 import { theme } from '../src/theme';
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, lastLogin, sessionExpired } = useAuth();
   const router = useRouter();
 
-  const [mode, setMode] = useState<AuthMode>('apiKey');
-  const [baseUrl, setBaseUrl] = useState('');
+  const [mode, setMode] = useState<AuthMode>(lastLogin?.mode ?? 'apiKey');
+  const [baseUrl, setBaseUrl] = useState(lastLogin?.baseUrl ?? '');
   const [apiKey, setApiKey] = useState('');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(lastLogin?.username ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<{ message: string; detail?: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -62,6 +62,14 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>
           Les identifiants sont stockés dans le trousseau sécurisé de l&apos;appareil.
         </Text>
+
+        {sessionExpired ? (
+          <Text accessibilityRole="alert" style={styles.expired}>
+            {lastLogin?.mode === 'jwt'
+              ? 'Votre session a expiré. Reconnectez-vous pour continuer.'
+              : "L'access token a été refusé par Portainer : il a probablement été révoqué."}
+          </Text>
+        ) : null}
 
         <Card style={styles.card}>
           <Field
@@ -169,6 +177,17 @@ const styles = StyleSheet.create({
   content: { padding: theme.spacing(5), gap: theme.spacing(3), paddingBottom: theme.spacing(12) },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
   subtitle: { color: theme.colors.textMuted, fontSize: 14 },
+  expired: {
+    color: theme.colors.warning,
+    backgroundColor: theme.colors.surfaceAlt,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    borderRadius: theme.radius.sm,
+    fontSize: 13,
+    lineHeight: 18,
+    padding: theme.spacing(3),
+    overflow: 'hidden',
+  },
   card: { gap: theme.spacing(4), marginTop: theme.spacing(2) },
   field: { gap: theme.spacing(1.5) },
   fieldLabel: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '600' },
