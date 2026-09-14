@@ -4,18 +4,22 @@
     "slug": "stackpilot",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/ios-light-1024.png",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.stackpilot"
+      "bundleIdentifier": "app.stackpilot",
+      "icon": {
+        "light": "./assets/ios-light-1024.png",
+        "dark": "./assets/ios-dark-1024.png",
+        "tinted": "./assets/ios-tinted-1024.png"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/ic_launcher_foreground-1024.png",
+        "monochromeImage": "./assets/ic_launcher_monochrome-1024.png",
+        "backgroundColor": "#0F172A"
       },
       "predictiveBackGestureEnabled": false,
       "package": "app.stackpilot"
@@ -31,7 +35,8 @@
         {
           "color": "#0ba5ec"
         }
-      ]
+      ],
+      "./plugins/withAndroidReleaseSigning"
     ],
     "scheme": "stackpilot",
     "newArchEnabled": true,

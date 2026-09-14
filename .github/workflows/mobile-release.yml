@@ -1,0 +1,266 @@
+name: Mobile release
+
+# Test sur chaque fusion dans main, production sur un tag `vX.Y.Z`. Un seul
+# fichier pour les deux : le numéro de build est `run_number`, que les stores
+# exigent strictement croissant, et deux workflows auraient deux compteurs.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Préparation
+    runs-on: ubuntu-latest
+    outputs:
+      track: ${{ steps.plan.outputs.track }}
+      build_number: ${{ steps.plan.outputs.build_number }}
+      ios: ${{ steps.plan.outputs.ios }}
+      android: ${{ steps.plan.outputs.android }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
+      # Vérifié ici, avant vingt minutes de compilation : sinon Apple refuserait
+      # l'envoi, ou pire, l'accepterait sous une version qu'on ne voulait pas.
+      - name: Vérifier que le tag correspond à la version
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(jq -r .expo.version app.json)
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::Le tag $TAG ne correspond pas à la version $version de app.json. Bumpez la version, fusionnez, puis retaguez."
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Les secrets ne sont pas lisibles dans un `if` de job : ce job les
+      # traduit en sorties, et chaque plateforme est ignorée tant que les
+      # siens manquent, sans faire échouer le workflow.
+      - id: plan
+        env:
+          TRACK: ${{ github.ref_type == 'tag' && 'production' || 'beta' }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          HAS_IOS: ${{ secrets.APPLE_TEAM_ID != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_API_KEY_P8_BASE64 != '' }}
+          HAS_ANDROID: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && secrets.ANDROID_UPLOAD_KEY_ALIAS != '' && secrets.ANDROID_UPLOAD_KEY_PASSWORD != '' && secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        run: |
+          {
+            echo "track=$TRACK"
+            echo "build_number=$BUILD_NUMBER"
+            echo "ios=$HAS_IOS"
+            echo "android=$HAS_ANDROID"
+          } >> "$GITHUB_OUTPUT"
+          echo "::notice::Destination : $TRACK — build $BUILD_NUMBER"
+          [ "$HAS_IOS" = true ] || echo "::warning::iOS ignoré : secrets Apple absents (voir docs/release.md)."
+          [ "$HAS_ANDROID" = true ] || echo "::warning::Android ignoré : secrets Google Play absents (voir docs/release.md)."
+
+  ios:
+    # Pour iOS, test et production sont le même envoi vers App Store Connect :
+    # un build y arrive dans TestFlight, et c'est depuis la console Apple qu'on
+    # le soumet à l'App Store. Seul le numéro de build distingue les envois.
+    name: iOS → App Store Connect
+    needs: prepare
+    if: needs.prepare.outputs.ios == 'true'
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      CI: 1
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Générer le projet natif
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Installer la clé API App Store Connect
+        env:
+          ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          echo "$ASC_API_KEY_P8_BASE64" | base64 --decode > "$RUNNER_TEMP/asc/AuthKey.p8"
+
+      # Signature automatique gérée par Apple : avec la clé API, Xcode obtient
+      # ou crée lui-même le certificat de distribution et le profil. Rien à
+      # exporter depuis un Mac, rien à renouveler à la main.
+      - name: Archiver
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -workspace ios/StackPilot.xcworkspace \
+            -scheme StackPilot \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/StackPilot.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            -quiet | tee "$RUNNER_TEMP/archive.log"
+
+      - name: Exporter et envoyer à App Store Connect
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/StackPilot.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            | tee "$RUNNER_TEMP/export.log"
+
+      - name: Journaux xcodebuild
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-logs-${{ needs.prepare.outputs.build_number }}
+          path: ${{ runner.temp }}/*.log
+          if-no-files-found: ignore
+
+  android:
+    name: Android → Google Play (${{ needs.prepare.outputs.track }})
+    needs: prepare
+    if: needs.prepare.outputs.android == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CI: 1
+      BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Générer le projet natif
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Installer la clé d'envoi
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: echo "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+
+      # Les propriétés sont lues par plugins/withAndroidReleaseSigning.js ;
+      # Gradle les prend depuis les variables ORG_GRADLE_PROJECT_*.
+      - name: Construire le bundle signé
+        env:
+          ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_STORE_FILE: ${{ runner.temp }}/upload.jks
+          ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: cd android && ./gradlew bundleRelease --no-daemon
+
+      # Sortie forcée en anglais : keytool suit la langue du système.
+      - name: Vérifier la signature
+        run: |
+          cert=$(keytool -J-Duser.language=en -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab)
+          if echo "$cert" | grep -q "CN=Android Debug"; then
+            echo "::error::Le bundle est signé avec la clé de debug : la clé d'envoi n'a pas été prise en compte."
+            exit 1
+          fi
+          echo "$cert" | grep -E "^Owner|SHA256:" | head -2 || true
+
+      # Conservé même si l'envoi échoue : le tout premier envoi vers Google
+      # Play doit se faire à la main depuis la console, avec ce fichier.
+      - name: Conserver le bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab-${{ needs.prepare.outputs.build_number }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      # Test : piste interne, publiée aux testeurs. Production : déposé en
+      # brouillon, à lancer depuis la console pour ne rien publier sans un clic.
+      - name: Envoyer à Google Play
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: app.stackpilot
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ needs.prepare.outputs.track == 'production' && 'production' || 'internal' }}
+          status: ${{ needs.prepare.outputs.track == 'production' && 'draft' || 'completed' }}
+
+  release:
+    # Une GitHub Release par tag, créée seulement une fois les envois faits :
+    # elle atteste ce qui est parti aux stores, pas ce qu'on comptait envoyer.
+    # `!cancelled()` la laisse s'évaluer même si une plateforme a été ignorée.
+    name: GitHub Release
+    needs: [prepare, ios, android]
+    if: ${{ !cancelled() && !failure() && needs.prepare.outputs.track == 'production' && (needs.ios.result == 'success' || needs.android.result == 'success') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Récupérer le bundle Android
+        if: needs.android.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aab-${{ needs.prepare.outputs.build_number }}
+          path: dist
+
+      - name: Créer la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+          IOS: ${{ needs.ios.result }}
+          ANDROID: ${{ needs.android.result }}
+        run: |
+          notes="Build ${BUILD_NUMBER} · commit ${GITHUB_SHA::7}"
+          notes="$notes"$'\n'"iOS : ${IOS} · Android : ${ANDROID}"
+          assets=()
+          [ -f dist/app-release.aab ] && assets+=("dist/app-release.aab#StackPilot-${TAG}-${BUILD_NUMBER}.aab")
+          gh release create "$TAG" "${assets[@]}" \
+            --title "StackPilot ${TAG#v}" \
+            --notes "$notes" \
+            --generate-notes \
+            --verify-tag

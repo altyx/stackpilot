@@ -14,6 +14,9 @@ d'écrire du code touchant aux modules Expo.
 - L'UI et les messages d'erreur sont en français.
 - `react-dom` est épinglé via `overrides` dans `package.json` pour aligner son peer
   `react` sur la version imposée par Expo — ne pas retirer sans revérifier `npm install`.
+- Les dossiers `ios/` et `android/` ne sont pas versionnés : ils sont regénérés
+  par `expo prebuild`, en local comme en CI. Toute modification native passe par
+  un plugin de config dans `plugins/`, jamais par une édition directe.
 - `useLocalSearchParams` ne renvoie que les paramètres de la **route courante**.
   Un écran enfant d'un navigateur imbriqué ne voit donc pas les segments
   dynamiques de sa route parente : `[endpointId]` est rediffusé par

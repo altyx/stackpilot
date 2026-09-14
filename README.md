@@ -118,6 +118,13 @@ s'appliquent donc telles quelles.
 | `npm run ios` / `npm run android` | lance sur simulateur / émulateur |
 | `npm run typecheck` | vérification TypeScript |
 
+## Publication
+
+Un workflow GitHub Actions construit et envoie l'application : chaque fusion
+sur `main` part en test (TestFlight, piste interne Google Play), chaque tag
+`vX.Y.Z` part en production et crée la GitHub Release. Sans service de build
+tiers. Prérequis, secrets et premier envoi : [docs/release.md](docs/release.md).
+
 ## Licence
 
 MIT — voir [LICENSE](LICENSE).
