@@ -27,6 +27,15 @@ jobs:
       android: ${{ steps.plan.outputs.android }}
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      # docs/legal est la version publique des textes affichés dans l'app, et
+      # son URL est déclarée dans les stores : les deux doivent rester
+      # identiques. Le script n'a aucune dépendance, pas besoin de `npm ci`.
+      - name: Vérifier que les textes légaux publiés sont à jour
+        run: npm run legal -- --check
 
       # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
       # Vérifié ici, avant vingt minutes de compilation : sinon Apple refuserait
@@ -42,6 +51,16 @@ jobs:
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # Les builds de test peuvent partir avec des mentions légales provisoires,
+      # pas une version de production : les CGU affichées doivent être complètes.
+      - name: Vérifier que les mentions légales sont complétées
+        if: github.ref_type == 'tag'
+        run: |
+          if grep -rn "À COMPLÉTER" src/legal; then
+            echo "::error::Des champs « À COMPLÉTER » restent dans src/legal (voir les lignes ci-dessus). Complétez-les, fusionnez, puis retaguez."
+            exit 1
+          fi
 
       # Les secrets ne sont pas lisibles dans un `if` de job : ce job les
       # traduit en sorties, et chaque plateforme est ignorée tant que les

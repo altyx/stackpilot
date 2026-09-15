@@ -29,6 +29,9 @@ const queryClient = new QueryClient({
   },
 });
 
+// Écrans lisibles sans session : la connexion, et les textes légaux qu'elle lie.
+const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy']);
+
 function RootNavigator() {
   const { session, isRestoring } = useAuth();
   const segments = useSegments();
@@ -39,7 +42,7 @@ function RootNavigator() {
   useEffect(() => {
     if (isRestoring) return;
     const onLoginScreen = segments[0] === 'login';
-    if (!session && !onLoginScreen) router.replace('/login');
+    if (!session && !PUBLIC_SCREENS.has(segments[0] ?? '')) router.replace('/login');
     else if (session && onLoginScreen) router.replace('/endpoints');
   }, [session, isRestoring, segments, router]);
 
@@ -56,6 +59,8 @@ function RootNavigator() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: '' }} />
       <Stack.Screen name="notifications" options={{ title: '' }} />
+      <Stack.Screen name="terms" options={{ title: '' }} />
+      <Stack.Screen name="privacy" options={{ title: '' }} />
       <Stack.Screen name="endpoints/index" options={{ title: '' }} />
       <Stack.Screen name="endpoints/[endpointId]/(tabs)" options={{ title: '' }} />
       <Stack.Screen

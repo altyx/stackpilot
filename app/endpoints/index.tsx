@@ -95,7 +95,19 @@ export default function EndpointsScreen() {
           />
         }
         renderItem={({ item }) => <EndpointCard endpoint={item} />}
-        ListFooterComponent={<BuildInfo />}
+        ListFooterComponent={
+          <View style={styles.footer}>
+            <View style={styles.footerLinks}>
+              <Link href="/terms" style={styles.footerLink}>
+                Conditions générales d&apos;utilisation
+              </Link>
+              <Link href="/privacy" style={styles.footerLink}>
+                Politique de confidentialité
+              </Link>
+            </View>
+            <BuildInfo />
+          </View>
+        }
       />
     </>
   );
@@ -165,4 +177,18 @@ const styles = StyleSheet.create({
   unsupported: { color: theme.colors.warning, fontSize: 12 },
   disabled: { opacity: 0.55 },
   pressed: { opacity: 0.75 },
+  footer: { alignItems: 'center', paddingTop: theme.spacing(4) },
+  footerLinks: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    columnGap: theme.spacing(4),
+  },
+  // Marge intérieure plutôt qu'externe : elle agrandit la zone de tap du lien.
+  footerLink: {
+    color: theme.colors.accent,
+    fontSize: 12,
+    fontWeight: '600',
+    paddingVertical: theme.spacing(2),
+  },
 });

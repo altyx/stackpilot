@@ -22,6 +22,10 @@ d'écrire du code touchant aux modules Expo.
   généré, le temps du build : ce n'est pas une modification native à porter
   dans un plugin. Ne pas revenir à la signature automatique de Xcode, qui
   échoue dès le deuxième run sur un runner éphémère.
+- Les textes légaux s'écrivent dans `src/legal` et décrivent le comportement
+  réel de l'app (stockage, réseau, notifications) : toute évolution de ce
+  comportement doit s'y refléter. `docs/legal` en est une copie générée par
+  `npm run legal`, jamais éditée à la main.
 - `useLocalSearchParams` ne renvoie que les paramètres de la **route courante**.
   Un écran enfant d'un navigateur imbriqué ne voit donc pas les segments
   dynamiques de sa route parente : `[endpointId]` est rediffusé par
@@ -31,4 +35,5 @@ d'écrire du code touchant aux modules Expo.
 ```bash
 npm run typecheck
 npx expo export --platform ios --output-dir /tmp/stackpilot-export-check
+npm run legal -- --check
 ```
