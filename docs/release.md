@@ -3,8 +3,9 @@
 Le workflow [`mobile-release.yml`](../.github/workflows/mobile-release.yml)
 construit l'application sur GitHub Actions et l'envoie aux stores. Il ne
 dépend d'aucun service de build tiers : la compilation iOS se fait avec
-`xcodebuild` sur un runner macOS, la compilation Android avec Gradle sur un
-runner Linux, et les envois passent par les API d'Apple et de Google.
+fastlane, qui pilote `xcodebuild`, sur un runner macOS, la compilation Android
+avec Gradle sur un runner Linux, et les envois passent par les API d'Apple et
+de Google.
 
 ## Déclencheurs
 
@@ -75,33 +76,107 @@ porter un numéro inférieur à un envoi de test.
 La **version** visible par l'utilisateur (`1.0.0`) reste dans `app.json`, à
 incrémenter à la main.
 
-## Secrets iOS
+## iOS
+
+### Signature
+
+La signature passe par [fastlane match](https://docs.fastlane.tools/actions/match/).
+Le certificat de distribution, sa clé privée et le profil App Store sont
+stockés chiffrés dans un dépôt privé, `altyx/stackpilot-certificates`, déclaré
+dans [`fastlane/Matchfile`](../fastlane/Matchfile). La CI les lit en lecture
+seule, avec une clé de déploiement, et ne crée jamais rien chez Apple.
+
+La signature automatique de Xcode ne convient pas ici : sur un runner
+éphémère, elle crée un certificat de développement à chaque run, dont la clé
+privée disparaît avec la machine, et le run suivant échoue.
+
+Les lanes du [`Fastfile`](../fastlane/Fastfile) :
+
+| Lane | Lancée par | Rôle |
+| --- | --- | --- |
+| `certificates` | vous, sur un Mac | crée ou renouvelle le certificat et le profil |
+| `build` | le workflow | installe la signature, compile et exporte l'IPA |
+| `upload` | le workflow | envoie l'IPA à App Store Connect |
+
+`build` et `upload` sont deux étapes séparées du workflow : les scripts npm
+exécutés pendant la compilation n'ont pas accès à la clé App Store Connect.
+
+Apple réserve la création des certificats et des profils de distribution aux
+rôles *Account Holder* et *Admin*. D'où **deux clés API** :
+
+- une clé **Admin**, qui reste sur votre Mac et ne sert qu'à `certificates` ;
+- une clé **App Manager**, dans les secrets GitHub, qui ne sert qu'à envoyer
+  les builds.
+
+### Secrets iOS
 
 À définir dans *Settings → Secrets and variables → Actions* du dépôt.
 
 | Secret | Contenu |
 | --- | --- |
-| `APPLE_TEAM_ID` | Identifiant d'équipe, dans *Membership details* du compte développeur |
-| `ASC_KEY_ID` | Identifiant de la clé API App Store Connect |
-| `ASC_ISSUER_ID` | *Issuer ID*, affiché sur la même page que les clés |
-| `ASC_API_KEY_P8_BASE64` | Le fichier `.p8` de la clé, encodé en base64 |
-
-La clé se crée dans App Store Connect : *Users and Access → Integrations →
-App Store Connect API → Team Keys*. Donnez-lui le rôle **Admin** : la
-signature est confiée à Apple (*cloud signing*), et c'est ce rôle qui permet
-à Xcode de créer le certificat de distribution et le profil. Apple ne laisse
-télécharger le `.p8` **qu'une seule fois** : conservez-le dans un gestionnaire
-de mots de passe.
+| `ASC_KEY_ID` | Identifiant de la clé API **App Manager** |
+| `ASC_ISSUER_ID` | *Issuer ID*, affiché au-dessus de la liste des clés |
+| `ASC_API_KEY_P8_BASE64` | Le `.p8` de cette clé, encodé en base64 |
+| `MATCH_PASSWORD` | La phrase de passe choisie au premier lancement de `certificates` |
+| `MATCH_DEPLOY_KEY` | La clé SSH privée de déploiement du dépôt des certificats, lignes `BEGIN` et `END` comprises |
 
 ```bash
 base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
 ```
 
-Avant le premier envoi, dans le compte développeur :
+### Mise en service
 
-1. déclarer l'identifiant `app.stackpilot` dans *Certificates, Identifiers &
-   Profiles → Identifiers*, avec la capacité **Push Notifications** ;
-2. créer l'application dans App Store Connect avec cet identifiant.
+Une seule fois, dans cet ordre :
+
+1. **Accès à l'API** : App Store Connect › *Users and Access* ›
+   *Integrations* › *Request Access*, depuis le compte *Account Holder*.
+   Apple examine la demande au cas par cas : à lancer en premier.
+2. **Accords** : accepter dans App Store Connect l'accord de licence en
+   attente, sans quoi les envois sont refusés.
+3. **Identifiant** : *Certificates, Identifiers & Profiles › Identifiers*,
+   App ID explicite `app.stackpilot` avec la capacité **Push Notifications**.
+4. **Fiche de l'app** : App Store Connect › *Apps* › *New App*, avec cet
+   identifiant.
+5. **Clés API** : *Integrations › Team Keys*, une clé Admin et une clé App
+   Manager. Chaque `.p8` ne se télécharge **qu'une seule fois** : conservez-les
+   dans un gestionnaire de mots de passe.
+6. **Clé de déploiement** : générer une paire de clés, puis ajouter la partie
+   publique (`.pub`) dans *Settings › Deploy keys* du dépôt des certificats,
+   **sans** cocher *Allow write access*. La partie privée devient
+   `MATCH_DEPLOY_KEY`.
+
+   ```bash
+   ssh-keygen -t ed25519 -N "" -C "stackpilot-ci" -f stackpilot_match_deploy
+   ```
+
+7. **Certificat et profil** : depuis la racine de ce dépôt, avec la clé Admin.
+   La Ruby livrée avec macOS est trop ancienne (fastlane exige 3.1 ou plus) :
+   installer celle de Homebrew (`brew install ruby`) et placer
+   `/opt/homebrew/opt/ruby/bin` en tête du `PATH`.
+
+   ```bash
+   bundle install
+   ```
+
+   ```bash
+   ASC_KEY_ID=XXXXXXXXXX ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx ASC_KEY_PATH=~/AuthKey_XXXXXXXXXX.p8 bundle exec fastlane ios certificates
+   ```
+
+   match demande une phrase de passe pour chiffrer le dépôt (c'est
+   `MATCH_PASSWORD`), éventuellement le mot de passe de session du Mac pour
+   ranger le certificat dans le trousseau, puis pousse le tout dans le dépôt
+   des certificats.
+8. **Secrets** : renseigner les cinq secrets ci-dessus.
+9. **TestFlight** : App Store Connect › *TestFlight* › *Internal Testing*,
+   créer un groupe, s'y ajouter et activer la distribution automatique. Le
+   workflow n'attend pas la fin du traitement par Apple : c'est ce groupe qui
+   reçoit chaque nouveau build.
+
+### Renouvellement
+
+Le certificat de distribution expire au bout d'un an, et les builds échouent
+ensuite. Relancer alors `certificates` (étape 7) : la lane remplace le
+certificat expiré et régénère le profil. Les secrets GitHub ne changent pas.
 
 ## Secrets Android
 
@@ -157,19 +232,42 @@ Vérifié en local, sur ce dépôt :
   produit un `build.gradle` qui signe la release avec la clé d'envoi quand
   elle est fournie, et avec la clé de debug sinon ; un bundle de release a été
   construit et sa signature contrôlée dans les deux cas ;
-- le projet iOS généré compile en Release, sans signature.
+- le projet iOS généré compile en Release, sans signature ;
+- le `Fastfile` se charge avec fastlane 2.240 et Ruby 4.0, et ses lanes
+  s'arrêtent sur un message clair quand une variable manque ;
+- match en lecture seule, sur un dépôt vide : clone par clé de déploiement,
+  branche `main`, déchiffrement avec `MATCH_PASSWORD`, puis refus attendu
+  faute de certificat, sans aucune connexion à Apple ;
+- sur un projet fraîchement généré par `expo prebuild`, la signature de
+  distribution ne s'applique qu'à la cible de l'app en Release, et une archive
+  n'échoue que sur l'absence du profil, sans erreur venant des Pods ;
+- l'`Info.plist` généré déclare `ITSAppUsesNonExemptEncryption` à `false` ;
+- Xcode 26.4 accepte la méthode d'export `app-store` que transmet fastlane,
+  avec un simple avertissement de dépréciation.
 
-Non vérifié, faute de comptes : la signature iOS confiée à Apple, l'envoi vers
-App Store Connect, et l'envoi vers Google Play. Ces étapes suivent la
-documentation d'Apple et de Google, mais le premier run réel demandera sans
-doute un ajustement. Les journaux `xcodebuild` sont conservés en artefact
-quand le job iOS échoue.
+Non vérifié, faute de comptes : la création du certificat par match, la
+signature réelle, l'envoi vers App Store Connect, et l'envoi vers Google Play.
+Ces étapes suivent la documentation d'Apple, de fastlane et de Google, mais le
+premier run réel demandera peut-être un ajustement. Les journaux de
+compilation iOS sont conservés en artefact quand le job échoue.
 
 ## Dépannage
 
 - **iOS ignoré / Android ignoré** dans le job *Préparation* : un secret manque.
-- **`No profiles for 'app.stackpilot' were found`** : la clé API n'a pas le
-  rôle Admin, ou l'identifiant n'est pas déclaré dans le compte développeur.
+- **`Permission denied (publickey)`** au clonage des certificats : la clé
+  publique n'est pas dans les *Deploy keys* du dépôt des certificats, ou
+  `MATCH_DEPLOY_KEY` est incomplet.
+- **`Invalid password passed via 'MATCH_PASSWORD'`** : le secret ne correspond
+  pas à la phrase de passe choisie au premier lancement de `certificates`.
+- **`No code signing identity found and cannot create a new one because you
+  enabled readonly`** : `certificates` n'a pas encore été lancée, ou l'a été
+  sur un autre dépôt ou une autre branche que ceux du `Matchfile`.
+- **`Couldn't find app 'app.stackpilot'`** à l'envoi : la fiche App Store
+  Connect n'existe pas, ou utilise un autre identifiant.
+- **Envoi refusé pour droits insuffisants** : la clé des secrets n'a pas le
+  rôle App Manager.
+- **Build bloqué en « Missing Compliance »** dans TestFlight :
+  `ios.config.usesNonExemptEncryption` a disparu de `app.json`.
 - **Le bundle est signé avec la clé de debug** : les secrets Android sont
   définis mais le plugin n'a pas modifié `build.gradle` ; vérifier que
   `./plugins/withAndroidReleaseSigning` figure dans `app.json`.
