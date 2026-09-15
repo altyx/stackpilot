@@ -77,6 +77,7 @@ src/
   notifications/                         enregistrement push + navigation au tap
 watcher/                                 service serveur qui émet les alertes
   theme.ts                               palette et espacements
+fastlane/                                signature, compilation et envoi iOS
 ```
 
 Toutes les requêtes Docker passent par le proxy Portainer
@@ -123,7 +124,8 @@ s'appliquent donc telles quelles.
 Un workflow GitHub Actions construit et envoie l'application : chaque fusion
 sur `main` part en test (TestFlight, piste interne Google Play), chaque tag
 `vX.Y.Z` part en production et crée la GitHub Release. Sans service de build
-tiers. Prérequis, secrets et premier envoi : [docs/release.md](docs/release.md).
+tiers : Gradle pour Android, fastlane pour iOS, avec une signature gérée par
+match. Prérequis, secrets et premier envoi : [docs/release.md](docs/release.md).
 
 ## Licence
 

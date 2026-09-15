@@ -17,6 +17,11 @@ d'écrire du code touchant aux modules Expo.
 - Les dossiers `ios/` et `android/` ne sont pas versionnés : ils sont regénérés
   par `expo prebuild`, en local comme en CI. Toute modification native passe par
   un plugin de config dans `plugins/`, jamais par une édition directe.
+- La signature iOS en CI passe par fastlane match (`fastlane/`, voir
+  `docs/release.md`). La lane `build` règle la signature du projet tout juste
+  généré, le temps du build : ce n'est pas une modification native à porter
+  dans un plugin. Ne pas revenir à la signature automatique de Xcode, qui
+  échoue dès le deuxième run sur un runner éphémère.
 - `useLocalSearchParams` ne renvoie que les paramètres de la **route courante**.
   Un écran enfant d'un navigateur imbriqué ne voit donc pas les segments
   dynamiques de sa route parente : `[endpointId]` est rediffusé par
