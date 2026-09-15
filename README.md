@@ -20,6 +20,7 @@ intermédiaire, aucune donnée qui sort de votre réseau.
 - **Images** et **volumes** marqués utilisés / inutilisés, avec les conteneurs qui les
   référencent, les images sans tag (dangling) et l'espace récupérable
 - **Notifications push** quand un conteneur tombe, via le service [`watcher/`](watcher/)
+- **Conditions générales d'utilisation** et **politique de confidentialité** consultables depuis la connexion et la liste des environnements, et publiées dans [`docs/legal`](docs/legal)
 
 Les environnements Kubernetes sont détectés et signalés comme non pris en charge.
 
@@ -61,6 +62,7 @@ app/                                     routes expo-router (file-based)
   _layout.tsx                            providers + garde d'authentification
   index.tsx                              aiguillage démarrage
   login.tsx                              connexion
+  terms.tsx, privacy.tsx                 textes légaux, accessibles sans session
   endpoints/index.tsx                    liste des environnements
   endpoints/[endpointId]/(tabs)/         onglets conteneurs / images / volumes
   endpoints/[endpointId]/containers/     détail d'un conteneur
@@ -70,6 +72,7 @@ src/
   api/hooks.ts                           hooks TanStack Query
   api/types.ts                           types Portainer / Docker
   auth/                                  session sécurisée + contexte React
+  legal/                                 CGU, confidentialité, identité de l'éditeur
   components/ui.tsx                      composants partagés
   lib/format.ts                          formatage (noms, dates, tailles)
   lib/usage.ts                           calcul utilisé / inutilisé
@@ -118,6 +121,7 @@ s'appliquent donc telles quelles.
 | `npm start` | serveur de développement Expo |
 | `npm run ios` / `npm run android` | lance sur simulateur / émulateur |
 | `npm run typecheck` | vérification TypeScript |
+| `npm run legal` | publie les textes légaux de `src/legal` dans `docs/legal` |
 
 ## Publication
 

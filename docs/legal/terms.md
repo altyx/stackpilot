@@ -1,0 +1,103 @@
+<!-- Généré par scripts/legal-markdown.mjs depuis src/legal : ne pas modifier à la main. -->
+
+# Conditions générales d'utilisation
+
+_Dernière mise à jour : 15 septembre 2026_
+
+Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'utilisation de l'application mobile StackPilot (l'« Application »). En utilisant l'Application, vous acceptez les CGU dans leur intégralité ; si vous ne les acceptez pas, n'utilisez pas l'Application.
+
+## 1. Éditeur
+
+L'Application est éditée par Moutawakil Samir (Particulier), \[À COMPLÉTER : adresse postale\].
+
+Directeur de la publication : Samir Moutawakil.
+
+Contact : samir@altyxlab.fr.
+
+L'Application est distribuée par l'App Store d'Apple et par Google Play. Elle ne s'appuie sur aucun serveur exploité par l'éditeur.
+
+## 2. Objet de l'Application
+
+StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks.
+
+L'Application est un projet indépendant : elle n'est ni éditée, ni affiliée, ni approuvée par Portainer.io ou Docker, Inc. « Portainer » et « Docker » sont des marques de leurs titulaires respectifs.
+
+## 3. Accès à l'Application
+
+L'Application est proposée gratuitement. Son utilisation suppose de disposer d'une instance Portainer et d'identifiants valides : un access token, ou un nom d'utilisateur et un mot de passe.
+
+Vous vous engagez à ne connecter l'Application qu'à des instances que vous administrez ou pour lesquelles vous avez reçu une autorisation. Accéder ou se maintenir frauduleusement dans un système informatique, ou en entraver le fonctionnement, est puni par les articles 323-1 et suivants du Code pénal.
+
+Les fonctionnalités disponibles dépendent de la version de votre instance et des droits de votre compte Portainer. Les environnements Kubernetes ne sont pas pris en charge.
+
+## 4. Fonctionnement et sécurité
+
+L'Application communique directement avec l'instance Portainer dont vous saisissez l'adresse : vos données ne transitent par aucun serveur de l'éditeur.
+
+Votre access token, ou le jeton de session obtenu avec votre mot de passe, est conservé dans le trousseau sécurisé de l'appareil (Keychain sur iOS, Keystore sur Android). Le mot de passe lui-même n'est jamais enregistré.
+
+Les actions déclenchées depuis l'Application s'exécutent avec les droits du compte Portainer utilisé ; l'Application ne permet pas de les dépasser.
+
+Il vous appartient de protéger l'accès à votre instance : connexion chiffrée (HTTPS), jetons limités aux droits nécessaires, révocation des jetons inutilisés.
+
+## 5. Vos responsabilités
+
+Vous êtes responsable :
+
+- de la sécurité de votre appareil (code de verrouillage, mises à jour du système) et de la confidentialité de vos identifiants ;
+- des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ;
+- de la configuration, de la sécurité et des sauvegardes de votre instance Portainer et des services qu'elle gère ;
+- du service de surveillance que vous déployez pour recevoir des notifications.
+
+Les actions sur une stack s'appliquent conteneur par conteneur, sans tenir compte de l'ordre de dépendance entre ses services. Lorsque cet ordre compte, agissez sur chaque conteneur séparément.
+
+En cas de perte ou de vol de votre appareil, révoquez sans délai, depuis Portainer, le token d'accès utilisé par l'Application, ou changez votre mot de passe si vous vous connectiez avec celui-ci.
+
+## 6. Notifications
+
+Les notifications sont facultatives. Elles reposent sur un service de surveillance que vous déployez vous-même sur votre infrastructure : il observe les événements Docker et envoie les alertes à votre appareil par le service de notifications d'Expo, puis par Apple Push Notification service (iOS) ou Firebase Cloud Messaging (Android).
+
+Le contenu d'une alerte (nom du conteneur, motif de l'alerte, identifiants de l'environnement et du conteneur) transite par ces prestataires, dans les conditions qui leur sont propres.
+
+L'éditeur n'exploite aucun de ces services et ne garantit ni la réception ni le délai des alertes. Ne faites pas de l'Application votre unique moyen de supervision de services critiques.
+
+## 7. Données personnelles
+
+L'éditeur ne collecte aucune donnée personnelle par l'intermédiaire de l'Application : elle ne nécessite pas de compte StackPilot et ne contient ni mesure d'audience, ni publicité.
+
+Les données qu'utilise l'Application, leur conservation et vos droits sont décrits dans la politique de confidentialité, consultable dans l'Application et à l'adresse https://github.com/altyx/stackpilot/blob/main/docs/legal/privacy.md.
+
+## 8. Propriété intellectuelle
+
+Le code source de l'Application est publié sous licence MIT, qui en fixe les conditions de réutilisation : https://github.com/altyx/stackpilot.
+
+Le nom « StackPilot » et le logo de l'Application restent la propriété de l'éditeur.
+
+## 9. Disponibilité et garanties
+
+L'Application est fournie gratuitement et « en l'état ». L'éditeur s'efforce d'en assurer le bon fonctionnement, sans garantir qu'elle soit exempte d'erreurs, compatible avec toutes les versions de Portainer ou disponible en permanence.
+
+L'éditeur peut à tout moment faire évoluer l'Application, en suspendre la distribution ou y mettre fin.
+
+## 10. Responsabilité
+
+Dans les limites autorisées par la loi, l'éditeur ne peut être tenu responsable des dommages résultant :
+
+- d'une action effectuée depuis l'Application ;
+- d'une erreur ou d'une indisponibilité de l'Application, de votre instance Portainer ou des services tiers mentionnés dans les CGU ;
+- d'une alerte non reçue ou reçue en retard ;
+- d'un accès d'un tiers à votre appareil ou à vos identifiants.
+
+Ces limitations ne s'appliquent pas lorsque la loi interdit de restreindre la responsabilité de l'éditeur.
+
+## 11. Modification des CGU
+
+L'éditeur peut modifier les CGU, notamment pour tenir compte des évolutions de l'Application ou de la réglementation. La date de dernière mise à jour figure en tête du document. Continuer à utiliser l'Application après une modification vaut acceptation de la nouvelle version.
+
+## 12. Durée
+
+Les CGU s'appliquent pendant toute la durée d'utilisation de l'Application. Vous pouvez y mettre fin à tout moment : déconnectez-vous, désinstallez l'Application et révoquez depuis Portainer les access tokens créés pour elle.
+
+## 13. Droit applicable et litiges
+
+Les CGU sont régies par le droit français. En cas de litige, contactez d'abord l'éditeur afin de rechercher une solution amiable. À défaut, le litige sera porté devant les juridictions compétentes selon les règles de droit commun.

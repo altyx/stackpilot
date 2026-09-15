@@ -32,7 +32,9 @@ avertissement**, sans faire échouer le workflow. On peut donc fusionner sur
 ## Publier une version
 
 Le tag est le déclencheur de la production, et il doit correspondre à la
-version de `app.json` — le workflow le vérifie avant de compiler.
+version de `app.json` — le workflow le vérifie avant de compiler. Il vérifie
+aussi qu'aucun champ « À COMPLÉTER » ne reste dans les mentions légales
+([`src/legal`](../src/legal)), affichées dans l'app.
 
 1. Mettre `expo.version` à jour dans `app.json`, fusionner sur `main`. Cette
    fusion produit un dernier build de test, à vérifier.
@@ -54,6 +56,23 @@ Apple et le déploiement progressif Google se suivent dans leurs consoles.
 Si la production échoue après le tag, supprimez le tag (`git push --delete
 origin v1.0.0`), corrigez, retaguez. Ne relancez pas le run : un *Re-run*
 garde le même numéro de build, que les stores refuseront.
+
+## Textes légaux
+
+Les CGU et la politique de confidentialité s'écrivent dans
+[`src/legal`](../src/legal) : c'est ce que l'app affiche. `npm run legal` en
+publie une copie Markdown dans [`docs/legal`](legal), et le workflow échoue
+dès la préparation si cette copie n'est plus à jour. Après toute modification
+de `src/legal`, régénérer et committer les deux ensemble.
+
+Les stores demandent l'adresse publique de la politique de confidentialité :
+
+```
+https://github.com/altyx/stackpilot/blob/main/docs/legal/privacy.md
+```
+
+Elle pointe sur `main` : le fichier doit y être fusionné avant de la déclarer,
+et ne doit plus changer de chemin ensuite.
 
 ## Retrouver le commit d'un build
 
@@ -278,3 +297,9 @@ compilation iOS sont conservés en artefact quand le job échoue.
   production, supprimer le tag et retaguer.
 - **`Le tag vX.Y.Z ne correspond pas à la version`** : `app.json` n'a pas été
   bumpé avant le tag. Supprimer le tag, bumper, fusionner, retaguer.
+- **`Des champs « À COMPLÉTER » restent dans src/legal`** : les mentions
+  légales de [`src/legal/publisher.ts`](../src/legal/publisher.ts) n'ont pas
+  été renseignées. Les compléter, fusionner, puis retaguer.
+- **`Textes légaux publiés à régénérer`** dans le job *Préparation* :
+  `src/legal` a changé sans que `docs/legal` suive. Lancer `npm run legal` et
+  committer le résultat.

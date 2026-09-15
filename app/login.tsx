@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { PortainerError } from '../src/api/client';
 import { loginWithApiKey, loginWithPassword } from '../src/api/portainer';
 import type { AuthMode } from '../src/api/types';
@@ -134,6 +134,18 @@ export default function LoginScreen() {
           />
         </Card>
 
+        <Text style={styles.legal}>
+          En vous connectant, vous acceptez les{' '}
+          <Link href="/terms" style={styles.legalLink}>
+            conditions générales d&apos;utilisation
+          </Link>
+          . Voir aussi la{' '}
+          <Link href="/privacy" style={styles.legalLink}>
+            politique de confidentialité
+          </Link>
+          .
+        </Text>
+
         <Text style={styles.hint}>
           {mode === 'apiKey'
             ? 'Créez un access token depuis Portainer › My account › Access tokens. Il ne expire pas et reste révocable côté serveur.'
@@ -223,5 +235,7 @@ const styles = StyleSheet.create({
   error: { color: theme.colors.danger, fontSize: 13, lineHeight: 18 },
   errorDetail: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 15 },
   submit: { marginTop: theme.spacing(1) },
+  legal: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
+  legalLink: { color: theme.colors.accent, fontWeight: '600' },
   hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
 });
