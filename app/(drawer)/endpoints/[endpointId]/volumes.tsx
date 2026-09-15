@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { useEndpointId } from '../../../../src/api/EndpointContext';
+import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useVolumes } from '../../../../src/api/hooks';
 import type { VolumeSummary } from '../../../../src/api/types';
 import {
@@ -18,7 +18,7 @@ import { theme } from '../../../../src/theme';
 type Filter = 'all' | 'used' | 'unused';
 
 export default function VolumesScreen() {
-  const id = useEndpointId();
+  const id = useEndpointParam();
 
   const volumes = useVolumes(id);
   const containers = useContainers(id);

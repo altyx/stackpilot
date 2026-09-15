@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { useEndpointId } from '../../../../src/api/EndpointContext';
+import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useImages } from '../../../../src/api/hooks';
 import type { ImageSummary } from '../../../../src/api/types';
 import {
@@ -25,7 +25,7 @@ import { theme } from '../../../../src/theme';
 type Filter = 'all' | 'used' | 'unused';
 
 export default function ImagesScreen() {
-  const id = useEndpointId();
+  const id = useEndpointParam();
 
   const images = useImages(id);
   const containers = useContainers(id);

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link } from 'expo-router';
-import { useEndpointId } from '../../../../src/api/EndpointContext';
+import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction, type StackActionResult } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
@@ -31,7 +31,7 @@ import { theme } from '../../../../src/theme';
 type Filter = 'all' | 'running' | 'stopped';
 
 export default function ContainersScreen() {
-  const id = useEndpointId();
+  const id = useEndpointParam();
   const { data, error, isPending, refetch, isRefetching } = useContainers(id);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');

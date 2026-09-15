@@ -42,7 +42,7 @@ export default function LoginScreen() {
           : await loginWithPassword(baseUrl, username.trim(), password);
       await signIn(session);
       setPassword('');
-      router.replace('/endpoints');
+      router.replace('/');
     } catch (e) {
       setError({
         message: e instanceof Error ? e.message : 'Connexion impossible.',
