@@ -4,6 +4,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useContainer, useContainerAction, useContainerLogs } from '../../../../src/api/hooks';
 import type { ContainerAction } from '../../../../src/api/types';
 import { ConfirmSheet } from '../../../../src/components/BottomSheet';
+import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { Button, Card, ErrorView, Loader, Row, StatusDot } from '../../../../src/components/ui';
 import { formatDate, inspectName, shortId, stateLabel } from '../../../../src/lib/format';
 import { theme } from '../../../../src/theme';
@@ -18,11 +19,10 @@ const ACTION_LABELS: Record<ContainerAction, string> = {
 };
 
 export default function ContainerDetailScreen() {
-  const { endpointId, containerId } = useLocalSearchParams<{
-    endpointId: string;
-    containerId: string;
-  }>();
-  const id = Number(endpointId);
+  const { containerId } = useLocalSearchParams<{ containerId: string }>();
+  // Ouvert par une alerte au démarrage, le conteneur n'a que l'aiguillage
+  // d'accueil sous lui : retenir son environnement ramène à ses voisins au retour.
+  const id = useEndpointParam();
 
   const { data, error, isPending, refetch, isRefetching } = useContainer(id, containerId);
   const action = useContainerAction(id, containerId);

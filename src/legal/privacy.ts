@@ -31,6 +31,7 @@ export const PRIVACY: LegalDocument = {
           "votre nom d'utilisateur Portainer, si vous vous connectez avec vos identifiants ;",
           "votre access token, ou le jeton de session obtenu avec votre mot de passe. Le mot de passe lui-même n'est jamais enregistré.",
         ],
+        "Elle y enregistre aussi l'identifiant du dernier environnement consulté sur cette instance, pour rouvrir l'Application sur ses conteneurs.",
         "Les informations lues sur votre instance (environnements, conteneurs, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.",
         "Ces données ne quittent l'appareil que pour être envoyées directement à votre instance Portainer.",
       ],
@@ -38,7 +39,7 @@ export const PRIVACY: LegalDocument = {
     {
       title: 'Durée de conservation',
       body: [
-        "Le jeton est supprimé à la déconnexion, ou automatiquement dès que votre instance le refuse. L'adresse de l'instance, le mode de connexion et le nom d'utilisateur sont conservés après la déconnexion, pour pré-remplir la connexion suivante.",
+        "Le jeton est supprimé à la déconnexion, ou automatiquement dès que votre instance le refuse. L'adresse de l'instance, le mode de connexion et le nom d'utilisateur sont conservés après la déconnexion, pour pré-remplir la connexion suivante ; l'identifiant du dernier environnement consulté l'est aussi, pour rouvrir le même environnement.",
         "Sur Android, la désinstallation de l'Application efface ces informations. Sur iOS, le système peut les conserver dans le trousseau après la désinstallation : elles sont alors retrouvées si vous réinstallez l'Application.",
       ],
     },
