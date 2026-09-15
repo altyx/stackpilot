@@ -1,0 +1,106 @@
+# Signature, compilation et envoi iOS. Mode d'emploi : docs/release.md.
+#
+# La signature repose sur match : certificat de distribution, clé privée et
+# profil App Store sont stockés chiffrés dans le dépôt déclaré par le Matchfile.
+# La CI les lit en lecture seule et ne crée jamais rien chez Apple. Seule la
+# lane `certificates`, lancée à la main depuis un Mac, en génère.
+#
+# C'est ce qui remplace la signature automatique de Xcode : sur un runner
+# éphémère, elle crée un certificat de développement à chaque run, puis échoue
+# au run suivant faute d'en retrouver la clé privée.
+
+require "json"
+
+default_platform(:ios)
+
+ROOT = File.expand_path("..", __dir__)
+IOS_DIR = File.join(ROOT, "ios")
+OUTPUT_DIR = File.join(ROOT, "build", "ios")
+APP_IDENTIFIER = JSON.parse(File.read(File.join(ROOT, "app.json"))).dig("expo", "ios", "bundleIdentifier")
+
+platform :ios do
+  desc "Crée ou renouvelle le certificat de distribution et le profil App Store (Mac, clé API Admin)"
+  lane :certificates do
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      readonly: false,
+      # Le certificat expire au bout d'un an : relancer la lane le remplace, et
+      # match régénère alors le profil qu'Apple a invalidé avec lui.
+      renew_expired_certs: true,
+      api_key: asc_api_key,
+    )
+  end
+
+  desc "Signe et compile le projet généré par `expo prebuild` (CI)"
+  lane :build do
+    project = xcode_project_name
+    setup_ci
+    match(type: "appstore", app_identifier: APP_IDENTIFIER, readonly: true)
+
+    # Variables posées par match d'après le profil qu'il vient d'installer.
+    installed = "sigh_#{APP_IDENTIFIER}_appstore"
+    update_code_signing_settings(
+      path: File.join(IOS_DIR, "#{project}.xcodeproj"),
+      # La cible de l'app seulement : les cibles des Pods refusent qu'on leur
+      # impose un profil, ce qui arrive si la signature passe en argument de
+      # xcodebuild.
+      targets: [project],
+      build_configurations: ["Release"],
+      use_automatic_signing: false,
+      team_id: required_env("#{installed}_team-id"),
+      code_sign_identity: required_env("#{installed}_certificate-name"),
+      profile_name: required_env("#{installed}_profile-name"),
+    )
+
+    build_app(
+      workspace: File.join(IOS_DIR, "#{project}.xcworkspace"),
+      scheme: project,
+      configuration: "Release",
+      output_directory: OUTPUT_DIR,
+      output_name: "#{project}.ipa",
+      buildlog_path: File.join(OUTPUT_DIR, "logs"),
+      # Le numéro de build est posé par app.config.ts ; Xcode n'y touche pas.
+      export_options: { manageAppVersionAndBuildNumber: false },
+    )
+  end
+
+  desc "Envoie l'IPA compilée à App Store Connect, d'où elle part dans TestFlight (CI)"
+  lane :upload do
+    upload_to_testflight(
+      api_key: asc_api_key,
+      ipa: File.join(OUTPUT_DIR, "#{xcode_project_name}.ipa"),
+      # Attendre le traitement d'Apple consommerait du runner pour rien : un
+      # groupe de testeurs internes en distribution automatique reçoit le build
+      # dès qu'il est prêt.
+      skip_waiting_for_build_processing: true,
+    )
+  end
+end
+
+# En CI, la clé arrive encodée en base64 par un secret ; sur un Mac, on désigne
+# le fichier .p8 téléchargé depuis App Store Connect.
+def asc_api_key
+  key = { key_id: required_env("ASC_KEY_ID"), issuer_id: required_env("ASC_ISSUER_ID") }
+  if ENV["ASC_API_KEY_P8_BASE64"].to_s.empty?
+    key[:key_filepath] = required_env("ASC_KEY_PATH")
+  else
+    key[:key_content] = ENV["ASC_API_KEY_P8_BASE64"]
+    key[:is_key_content_base64] = true
+  end
+  app_store_connect_api_key(**key)
+end
+
+def required_env(name)
+  value = ENV[name].to_s
+  UI.user_error!("Variable d'environnement #{name} absente (voir docs/release.md).") if value.empty?
+  value
+end
+
+# `expo prebuild` nomme le projet d'après `expo.name` : on le lit plutôt que de
+# le figer, pour qu'un renommage de l'app ne casse pas la compilation.
+def xcode_project_name
+  workspaces = Dir[File.join(IOS_DIR, "*.xcworkspace")]
+  UI.user_error!("Projet iOS introuvable : lancez d'abord `npx expo prebuild --platform ios`.") unless workspaces.one?
+  File.basename(workspaces.first, ".xcworkspace")
+end
