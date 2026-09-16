@@ -10,7 +10,7 @@ export const PUBLISHER = {
   name: 'Moutawakil Samir',
   /** « Particulier », « Entrepreneur individuel, SIREN … » ou « SAS au capital de … €, RCS … ». */
   legalStatus: 'Particulier',
-  address: '[À COMPLÉTER : adresse postale]',
+  address: '',
   /** Adresse à laquelle les utilisateurs peuvent écrire. */
   email: 'samir@altyxlab.fr',
   /** En général l'éditeur lui-même. */
