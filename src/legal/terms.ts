@@ -17,7 +17,7 @@ export const TERMS: LegalDocument = {
     {
       title: 'Éditeur',
       body: [
-        `L'Application est éditée par ${PUBLISHER.name} (${PUBLISHER.legalStatus}), ${PUBLISHER.address}.`,
+        `L'Application est éditée par ${PUBLISHER.name} (${PUBLISHER.legalStatus}).`,
         `Directeur de la publication : ${PUBLISHER.publicationDirector}.`,
         `Contact : ${PUBLISHER.email}.`,
         "L'Application est distribuée par l'App Store d'Apple et par Google Play. Elle ne s'appuie sur aucun serveur exploité par l'éditeur.",
