@@ -62,11 +62,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
         {item('Volumes', 'save-outline', endpointBase && `${endpointBase}/volumes`)}
 
         <View style={styles.separator} />
-        {item('Notifications', 'notifications-outline', '/notifications')}
-
-        <View style={styles.separator} />
-        {item("Conditions d'utilisation", 'document-text-outline', '/legal/terms')}
-        {item('Politique de confidentialité', 'shield-checkmark-outline', '/legal/privacy')}
+        {item('Réglages', 'settings-outline', '/settings')}
       </ScrollView>
 
       <View style={styles.footer}>

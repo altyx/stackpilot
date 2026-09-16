@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { Loader } from '../src/components/ui';
 import { CurrentEndpointProvider } from '../src/navigation/CurrentEndpoint';
+import { SettingsProvider } from '../src/settings/SettingsContext';
 import { usePushNavigation } from '../src/notifications/usePushNavigation';
 import { theme } from '../src/theme';
 
@@ -63,8 +64,11 @@ function RootNavigator() {
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: '' }} />
+      {/* Les textes légaux servent l'écran de connexion comme les réglages. */}
       <Stack.Screen name="terms" options={{ title: '' }} />
       <Stack.Screen name="privacy" options={{ title: '' }} />
+      <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Stack.Screen name="changelog" options={{ title: 'Nouveautés' }} />
       {/* Le menu porte ses propres en-têtes, avec le bouton qui l'ouvre. */}
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
@@ -82,12 +86,14 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <CurrentEndpointProvider>
-              <StatusBar style="light" />
-              <RootNavigator />
-            </CurrentEndpointProvider>
-          </AuthProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              <CurrentEndpointProvider>
+                <StatusBar style="light" />
+                <RootNavigator />
+              </CurrentEndpointProvider>
+            </AuthProvider>
+          </SettingsProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

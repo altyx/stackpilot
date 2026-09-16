@@ -27,9 +27,7 @@ export default function DrawerLayout() {
       <Drawer.Screen name="endpoints/[endpointId]/images" options={{ title: 'Images' }} />
       <Drawer.Screen name="endpoints/[endpointId]/volumes" options={{ title: 'Volumes' }} />
       <Drawer.Screen name="endpoints/index" options={{ title: 'Environnements' }} />
-      <Drawer.Screen name="notifications" options={{ title: 'Notifications' }} />
-      <Drawer.Screen name="legal/terms" options={{ title: 'CGU' }} />
-      <Drawer.Screen name="legal/privacy" options={{ title: 'Confidentialité' }} />
+      <Drawer.Screen name="settings" options={{ title: 'Réglages' }} />
     </Drawer>
   );
 }

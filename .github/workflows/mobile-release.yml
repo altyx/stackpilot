@@ -37,6 +37,12 @@ jobs:
       - name: Vérifier que les textes légaux publiés sont à jour
         run: npm run legal -- --check
 
+      # Le changelog est embarqué dans le binaire : s'il ne décrit pas la
+      # version compilée, les utilisateurs de cette version ne verront jamais
+      # ses nouveautés, et aucun envoi ultérieur ne les leur apportera.
+      - name: Vérifier que le changelog décrit la version compilée
+        run: npm run changelog
+
       # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
       # Vérifié ici, avant vingt minutes de compilation : sinon Apple refuserait
       # l'envoi, ou pire, l'accepterait sous une version qu'on ne voulait pas.
