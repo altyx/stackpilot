@@ -1,7 +1,7 @@
 /**
  * Identité de l'éditeur, reprise par les textes légaux de l'application.
  *
- * Chaque valeur « À COMPLÉTER » s'affiche telle quelle dans l'app. Le workflow
+ * Chaque valeur à compléter s'affiche telle quelle dans l'app. Le workflow
  * de publication refuse de construire une version de production tant qu'il en
  * reste une dans `src/legal`.
  */
