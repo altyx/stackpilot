@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Button, Card } from '../src/components/ui';
-import { registerForPush, type PushRegistration } from '../src/notifications/push';
-import { theme } from '../src/theme';
+import { Button, Card } from '../../src/components/ui';
+import { registerForPush, type PushRegistration } from '../../src/notifications/push';
+import { theme } from '../../src/theme';
 
 export default function NotificationsScreen() {
   const [registration, setRegistration] = useState<PushRegistration | null>(null);

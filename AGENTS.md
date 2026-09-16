@@ -28,8 +28,16 @@ d'écrire du code touchant aux modules Expo.
   `npm run legal`, jamais éditée à la main.
 - `useLocalSearchParams` ne renvoie que les paramètres de la **route courante**.
   Un écran enfant d'un navigateur imbriqué ne voit donc pas les segments
-  dynamiques de sa route parente : `[endpointId]` est rediffusé par
-  `src/api/EndpointContext.tsx` depuis le layout `(tabs)`, qui porte le segment.
+  dynamiques de sa route parente. Les écrans d'un environnement sont pour cette
+  raison des enfants directs du menu `app/(drawer)`, sans layout intermédiaire
+  sous `[endpointId]` : chacun lit son segment via `useEndpointParam`.
+- Navigation : les écrans principaux vivent sous le menu latéral
+  `app/(drawer)`, dont le contenu est `src/navigation/AppDrawerContent.tsx`.
+  Les écrans de détail restent dans la pile racine, par-dessus le menu, avec
+  un bouton retour. L'environnement visé par le menu est celui du dernier écran
+  focalisé (`src/navigation/CurrentEndpoint.tsx`), persisté par instance.
+- `app/terms.tsx` et `app/privacy.tsx` servent les textes légaux hors session
+  (liens de l'écran de connexion) ; `app/(drawer)/legal/` les sert depuis le menu.
 
 ## Vérifications avant commit
 ```bash

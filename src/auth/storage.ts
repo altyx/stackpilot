@@ -3,6 +3,7 @@ import type { AuthMode, Session } from '../api/types';
 
 const SESSION_KEY = 'portainer.session';
 const LAST_LOGIN_KEY = 'portainer.lastLogin';
+const LAST_ENDPOINT_KEY = 'portainer.lastEndpoint';
 
 /** Ce qui sert à pré-remplir le formulaire de connexion — jamais le token. */
 export type LastLogin = Pick<Session, 'baseUrl' | 'mode' | 'username'>;
@@ -54,4 +55,32 @@ export async function loadSession(): Promise<Session | null> {
 
 export async function clearSession(): Promise<void> {
   await SecureStore.deleteItemAsync(SESSION_KEY);
+}
+
+/**
+ * Dernier environnement ouvert, rattaché à son instance : un identifiant
+ * d'environnement n'a de sens que sur l'instance qui l'a attribué.
+ */
+export interface LastEndpoint {
+  baseUrl: string;
+  endpointId: number;
+}
+
+export async function saveLastEndpoint(lastEndpoint: LastEndpoint): Promise<void> {
+  // Survit à `clearSession`, comme `LAST_LOGIN_KEY` : une reconnexion à la même
+  // instance rouvre l'environnement consulté en dernier.
+  await SecureStore.setItemAsync(LAST_ENDPOINT_KEY, JSON.stringify(lastEndpoint), {
+    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+}
+
+export async function loadLastEndpoint(): Promise<LastEndpoint | null> {
+  const raw = await SecureStore.getItemAsync(LAST_ENDPOINT_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as LastEndpoint;
+    return parsed.baseUrl && Number.isInteger(parsed.endpointId) ? parsed : null;
+  } catch {
+    return null;
+  }
 }

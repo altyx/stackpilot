@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { Loader } from '../src/components/ui';
+import { CurrentEndpointProvider } from '../src/navigation/CurrentEndpoint';
 import { usePushNavigation } from '../src/notifications/usePushNavigation';
 import { theme } from '../src/theme';
 
@@ -43,7 +46,7 @@ function RootNavigator() {
     if (isRestoring) return;
     const onLoginScreen = segments[0] === 'login';
     if (!session && !PUBLIC_SCREENS.has(segments[0] ?? '')) router.replace('/login');
-    else if (session && onLoginScreen) router.replace('/endpoints');
+    else if (session && onLoginScreen) router.replace('/');
   }, [session, isRestoring, segments, router]);
 
   if (isRestoring) return <Loader label="Restauration de la session…" />;
@@ -55,14 +58,15 @@ function RootNavigator() {
         headerTintColor: theme.colors.text,
         headerTitleStyle: { color: theme.colors.text },
         contentStyle: { backgroundColor: theme.colors.bg },
+        // Sans quoi iOS affiche le titre de l'écran précédent, « (drawer) » compris.
+        headerBackButtonDisplayMode: 'minimal',
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: '' }} />
-      <Stack.Screen name="notifications" options={{ title: '' }} />
       <Stack.Screen name="terms" options={{ title: '' }} />
       <Stack.Screen name="privacy" options={{ title: '' }} />
-      <Stack.Screen name="endpoints/index" options={{ title: '' }} />
-      <Stack.Screen name="endpoints/[endpointId]/(tabs)" options={{ title: '' }} />
+      {/* Le menu porte ses propres en-têtes, avec le bouton qui l'ouvre. */}
+      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
         name="endpoints/[endpointId]/containers/[containerId]"
         options={{ title: '' }}
@@ -73,13 +77,23 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <StatusBar style="light" />
-          <RootNavigator />
-        </AuthProvider>
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    // Le menu latéral s'ouvre au glissement : sans cette racine, ses gestes
+    // restent inertes.
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <CurrentEndpointProvider>
+              <StatusBar style="light" />
+              <RootNavigator />
+            </CurrentEndpointProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: theme.colors.bg },
+});
