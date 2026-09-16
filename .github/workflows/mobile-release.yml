@@ -21,12 +21,19 @@ jobs:
     name: Préparation
     runs-on: ubuntu-latest
     outputs:
-      track: ${{ steps.plan.outputs.track }}
+      track: ${{ steps.version.outputs.track }}
+      tag: ${{ steps.version.outputs.tag }}
+      create_tag: ${{ steps.version.outputs.create_tag }}
       build_number: ${{ steps.plan.outputs.build_number }}
       ios: ${{ steps.plan.outputs.ios }}
       android: ${{ steps.plan.outputs.android }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Le commit précédent sert à repérer un changement de version, les
+          # tags à refuser de republier une version déjà partie.
+          fetch-depth: 2
+          fetch-tags: true
       - uses: actions/setup-node@v5
         with:
           node-version: 24
@@ -43,25 +50,56 @@ jobs:
       - name: Vérifier que le changelog décrit la version compilée
         run: npm run changelog
 
-      # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
-      # Vérifié ici, avant vingt minutes de compilation : sinon Apple refuserait
-      # l'envoi, ou pire, l'accepterait sous une version qu'on ne voulait pas.
-      - name: Vérifier que le tag correspond à la version
-        if: github.ref_type == 'tag'
+      # `expo.version` ne bouge que dans une PR de release : le voir changer sur
+      # `main` vaut donc décision de publier, et le tag est posé par le job
+      # `release`, une fois les envois réussis. Pousser un tag à la main reste
+      # accepté, pour reprendre une publication interrompue.
+      - name: Déterminer la destination
+        id: version
         env:
-          TAG: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           version=$(jq -r .expo.version app.json)
-          if [ "$TAG" != "v$version" ]; then
-            echo "::error::Le tag $TAG ne correspond pas à la version $version de app.json. Bumpez la version, fusionnez, puis retaguez."
-            exit 1
+          track=beta
+          create_tag=false
+
+          if [ "$REF_TYPE" = tag ]; then
+            # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
+            # Vérifié ici, avant vingt minutes de compilation : sinon Apple
+            # refuserait l'envoi, ou pire, l'accepterait sous une version qu'on
+            # ne voulait pas.
+            if [ "$REF_NAME" != "v$version" ]; then
+              echo "::error::Le tag $REF_NAME ne correspond pas à la version $version de app.json. Bumpez la version, fusionnez, puis retaguez."
+              exit 1
+            fi
+            track=production
+          else
+            previous=$(git show HEAD~1:app.json 2>/dev/null | jq -r .expo.version || true)
+            if [ -n "$previous" ] && [ "$previous" != "$version" ]; then
+              # Une version déjà taguée a déjà été envoyée : les stores
+              # refuseraient le doublon, et la Release écraserait l'existante.
+              if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+                echo "::error::Le tag v$version existe déjà : cette version est publiée. Bumpez à nouveau expo.version dans app.json."
+                exit 1
+              fi
+              track=production
+              create_tag=true
+              echo "::notice::Version $previous → $version : publication en production."
+            fi
           fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "version=$version"
+            echo "tag=v$version"
+            echo "track=$track"
+            echo "create_tag=$create_tag"
+          } >> "$GITHUB_OUTPUT"
 
       # Les builds de test peuvent partir avec des mentions légales provisoires,
       # pas une version de production : les CGU affichées doivent être complètes.
       - name: Vérifier que les mentions légales sont complétées
-        if: github.ref_type == 'tag'
+        if: steps.version.outputs.track == 'production'
         run: |
           if grep -rn "À COMPLÉTER" src/legal; then
             echo "::error::Des champs « À COMPLÉTER » restent dans src/legal (voir les lignes ci-dessus). Complétez-les, fusionnez, puis retaguez."
@@ -73,7 +111,7 @@ jobs:
       # siens manquent, sans faire échouer le workflow.
       - id: plan
         env:
-          TRACK: ${{ github.ref_type == 'tag' && 'production' || 'beta' }}
+          TRACK: ${{ steps.version.outputs.track }}
           BUILD_NUMBER: ${{ github.run_number }}
           HAS_IOS: ${{ secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_API_KEY_P8_BASE64 != '' && secrets.MATCH_PASSWORD != '' && secrets.MATCH_DEPLOY_KEY != '' }}
           HAS_ANDROID: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && secrets.ANDROID_UPLOAD_KEY_ALIAS != '' && secrets.ANDROID_UPLOAD_KEY_PASSWORD != '' && secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
@@ -139,6 +177,16 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_PRIVATE_KEY: ${{ runner.temp }}/match_deploy_key
         run: bundle exec fastlane ios build
+
+      # « What to Test » de TestFlight : les testeurs lisent ce que l'app
+      # affichera dans Réglages › Nouveautés, pas une liste de commits.
+      - name: Préparer les notes de version
+        run: |
+          {
+            echo 'RELEASE_NOTES<<CHANGELOG_EOF'
+            npm run --silent changelog -- --notes --max=4000
+            echo 'CHANGELOG_EOF'
+          } >> "$GITHUB_ENV"
 
       - name: Envoyer à App Store Connect
         env:
@@ -217,12 +265,24 @@ jobs:
 
       # Test : piste interne, publiée aux testeurs. Production : déposé en
       # brouillon, à lancer depuis la console pour ne rien publier sans un clic.
+      # Google Play refuse au-delà de 500 caractères par langue, et n'accepte
+      # que les langues déclarées sur la fiche du store : PLAY_NOTES_LANGUAGE
+      # doit en être une (voir docs/release.md).
+      - name: Préparer les notes de version
+        env:
+          PLAY_NOTES_LANGUAGE: fr-FR
+        run: |
+          mkdir -p distribution/whatsnew
+          npm run --silent changelog -- --notes --max=500 \
+            > "distribution/whatsnew/whatsnew-$PLAY_NOTES_LANGUAGE"
+
       - name: Envoyer à Google Play
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: app.stackpilot
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          whatsNewDirectory: distribution/whatsnew
           track: ${{ needs.prepare.outputs.track == 'production' && 'production' || 'internal' }}
           status: ${{ needs.prepare.outputs.track == 'production' && 'draft' || 'completed' }}
 
@@ -238,6 +298,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
 
       - name: Récupérer le bundle Android
         if: needs.android.result == 'success'
@@ -249,17 +312,26 @@ jobs:
       - name: Créer la release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          CREATE_TAG: ${{ needs.prepare.outputs.create_tag }}
           BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
           IOS: ${{ needs.ios.result }}
           ANDROID: ${{ needs.android.result }}
         run: |
-          notes="Build ${BUILD_NUMBER} · commit ${GITHUB_SHA::7}"
+          notes=$(npm run --silent changelog -- --notes)
+          notes="$notes"$'\n\n'"Build ${BUILD_NUMBER} · commit ${GITHUB_SHA::7}"
           notes="$notes"$'\n'"iOS : ${IOS} · Android : ${ANDROID}"
           assets=()
           [ -f dist/app-release.aab ] && assets+=("dist/app-release.aab#StackPilot-${TAG}-${BUILD_NUMBER}.aab")
-          gh release create "$TAG" "${assets[@]}" \
+          # Le tag naît avec la release, donc seulement si les envois ont
+          # réussi : rien ne prétend publié ce qui n'est pas parti. Posé avec
+          # GITHUB_TOKEN, il ne redéclenche pas ce workflow.
+          if [ "$CREATE_TAG" = true ]; then
+            ref=(--target "$GITHUB_SHA")
+          else
+            ref=(--verify-tag)
+          fi
+          gh release create "$TAG" "${assets[@]}" "${ref[@]}" \
             --title "StackPilot ${TAG#v}" \
             --notes "$notes" \
-            --generate-notes \
-            --verify-tag
+            --generate-notes

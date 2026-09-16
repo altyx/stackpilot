@@ -37,7 +37,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "legal": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/legal-markdown.mjs",
-    "changelog": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/changelog-check.mjs"
+    "changelog": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/changelog.mjs"
   },
   "private": true,
   "overrides": {
