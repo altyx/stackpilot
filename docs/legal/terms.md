@@ -8,7 +8,7 @@ Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'
 
 ## 1. Éditeur
 
-L'Application est éditée par Moutawakil Samir (Particulier), \[À COMPLÉTER : adresse postale\].
+L'Application est éditée par Moutawakil Samir (Particulier), .
 
 Directeur de la publication : Samir Moutawakil.
 

@@ -8,7 +8,7 @@ Cette politique explique quelles données l'application mobile StackPilot (l'« 
 
 ## 1. Responsable du traitement
 
-Le responsable du traitement est Moutawakil Samir (Particulier), \[À COMPLÉTER : adresse postale\], joignable à l'adresse samir@altyxlab.fr.
+Le responsable du traitement est Moutawakil Samir (Particulier), , joignable à l'adresse samir@altyxlab.fr.
 
 L'éditeur n'exploite aucun serveur pour l'Application : il n'a accès ni à vos identifiants, ni aux données de vos instances Portainer.
 
