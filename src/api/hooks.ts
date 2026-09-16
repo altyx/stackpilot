@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
+import { useSettings } from '../settings/SettingsContext';
 import {
   fetchContainerLogs,
   inspectContainer,
@@ -45,11 +46,14 @@ export function useEndpoints() {
 
 export function useContainers(endpointId: number) {
   const { session } = useAuth();
+  // Les images et les volumes lisent aussi cette requête : l'intervalle réglé
+  // dans les réglages vaut donc pour les trois écrans.
+  const { settings } = useSettings();
   return useQuery({
     queryKey: queryKeys.containers(endpointId),
     queryFn: () => listContainers(requireSession(session), endpointId),
     enabled: !!session,
-    refetchInterval: 15_000,
+    refetchInterval: settings.refreshIntervalMs ?? false,
   });
 }
 

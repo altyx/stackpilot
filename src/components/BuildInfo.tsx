@@ -1,25 +1,15 @@
-import * as Application from 'expo-application';
-import Constants from 'expo-constants';
 import { StyleSheet, Text } from 'react-native';
+import { versionLine } from '../lib/appInfo';
 import { theme } from '../theme';
 
 /**
- * « StackPilot 1.0.0 (57) · a1d8e36 » : version et numéro de build lus dans le
- * binaire installé, commit gravé par `app.config.ts`. C'est la ligne à demander
- * à un testeur qui signale un problème.
+ * « StackPilot 1.0.0 (57) · a1d8e36 » : la ligne à demander à un testeur qui
+ * signale un problème — et celle que « Signaler un problème » joint tout seul.
  */
 export function BuildInfo() {
-  const version = Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? '?';
-  const number = Application.nativeBuildVersion;
-  const commit = (Constants.expoConfig?.extra as { build?: { commit?: string | null } } | undefined)
-    ?.build?.commit;
-
-  const parts = [`StackPilot ${version}${number ? ` (${number})` : ''}`];
-  if (commit) parts.push(commit);
-
   return (
     <Text selectable style={styles.text}>
-      {parts.join(' · ')}
+      {versionLine()}
     </Text>
   );
 }

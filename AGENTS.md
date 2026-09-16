@@ -36,12 +36,22 @@ d'écrire du code touchant aux modules Expo.
   Les écrans de détail restent dans la pile racine, par-dessus le menu, avec
   un bouton retour. L'environnement visé par le menu est celui du dernier écran
   focalisé (`src/navigation/CurrentEndpoint.tsx`), persisté par instance.
-- `app/terms.tsx` et `app/privacy.tsx` servent les textes légaux hors session
-  (liens de l'écran de connexion) ; `app/(drawer)/legal/` les sert depuis le menu.
+- Les écrans annexes (`app/notifications.tsx`, `app/changelog.tsx`,
+  `app/terms.tsx`, `app/privacy.tsx`) vivent dans la pile racine et s'ouvrent
+  depuis les réglages, avec un bouton retour. Les textes légaux servent aussi
+  l'écran de connexion, hors session.
+- `src/changelog.ts` est embarqué dans le binaire : son entrée de tête doit
+  porter la version d'`app.json`. On écrit donc la note de version **avant** de
+  bumper la version et de poser le tag ; `npm run changelog` le vérifie, et le
+  workflow de publication refuse de compiler sinon.
+- Les réglages de l'application vivent dans `src/settings` et sont persistés
+  dans le trousseau, faute d'autre stockage embarqué. Toute nouvelle préférence
+  conservée sur l'appareil doit apparaître dans `src/legal/privacy.ts`.
 
 ## Vérifications avant commit
 ```bash
 npm run typecheck
 npx expo export --platform ios --output-dir /tmp/stackpilot-export-check
 npm run legal -- --check
+npm run changelog
 ```
