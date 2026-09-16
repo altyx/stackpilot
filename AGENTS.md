@@ -41,9 +41,14 @@ d'écrire du code touchant aux modules Expo.
   depuis les réglages, avec un bouton retour. Les textes légaux servent aussi
   l'écran de connexion, hors session.
 - `src/changelog.ts` est embarqué dans le binaire : son entrée de tête doit
-  porter la version d'`app.json`. On écrit donc la note de version **avant** de
-  bumper la version et de poser le tag ; `npm run changelog` le vérifie, et le
-  workflow de publication refuse de compiler sinon.
+  porter la version d'`app.json`. `npm run changelog` le vérifie, et le workflow
+  de publication refuse de compiler sinon. C'est aussi la source des notes
+  publiées (GitHub Release, TestFlight, Google Play), via
+  `npm run changelog -- --notes`.
+- Publier, c'est bumper `expo.version` dans `app.json` : la voir changer sur
+  `main` fait partir la production, et le workflow crée alors le tag `vX.Y.Z` et
+  la GitHub Release une fois les envois réussis (voir `docs/release.md`). Ne
+  bumper la version que dans une PR de release, avec sa note de changelog.
 - Les réglages de l'application vivent dans `src/settings` et sont persistés
   dans le trousseau, faute d'autre stockage embarqué. Toute nouvelle préférence
   conservée sur l'appareil doit apparaître dans `src/legal/privacy.ts`.

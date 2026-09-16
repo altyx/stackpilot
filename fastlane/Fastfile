@@ -70,6 +70,9 @@ platform :ios do
     upload_to_testflight(
       api_key: asc_api_key,
       ipa: File.join(OUTPUT_DIR, "#{xcode_project_name}.ipa"),
+      # « What to Test » : les notes de version de src/changelog.ts, posées par
+      # le workflow. Absentes en local, où le build ne sert qu'à vérifier.
+      changelog: ENV["RELEASE_NOTES"],
       # Attendre le traitement d'Apple consommerait du runner pour rien : un
       # groupe de testeurs internes en distribution automatique reçoit le build
       # dès qu'il est prêt.

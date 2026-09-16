@@ -13,7 +13,13 @@ de Google.
 | --- | --- |
 | Fusion sur `main` | **Test** : TestFlight et piste interne Google Play |
 | *Run workflow* manuel | idem |
-| Tag `vX.Y.Z` poussé | **Production** : App Store Connect et piste production Google Play en brouillon, puis GitHub Release |
+| Fusion sur `main` qui **change `expo.version`** | **Production**, et le tag `vX.Y.Z` est créé par le workflow |
+| Tag `vX.Y.Z` poussé à la main | **Production** (reprise d'une publication interrompue) |
+
+C'est donc le **numéro de version** qui décide, pas un geste séparé : tant que
+`expo.version` ne bouge pas, chaque fusion produit un build de test de plus,
+sous la même version, avec un numéro de build neuf. Voir « Publier une
+version » plus bas.
 
 Pour iOS, test et production sont **le même envoi** : un build arrive dans
 App Store Connect, apparaît dans TestFlight, et c'est depuis la console Apple
@@ -29,33 +35,75 @@ Tant que les secrets d'une plateforme manquent, son job est **ignoré avec un
 avertissement**, sans faire échouer le workflow. On peut donc fusionner sur
 `main` avant d'avoir les comptes.
 
+## Deux numéros, deux rôles
+
+`expo.version` dans `app.json` est la **version marketing** — celle que les
+stores affichent, `CFBundleShortVersionString` côté iOS et `versionName` côté
+Android. Elle est écrite à la main, dans une PR de release, et c'est la seule
+chose qui déclenche une publication.
+
+Le **numéro de build** est le compteur d'exécutions du workflow, posé par
+[`app.config.ts`](../app.config.ts) en `ios.buildNumber` et
+`android.versionCode`. Il croît à chaque run, y compris entre deux versions
+marketing identiques : d'où les `0.1.0 (12)`, `0.1.0 (13)` qui se succèdent
+dans TestFlight entre deux releases. Les stores exigent qu'il croisse
+strictement, jamais qu'il corresponde à quoi que ce soit.
+
+Le `version` de `package.json` ne sert à rien ici : seul `app.json` compte.
+
 ## Publier une version
 
-Le tag est le déclencheur de la production, et il doit correspondre à la
-version de `app.json` — le workflow le vérifie avant de compiler. Il vérifie
-aussi qu'aucun champ « À COMPLÉTER » ne reste dans les mentions légales
+Une publication tient dans une **PR de release**, qui ne fait que deux choses :
+
+1. Ajouter l'entrée de la version en tête de
+   [`src/changelog.ts`](../src/changelog.ts) — c'est le texte que liront les
+   utilisateurs, dans l'app comme sur les stores.
+2. Porter `expo.version` à ce même numéro dans `app.json`.
+
+Les deux vont ensemble : `npm run changelog` échoue si l'un avance sans
+l'autre, et le workflow lance ce contrôle avant de compiler. Il vérifie aussi
+qu'aucun champ « À COMPLÉTER » ne reste dans les mentions légales
 ([`src/legal`](../src/legal)), affichées dans l'app.
 
-1. Mettre `expo.version` à jour dans `app.json`, fusionner sur `main`. Cette
-   fusion produit un dernier build de test, à vérifier.
-2. Taguer ce commit et pousser le tag :
+À la fusion, le workflow compile, envoie aux stores, puis crée le tag `vX.Y.Z`
+et la **GitHub Release** correspondante, avec les notes du changelog, le rappel
+du build et du commit, la liste des commits et le bundle Android en pièce
+jointe. Le tag naît avec la release, donc **après** des envois réussis : il
+n'existe pas de tag qui prétende publié ce qui n'est pas parti.
+
+Reste à terminer dans les consoles : soumettre le build à l'App Store, lancer
+le déploiement du brouillon Google Play. Le tag atteste ce qui a été **envoyé**,
+pas ce qui est en ligne.
+
+Si la production échoue avant la création du tag, corrigez, puis relancez la
+publication en poussant le tag à la main :
 
 ```bash
 git tag v1.0.0 && git push origin v1.0.0
 ```
 
-3. Le workflow envoie aux stores, puis crée la **GitHub Release** `v1.0.0` avec
-   les notes générées depuis les commits et le bundle Android en pièce jointe.
-   Sa description rappelle le numéro de build et le commit.
-4. Terminer dans les consoles : soumettre le build à l'App Store, lancer le
-   déploiement du brouillon Google Play.
+Ne relancez pas le run : un *Re-run* garde le même numéro de build, que les
+stores refuseront. Et si le tag existe déjà, une nouvelle fusion sur cette même
+version est refusée dès la préparation : il faut alors bumper à nouveau.
 
-Le tag atteste ce qui a été **envoyé**, pas ce qui est en ligne : la revue
-Apple et le déploiement progressif Google se suivent dans leurs consoles.
+## Notes de version
 
-Si la production échoue après le tag, supprimez le tag (`git push --delete
-origin v1.0.0`), corrigez, retaguez. Ne relancez pas le run : un *Re-run*
-garde le même numéro de build, que les stores refuseront.
+`src/changelog.ts` est la source unique : l'app les affiche dans Réglages ›
+Nouveautés, et le workflow les reprend pour le corps de la GitHub Release, le
+« What to Test » de TestFlight et le « Nouveautés » de Google Play.
+
+```bash
+npm run changelog -- --notes            # ce qui partira
+npm run changelog -- --notes --max=500  # tronqué comme pour Google Play
+```
+
+Google Play limite ces notes à **500 caractères par langue** et n'accepte que
+les langues déclarées sur la fiche du store. Le workflow écrit
+`whatsnew-fr-FR` : si la fiche Google Play n'a pas le français, changez
+`PLAY_NOTES_LANGUAGE` dans le job Android, sans quoi l'envoi échoue.
+
+Les notes de l'App Store, elles, se saisissent dans App Store Connect au moment
+de soumettre le build : Apple ne les accepte pas d'un envoi TestFlight.
 
 ## Textes légaux
 
