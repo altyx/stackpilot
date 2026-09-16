@@ -19,16 +19,10 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
-    version: '0.1.0',
+    version: '0.2.0',
     date: '16 septembre 2026',
     changes: [
-      'Première version de StackPilot.',
-      "Connexion à une instance Portainer par access token ou par identifiants, avec jeton conservé dans le trousseau sécurisé de l'appareil.",
-      'Conteneurs regroupés par stack, avec recherche, filtres et actions sur un conteneur comme sur une stack entière.',
-      'Consultation des images et des volumes, avec repérage de ce qui est inutilisé.',
-      'Affichage des 200 dernières lignes de journal d’un conteneur.',
-      "Alertes par notification, en déployant le service de surveillance fourni sur votre serveur.",
-      "Menu latéral pour naviguer entre environnements, conteneurs, images, volumes et réglages.",
+      'Ajout d\'une page settings applicatif',
     ],
   },
 ];
