@@ -6,13 +6,11 @@ import {
   PanResponder,
   Pressable,
   StyleSheet,
-  Text,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../theme';
-import { Button } from './ui';
 
 const OPEN_MS = 260;
 const CLOSE_MS = 200;
@@ -153,79 +151,6 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
   );
 }
 
-export function SheetHeader({ title, message }: { title: string; message?: string }) {
-  return (
-    <View style={styles.header}>
-      <Text accessibilityRole="header" style={styles.title}>
-        {title}
-      </Text>
-      {message ? <Text style={styles.message}>{message}</Text> : null}
-    </View>
-  );
-}
-
-export function SheetActions({ children }: { children: ReactNode }) {
-  return <View style={styles.actions}>{children}</View>;
-}
-
-export interface ConfirmSheetProps {
-  visible: boolean;
-  title: string;
-  message?: string;
-  confirmLabel: string;
-  destructive?: boolean;
-  /** Appelé après la fermeture complète de la feuille. */
-  onConfirm: () => void;
-  onCancel: () => void;
-  children?: ReactNode;
-}
-
-export function ConfirmSheet({
-  visible,
-  title,
-  message,
-  confirmLabel,
-  destructive = false,
-  onConfirm,
-  onCancel,
-  children,
-}: ConfirmSheetProps) {
-  // Retient pourquoi la feuille se ferme : le rappel ne part qu'une fois l'animation finie.
-  const [outcome, setOutcome] = useState<'confirm' | 'cancel' | null>(null);
-  const close = (next: 'confirm' | 'cancel') => setOutcome((current) => current ?? next);
-
-  return (
-    <BottomSheet
-      visible={visible && outcome === null}
-      onRequestClose={() => close('cancel')}
-      onClosed={() => {
-        setOutcome(null);
-        if (outcome === 'confirm') onConfirm();
-        else onCancel();
-      }}>
-      <SheetHeader title={title} message={message} />
-      {children}
-      <SheetActions>
-        <Button
-          label={confirmLabel}
-          variant={destructive ? 'danger' : 'primary'}
-          onPress={() => close('confirm')}
-        />
-        <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
-      </SheetActions>
-    </BottomSheet>
-  );
-}
-
-/** Garde la dernière valeur non nulle, pour que le contenu reste affiché pendant la fermeture. */
-export function useLatched<T>(value: T | null): T | null {
-  const [latched, setLatched] = useState<T | null>(value);
-  useEffect(() => {
-    if (value !== null) setLatched(value);
-  }, [value]);
-  return value ?? latched;
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { backgroundColor: theme.colors.backdrop },
@@ -250,8 +175,4 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: theme.colors.border,
   },
-  header: { gap: theme.spacing(1.5) },
-  title: { color: theme.colors.text, fontSize: 18, fontWeight: '700' },
-  message: { color: theme.colors.textMuted, fontSize: 14, lineHeight: 20 },
-  actions: { gap: theme.spacing(2) },
 });

@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { LegalBlock, LegalDocument } from '../legal/document';
+import type { LegalDocument } from '../legal/document';
 import { theme } from '../theme';
+import { LegalDocumentBlock } from './LegalDocumentBlock';
 
 /** Affiche un texte légal : titre, date de mise à jour, puis sections numérotées. */
 export function LegalDocumentView({ document }: { document: LegalDocument }) {
@@ -23,33 +24,11 @@ export function LegalDocumentView({ document }: { document: LegalDocument }) {
             {index + 1}. {section.title}
           </Text>
           {section.body.map((block, blockIndex) => (
-            <Block key={blockIndex} block={block} />
+            <LegalDocumentBlock key={blockIndex} block={block} />
           ))}
         </View>
       ))}
     </ScrollView>
-  );
-}
-
-function Block({ block }: { block: LegalBlock }) {
-  if (typeof block === 'string') {
-    return (
-      <Text selectable style={styles.paragraph}>
-        {block}
-      </Text>
-    );
-  }
-  return (
-    <View style={styles.list}>
-      {block.map((item) => (
-        <View key={item} style={styles.listItem}>
-          <Text style={styles.bullet}>•</Text>
-          <Text selectable style={[styles.paragraph, styles.listText]}>
-            {item}
-          </Text>
-        </View>
-      ))}
-    </View>
   );
 }
 
@@ -61,8 +40,4 @@ const styles = StyleSheet.create({
   section: { gap: theme.spacing(2) },
   sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '600' },
   paragraph: { color: theme.colors.text, fontSize: 14, lineHeight: 21 },
-  list: { gap: theme.spacing(1.5) },
-  listItem: { flexDirection: 'row', gap: theme.spacing(2) },
-  bullet: { color: theme.colors.textMuted, fontSize: 14, lineHeight: 21 },
-  listText: { flex: 1 },
 });

@@ -1,12 +1,18 @@
 import { useState } from 'react';
-import { Alert, Platform, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useContainer, useContainerAction, useContainerLogs } from '../../../../src/api/hooks';
+import { useContainer, useContainerAction } from '../../../../src/api/hooks';
 import type { ContainerAction } from '../../../../src/api/types';
-import { ConfirmSheet } from '../../../../src/components/BottomSheet';
-import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
-import { Button, Card, ErrorView, Loader, Row, StatusDot } from '../../../../src/components/ui';
+import { Button } from '../../../../src/components/Button';
+import { Card } from '../../../../src/components/Card';
+import { ConfirmSheet } from '../../../../src/components/ConfirmSheet';
+import { ContainerLogsSection } from '../../../../src/components/ContainerLogsSection';
+import { ErrorView } from '../../../../src/components/ErrorView';
+import { Loader } from '../../../../src/components/Loader';
+import { Row } from '../../../../src/components/Row';
+import { StatusDot } from '../../../../src/components/StatusDot';
 import { formatDate, inspectName, shortId, stateLabel } from '../../../../src/lib/format';
+import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { theme } from '../../../../src/theme';
 
 const ACTION_LABELS: Record<ContainerAction, string> = {
@@ -128,7 +134,7 @@ export default function ContainerDetailScreen() {
         </Card>
       ) : null}
 
-      <LogsSection endpointId={id} containerId={containerId} />
+      <ContainerLogsSection endpointId={id} containerId={containerId} />
       <ConfirmSheet
         visible={confirming !== null}
         title={confirming ? `${ACTION_LABELS[confirming]} le conteneur ?` : ''}
@@ -152,48 +158,6 @@ function describeImpact(action: ContainerAction | null, name: string): string {
   return '';
 }
 
-function LogsSection({ endpointId, containerId }: { endpointId: number; containerId: string }) {
-  const [visible, setVisible] = useState(false);
-  const logs = useContainerLogs(endpointId, containerId);
-
-  if (!visible) {
-    return (
-      <Button
-        label="Afficher les logs"
-        variant="secondary"
-        onPress={() => {
-          setVisible(true);
-          void logs.refetch();
-        }}
-      />
-    );
-  }
-
-  return (
-    <Card style={styles.card}>
-      <View style={styles.logsHeader}>
-        <Text style={styles.sectionTitle}>200 dernières lignes</Text>
-        <Text accessibilityRole="button" onPress={() => logs.refetch()} style={styles.refresh}>
-          Rafraîchir
-        </Text>
-      </View>
-      {logs.isFetching ? (
-        <Text style={styles.logsMuted}>Chargement…</Text>
-      ) : logs.error ? (
-        <Text style={styles.logsError}>
-          {logs.error instanceof Error ? logs.error.message : 'Logs indisponibles.'}
-        </Text>
-      ) : (
-        <ScrollView horizontal style={styles.logsBox}>
-          <Text selectable style={styles.logsText}>
-            {logs.data?.trim() || 'Aucune sortie.'}
-          </Text>
-        </ScrollView>
-      )}
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   content: { padding: theme.spacing(4), gap: theme.spacing(3), paddingBottom: theme.spacing(10) },
   card: { gap: theme.spacing(3) },
@@ -204,20 +168,4 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: theme.spacing(2) },
   action: { flex: 1 },
   sectionTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
-  logsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  refresh: { color: theme.colors.accent, fontSize: 13, fontWeight: '600' },
-  logsBox: {
-    backgroundColor: theme.colors.bg,
-    borderRadius: theme.radius.sm,
-    maxHeight: 320,
-    padding: theme.spacing(3),
-  },
-  logsText: {
-    color: theme.colors.text,
-    fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
-    fontSize: 11,
-    lineHeight: 16,
-  },
-  logsMuted: { color: theme.colors.textMuted, fontSize: 13 },
-  logsError: { color: theme.colors.danger, fontSize: 13 },
 });

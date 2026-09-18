@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Button, Card } from '../src/components/ui';
+import { Button } from '../src/components/Button';
+import { Card } from '../src/components/Card';
+import { NotificationStep } from '../src/components/NotificationStep';
 import { registerForPush, type PushRegistration } from '../src/notifications/push';
 import { theme } from '../src/theme';
 
@@ -71,9 +73,9 @@ export default function NotificationsScreen() {
 
       <Card style={styles.card}>
         <Text style={styles.sectionTitle}>Mise en service</Text>
-        <Step n={1} text="Déployez le service watcher/ sur votre serveur (voir son README)." />
-        <Step n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
-        <Step
+        <NotificationStep n={1} text="Déployez le service watcher/ sur votre serveur (voir son README)." />
+        <NotificationStep n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
+        <NotificationStep
           n={3}
           text="Le service vous alerte sur un arrêt anormal, un passage en unhealthy, un redémarrage ou un dépassement mémoire."
         />
@@ -84,15 +86,6 @@ export default function NotificationsScreen() {
         l&apos;application : elles ne fonctionnent ni en simulateur, ni dans Expo Go.
       </Text>
     </ScrollView>
-  );
-}
-
-function Step({ n, text }: { n: number; text: string }) {
-  return (
-    <View style={styles.step}>
-      <Text style={styles.stepNumber}>{n}</Text>
-      <Text style={styles.stepText}>{text}</Text>
-    </View>
   );
 }
 
@@ -110,13 +103,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     padding: theme.spacing(3),
   },
-  step: { flexDirection: 'row', gap: theme.spacing(3), alignItems: 'flex-start' },
-  stepNumber: {
-    color: theme.colors.accent,
-    fontSize: 13,
-    fontWeight: '700',
-    minWidth: 16,
-  },
-  stepText: { color: theme.colors.text, fontSize: 13, lineHeight: 19, flex: 1 },
   footnote: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 16 },
 });

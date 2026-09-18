@@ -1,29 +1,17 @@
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  SectionList,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Link } from 'expo-router';
+import { Alert, RefreshControl, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction, type StackActionResult } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
+import { Card } from '../../../../src/components/Card';
+import { ContainerRow } from '../../../../src/components/ContainerRow';
+import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { ErrorView } from '../../../../src/components/ErrorView';
+import { Loader } from '../../../../src/components/Loader';
+import { Segmented } from '../../../../src/components/Segmented';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
-import {
-  Card,
-  EmptyState,
-  ErrorView,
-  Loader,
-  Segmented,
-  StatusDot,
-} from '../../../../src/components/ui';
+import { StackHeader } from '../../../../src/components/StackHeader';
 import { containerName } from '../../../../src/lib/format';
 import { countStacks, groupByStack, type StackSection } from '../../../../src/lib/stacks';
 import { theme } from '../../../../src/theme';
@@ -133,7 +121,7 @@ export default function ContainersScreen() {
           />
         }
         renderItem={({ item }) => <ContainerRow endpointId={id} container={item} />}
-        ItemSeparatorComponent={RowSeparator}
+        ItemSeparatorComponent={ContainerRowSeparator}
       />
       <StackActionSheet
         section={sheetSection}
@@ -161,76 +149,6 @@ function reportStackResult(
   );
 }
 
-function StackHeader({
-  section,
-  busy,
-  disabled,
-  onPressActions,
-}: {
-  section: StackSection;
-  busy: boolean;
-  disabled: boolean;
-  onPressActions: (section: StackSection) => void;
-}) {
-  const { title, members, running } = section;
-  return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle} numberOfLines={1}>
-        {title}
-      </Text>
-      <Text style={[styles.sectionCount, running === members.length && styles.sectionCountFull]}>
-        {running}/{members.length} en cours
-      </Text>
-      {section.ungrouped ? null : busy ? (
-        <ActivityIndicator color={theme.colors.accent} size="small" style={styles.sectionAction} />
-      ) : (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Actions sur la stack ${title}`}
-          accessibilityState={{ disabled }}
-          disabled={disabled}
-          hitSlop={12}
-          onPress={() => onPressActions(section)}
-          style={({ pressed }) => [styles.sectionAction, (pressed || disabled) && styles.pressed]}>
-          <Ionicons name="ellipsis-horizontal" size={18} color={theme.colors.accent} />
-        </Pressable>
-      )}
-    </View>
-  );
-}
-
-/**
- * L'espace entre cartes vient d'un séparateur et non d'une marge sur la carte :
- * `Link asChild` fusionne le style de son enfant par étalement d'objet, et un
- * style fonction de `Pressable` y est perdu, marge comprise.
- */
-function RowSeparator() {
-  return <View style={styles.rowSeparator} />;
-}
-
-function ContainerRow({ endpointId, container }: { endpointId: number; container: ContainerSummary }) {
-  return (
-    <Link href={`/endpoints/${endpointId}/containers/${container.Id}`} asChild>
-      <Pressable style={({ pressed }) => pressed && styles.pressed}>
-        <Card style={styles.card}>
-          <View style={styles.cardHeader}>
-            <StatusDot state={container.State} />
-            <Text style={styles.name} numberOfLines={1}>
-              {containerName(container)}
-            </Text>
-          </View>
-          <Text style={styles.image} numberOfLines={1}>
-            {container.Image}
-          </Text>
-          <Text style={styles.status} numberOfLines={1}>
-            {container.Status}
-          </Text>
-        </Card>
-      </Pressable>
-    </Link>
-  );
-}
-
 const styles = StyleSheet.create({
   list: { padding: theme.spacing(4), paddingBottom: theme.spacing(8) },
   header: { gap: theme.spacing(2), marginBottom: theme.spacing(2) },
@@ -245,31 +163,4 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing(2.5),
   },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-  // Fond opaque obligatoire : l'en-tête reste collé au-dessus des cartes.
-  sectionHeader: {
-    backgroundColor: theme.colors.bg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(3),
-    paddingTop: theme.spacing(3),
-    paddingBottom: theme.spacing(2),
-  },
-  sectionTitle: {
-    color: theme.colors.text,
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    flexShrink: 1,
-  },
-  sectionCount: { color: theme.colors.textMuted, fontSize: 12, marginLeft: 'auto' },
-  sectionCountFull: { color: theme.colors.success },
-  sectionAction: { width: 28, alignItems: 'flex-end' },
-  rowSeparator: { height: theme.spacing(2) },
-  card: { gap: theme.spacing(1) },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
-  name: { color: theme.colors.text, fontSize: 15, fontWeight: '600', flex: 1 },
-  image: { color: theme.colors.textMuted, fontSize: 12 },
-  status: { color: theme.colors.textMuted, fontSize: 12 },
-  pressed: { opacity: 0.75 },
 });

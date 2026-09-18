@@ -1,21 +1,14 @@
 import { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { PortainerError } from '../src/api/client';
 import { loginWithApiKey, loginWithPassword } from '../src/api/portainer';
 import type { AuthMode } from '../src/api/types';
 import { useAuth } from '../src/auth/AuthContext';
-import { Button, Card } from '../src/components/ui';
+import { Button } from '../src/components/Button';
+import { Card } from '../src/components/Card';
+import { LoginField } from '../src/components/LoginField';
+import { LoginModeTab } from '../src/components/LoginModeTab';
 import { theme } from '../src/theme';
 
 export default function LoginScreen() {
@@ -74,7 +67,7 @@ export default function LoginScreen() {
         ) : null}
 
         <Card style={styles.card}>
-          <Field
+          <LoginField
             label="URL de l'instance"
             placeholder="https://portainer.local:9443"
             value={baseUrl}
@@ -86,12 +79,12 @@ export default function LoginScreen() {
           />
 
           <View style={styles.segmented}>
-            <ModeTab label="Access token" active={mode === 'apiKey'} onPress={() => setMode('apiKey')} />
-            <ModeTab label="Identifiants" active={mode === 'jwt'} onPress={() => setMode('jwt')} />
+            <LoginModeTab label="Access token" active={mode === 'apiKey'} onPress={() => setMode('apiKey')} />
+            <LoginModeTab label="Identifiants" active={mode === 'jwt'} onPress={() => setMode('jwt')} />
           </View>
 
           {mode === 'apiKey' ? (
-            <Field
+            <LoginField
               label="Access token"
               placeholder="ptr_…"
               value={apiKey}
@@ -100,7 +93,7 @@ export default function LoginScreen() {
             />
           ) : (
             <>
-              <Field
+              <LoginField
                 label="Utilisateur"
                 value={username}
                 onChangeText={setUsername}
@@ -108,7 +101,7 @@ export default function LoginScreen() {
                 autoCorrect={false}
                 textContentType="username"
               />
-              <Field
+              <LoginField
                 label="Mot de passe"
                 value={password}
                 onChangeText={setPassword}
@@ -156,60 +149,6 @@ export default function LoginScreen() {
   );
 }
 
-/**
- * Champ libellé. Un champ `secret` est masqué par défaut, avec un bouton pour
- * l'afficher en clair le temps de vérifier la saisie.
- */
-function Field({
-  label,
-  secret = false,
-  ...inputProps
-}: { label: string; secret?: boolean } & Omit<React.ComponentProps<typeof TextInput>, 'secureTextEntry'>) {
-  const [revealed, setRevealed] = useState(false);
-  return (
-    <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <View style={styles.inputFrame}>
-        <TextInput
-          {...inputProps}
-          // Affiché en clair, un secret ne doit être ni capitalisé ni corrigé
-          // par le clavier.
-          {...(secret && { autoCapitalize: 'none', autoCorrect: false, spellCheck: false })}
-          secureTextEntry={secret && !revealed}
-          style={styles.input}
-          placeholderTextColor={theme.colors.textMuted}
-        />
-        {secret ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={revealed ? 'Masquer la saisie' : 'Afficher la saisie'}
-            hitSlop={theme.spacing(2)}
-            onPress={() => setRevealed((value) => !value)}
-            style={({ pressed }) => [styles.reveal, pressed && styles.revealPressed]}>
-            <Ionicons
-              name={revealed ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
-              color={theme.colors.textMuted}
-            />
-          </Pressable>
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
-function ModeTab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <Text
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      onPress={onPress}
-      style={[styles.modeTab, active && styles.modeTabActive]}>
-      {label}
-    </Text>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: theme.colors.bg },
   content: { padding: theme.spacing(5), gap: theme.spacing(3), paddingBottom: theme.spacing(12) },
@@ -227,24 +166,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   card: { gap: theme.spacing(4), marginTop: theme.spacing(2) },
-  field: { gap: theme.spacing(1.5) },
-  fieldLabel: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '600' },
-  inputFrame: {
-    flexDirection: 'row',
-    backgroundColor: theme.colors.surfaceAlt,
-    borderColor: theme.colors.border,
-    borderWidth: 1,
-    borderRadius: theme.radius.sm,
-  },
-  input: {
-    flex: 1,
-    color: theme.colors.text,
-    fontSize: 15,
-    paddingHorizontal: theme.spacing(3),
-    paddingVertical: theme.spacing(3),
-  },
-  reveal: { justifyContent: 'center', paddingHorizontal: theme.spacing(3) },
-  revealPressed: { opacity: 0.6 },
   segmented: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surfaceAlt,
@@ -252,17 +173,6 @@ const styles = StyleSheet.create({
     padding: theme.spacing(1),
     gap: theme.spacing(1),
   },
-  modeTab: {
-    flex: 1,
-    textAlign: 'center',
-    color: theme.colors.textMuted,
-    fontSize: 14,
-    fontWeight: '600',
-    paddingVertical: theme.spacing(2.5),
-    borderRadius: theme.radius.sm,
-    overflow: 'hidden',
-  },
-  modeTabActive: { backgroundColor: theme.colors.accent, color: theme.colors.text },
   errorBlock: { gap: theme.spacing(1) },
   error: { color: theme.colors.danger, fontSize: 13, lineHeight: 18 },
   errorDetail: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 15 },

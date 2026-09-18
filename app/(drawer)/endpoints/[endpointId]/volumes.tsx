@@ -2,17 +2,12 @@ import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useVolumes } from '../../../../src/api/hooks';
-import type { VolumeSummary } from '../../../../src/api/types';
-import {
-  Card,
-  EmptyState,
-  ErrorView,
-  Loader,
-  Segmented,
-  UsageBadge,
-} from '../../../../src/components/ui';
-import { formatDate } from '../../../../src/lib/format';
-import { volumesWithUsage, type Usage } from '../../../../src/lib/usage';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { ErrorView } from '../../../../src/components/ErrorView';
+import { Loader } from '../../../../src/components/Loader';
+import { Segmented } from '../../../../src/components/Segmented';
+import { VolumeCard } from '../../../../src/components/VolumeCard';
+import { volumesWithUsage } from '../../../../src/lib/usage';
 import { theme } from '../../../../src/theme';
 
 type Filter = 'all' | 'used' | 'unused';
@@ -91,43 +86,8 @@ export default function VolumesScreen() {
   );
 }
 
-function VolumeCard({ usage }: { usage: Usage<VolumeSummary> }) {
-  const { item: volume, usedBy } = usage;
-  return (
-    <Card style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.name} numberOfLines={2}>
-          {volume.Name}
-        </Text>
-        <UsageBadge usedBy={usedBy} />
-      </View>
-
-      <Text style={styles.meta}>
-        {volume.Driver}
-        {volume.CreatedAt ? ` · ${formatDate(volume.CreatedAt)}` : ''}
-      </Text>
-
-      {usedBy.length > 0 ? (
-        <Text style={styles.usedBy} numberOfLines={2}>
-          {usedBy.join(', ')}
-        </Text>
-      ) : null}
-
-      <Text style={styles.mountpoint} numberOfLines={1}>
-        {volume.Mountpoint}
-      </Text>
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   list: { padding: theme.spacing(4), gap: theme.spacing(3) },
   header: { gap: theme.spacing(2) },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-  card: { gap: theme.spacing(1) },
-  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
-  name: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flex: 1 },
-  meta: { color: theme.colors.textMuted, fontSize: 12 },
-  usedBy: { color: theme.colors.text, fontSize: 12 },
-  mountpoint: { color: theme.colors.textMuted, fontSize: 11 },
 });

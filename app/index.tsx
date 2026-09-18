@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router';
 import { useEndpoints } from '../src/api/hooks';
 import { useAuth } from '../src/auth/AuthContext';
-import { Loader } from '../src/components/ui';
+import { Loader } from '../src/components/Loader';
 import { pickHomeEndpoint } from '../src/lib/endpoints';
 import { useCurrentEndpoint } from '../src/navigation/CurrentEndpoint';
 
