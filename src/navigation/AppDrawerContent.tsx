@@ -55,6 +55,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
           {endpointBase === null ? 'Aucun environnement ouvert' : (endpointName ?? 'Environnement')}
         </Text>
         {item('Conteneurs', 'cube-outline', endpointBase)}
+        {item('Stacks', 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
         {item('Images', 'layers-outline', endpointBase && `${endpointBase}/images`)}
         {item('Volumes', 'save-outline', endpointBase && `${endpointBase}/volumes`)}
 

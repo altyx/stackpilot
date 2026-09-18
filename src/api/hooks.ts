@@ -4,10 +4,12 @@ import { useSettings } from '../settings/SettingsContext';
 import {
   fetchContainerLogs,
   fetchImageStatus,
+  fetchStackFile,
   inspectContainer,
   listContainers,
   listEndpoints,
   listImages,
+  listStacks,
   listVolumes,
   recreateContainer,
   runContainerAction,
@@ -44,6 +46,8 @@ export const queryKeys = {
     ['imageStatus', endpointId, containerId] as const,
   images: (endpointId: number) => ['images', endpointId] as const,
   volumes: (endpointId: number) => ['volumes', endpointId] as const,
+  stacks: (endpointId: number) => ['stacks', endpointId] as const,
+  stackFile: (stackId: number) => ['stackFile', stackId] as const,
 };
 
 export function useEndpoints() {
@@ -101,6 +105,24 @@ export function useVolumes(endpointId: number) {
     queryKey: queryKeys.volumes(endpointId),
     queryFn: () => listVolumes(requireSession(session), endpointId),
     enabled: !!session,
+  });
+}
+
+export function useStacks(endpointId: number) {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.stacks(endpointId),
+    queryFn: () => listStacks(requireSession(session), endpointId),
+    enabled: !!session,
+  });
+}
+
+export function useStackFile(stackId: number | null) {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.stackFile(stackId ?? 0),
+    queryFn: () => fetchStackFile(requireSession(session), stackId ?? 0),
+    enabled: !!session && stackId !== null,
   });
 }
 

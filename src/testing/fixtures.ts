@@ -4,7 +4,10 @@ import {
   type ContainerSummary,
   type Endpoint,
   type ImageSummary,
+  type PortainerStack,
   type VolumeSummary,
+  StackStatus,
+  StackType,
 } from '../api/types';
 
 /** Minimal Docker/Portainer payloads for tests; override only what matters. */
@@ -80,6 +83,23 @@ export function makeEndpoint(overrides: Partial<Endpoint> = {}): Endpoint {
     Type: EndpointType.DockerLocal,
     URL: 'unix:///var/run/docker.sock',
     Status: 1,
+    ...overrides,
+  };
+}
+
+export function makeStack(overrides: Partial<PortainerStack> = {}): PortainerStack {
+  return {
+    Id: 7,
+    Name: 'blog',
+    Type: StackType.DockerCompose,
+    EndpointId: 1,
+    EntryPoint: 'docker-compose.yml',
+    Env: null,
+    Status: StackStatus.Active,
+    CreationDate: 1_757_000_000,
+    CreatedBy: 'admin',
+    UpdateDate: 0,
+    UpdatedBy: '',
     ...overrides,
   };
 }

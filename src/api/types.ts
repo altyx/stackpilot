@@ -172,5 +172,66 @@ export interface ImageStatusResponse {
 
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'pause' | 'unpause' | 'kill';
 
+/** How Portainer deploys a stack (`StackType`). */
+export enum StackType {
+  DockerSwarm = 1,
+  DockerCompose = 2,
+  Kubernetes = 3,
+}
+
+/** Whether Portainer considers the stack deployed (`StackStatus`). */
+export enum StackStatus {
+  Active = 1,
+  Inactive = 2,
+}
+
+export interface StackEnv {
+  name: string;
+  value: string;
+}
+
+export interface StackGitConfig {
+  URL: string;
+  ReferenceName: string;
+  ConfigFilePath: string;
+}
+
+export interface StackAutoUpdate {
+  /** Polling interval such as `5m`, empty when only the webhook triggers. */
+  Interval?: string;
+  Webhook?: string;
+  ForceUpdate?: boolean;
+  ForcePullImage?: boolean;
+}
+
+/**
+ * Stack recorded by Portainer (`GET /stacks`). Stacks deployed outside
+ * Portainer only exist as Compose labels on their containers.
+ */
+export interface PortainerStack {
+  Id: number;
+  Name: string;
+  Type: StackType;
+  EndpointId: number;
+  SwarmId?: string;
+  EntryPoint: string;
+  Env: StackEnv[] | null;
+  Status: StackStatus;
+  /** Unix seconds; 0 when unknown. */
+  CreationDate: number;
+  CreatedBy: string;
+  UpdateDate: number;
+  UpdatedBy: string;
+  GitConfig?: StackGitConfig | null;
+  AutoUpdate?: StackAutoUpdate | null;
+  Webhook?: string;
+  FromAppTemplate?: boolean;
+}
+
+/** Payload of `GET /stacks/{id}/file`. */
+export interface StackFile {
+  StackFileContent: string;
+}
+
 /** Grouped actions offered at the stack level. */
 export type StackAction = Extract<ContainerAction, 'start' | 'stop'>;

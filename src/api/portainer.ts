@@ -7,8 +7,10 @@ import type {
   ImageStatus,
   ImageStatusResponse,
   ImageSummary,
+  PortainerStack,
   PortainerStatus,
   Session,
+  StackFile,
   VolumeListResponse,
   VolumeSummary,
 } from './types';
@@ -124,6 +126,26 @@ export function runContainerAction(
     // success, not an error.
     accept: [304],
   });
+}
+
+/**
+ * Stacks Portainer manages on an environment.
+ *
+ * Filtered here rather than through the route's `filters` parameter: that
+ * one matches Swarm stacks by Swarm id, not by environment, and would need a
+ * second call to learn it. Portainer answers 204 rather than `[]` when the
+ * account has no stack.
+ */
+export async function listStacks(session: Session, endpointId: number): Promise<PortainerStack[]> {
+  assertEndpointId(endpointId);
+  const stacks = await request<PortainerStack[] | undefined>(session, { path: '/stacks' });
+  return (stacks ?? []).filter((stack) => stack.EndpointId === endpointId);
+}
+
+/** Compose file of a stack, as Portainer stores it. */
+export async function fetchStackFile(session: Session, stackId: number): Promise<string> {
+  const file = await request<StackFile>(session, { path: `/stacks/${stackId}/file` });
+  return file.StackFileContent;
 }
 
 /**

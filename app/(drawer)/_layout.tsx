@@ -24,6 +24,7 @@ export default function DrawerLayout() {
         sceneStyle: { backgroundColor: theme.colors.bg },
       }}>
       <Drawer.Screen name="endpoints/[endpointId]/index" options={{ title: 'Conteneurs' }} />
+      <Drawer.Screen name="endpoints/[endpointId]/stacks" options={{ title: 'Stacks' }} />
       <Drawer.Screen name="endpoints/[endpointId]/images" options={{ title: 'Images' }} />
       <Drawer.Screen name="endpoints/[endpointId]/volumes" options={{ title: 'Volumes' }} />
       <Drawer.Screen name="endpoints/index" options={{ title: 'Environnements' }} />

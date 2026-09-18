@@ -47,6 +47,8 @@ export function RootNavigator() {
         name="endpoints/[endpointId]/containers/[containerId]"
         options={{ title: '' }}
       />
+      {/* Title set by the screen itself, from the stack name. */}
+      <Stack.Screen name="endpoints/[endpointId]/stacks/[stackName]" options={{ title: '' }} />
     </Stack>
   );
 }

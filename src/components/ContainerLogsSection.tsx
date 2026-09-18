@@ -43,7 +43,9 @@ export function ContainerLogsSection({
           {logs.error instanceof Error ? logs.error.message : 'Logs indisponibles.'}
         </Text>
       ) : (
-        <ScrollView horizontal style={styles.logsBox}>
+        // Horizontal only: the page scrolls vertically, so every line is
+        // reachable. A bounded box here would clip them with no way to scroll.
+        <ScrollView horizontal style={styles.logsBox} contentContainerStyle={styles.logsContent}>
           <Text selectable style={styles.logsText}>
             {logs.data?.trim() || 'Aucune sortie.'}
           </Text>
@@ -58,12 +60,8 @@ const styles = StyleSheet.create({
   sectionTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
   logsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   refresh: { color: theme.colors.accent, fontSize: 13, fontWeight: '600' },
-  logsBox: {
-    backgroundColor: theme.colors.bg,
-    borderRadius: theme.radius.sm,
-    maxHeight: 320,
-    padding: theme.spacing(3),
-  },
+  logsBox: { backgroundColor: theme.colors.bg, borderRadius: theme.radius.sm },
+  logsContent: { padding: theme.spacing(3) },
   logsText: {
     color: theme.colors.text,
     fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),

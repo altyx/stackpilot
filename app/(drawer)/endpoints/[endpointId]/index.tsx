@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
-import { useContainers, useStackAction, type StackActionResult } from '../../../../src/api/hooks';
+import { useContainers, useStackAction } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
 import { ContainerRow } from '../../../../src/components/ContainerRow';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
@@ -20,7 +20,12 @@ import { Segmented } from '../../../../src/components/Segmented';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
 import { StackHeader } from '../../../../src/components/StackHeader';
 import { containerName } from '../../../../src/lib/format';
-import { countStacks, groupByStack, type StackSection } from '../../../../src/lib/stacks';
+import {
+  countStacks,
+  describeStackResult,
+  groupByStack,
+  type StackSection,
+} from '../../../../src/lib/stacks';
 import { theme } from '../../../../src/theme';
 
 type Filter = 'all' | 'running' | 'stopped';
@@ -63,7 +68,10 @@ export default function ContainersScreen() {
     stackAction.mutate(
       { containers: section.members, action },
       {
-        onSuccess: (result) => reportStackResult(section, action, result),
+        onSuccess: (result) => {
+          const report = describeStackResult(section, action, result);
+          Alert.alert(report.title, report.message);
+        },
         onError: (e) =>
           Alert.alert(
             'Action échouée',
@@ -144,23 +152,6 @@ export default function ContainersScreen() {
         onClose={() => setSheetKey(null)}
       />
     </>
-  );
-}
-
-function reportStackResult(
-  section: StackSection,
-  action: StackAction,
-  result: StackActionResult,
-): void {
-  const verb = action === 'start' ? 'démarrés' : 'arrêtés';
-  if (result.failures.length === 0) {
-    Alert.alert(section.title, `${result.succeeded} conteneurs ${verb}.`);
-    return;
-  }
-  const detail = result.failures.map((f) => `• ${f.name} : ${f.message}`).join('\n');
-  Alert.alert(
-    section.title,
-    `${result.succeeded} conteneurs ${verb}, ${result.failures.length} en échec.\n\n${detail}`,
   );
 }
 

@@ -2,7 +2,7 @@
 
 # Politique de confidentialité
 
-_Dernière mise à jour : 16 septembre 2026_
+_Dernière mise à jour : 18 septembre 2026_
 
 Cette politique explique quelles données l'application mobile StackPilot (l'« Application ») utilise, où elles sont conservées et quels tiers peuvent y avoir accès. En résumé : l'éditeur ne collecte aucune donnée par l'intermédiaire de l'Application, qui communique directement avec votre instance Portainer.
 
@@ -22,7 +22,7 @@ Pour vous connecter, l'Application enregistre dans le trousseau sécurisé de l'
 
 Elle y enregistre aussi l'identifiant du dernier environnement consulté sur cette instance, pour rouvrir l'Application sur ses conteneurs, ainsi que vos réglages, comme l'intervalle de rafraîchissement choisi.
 
-Les informations lues sur votre instance (environnements, conteneurs, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.
+Les informations lues sur votre instance (environnements, conteneurs, stacks et leurs fichiers Compose, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.
 
 Ces données ne quittent l'appareil que pour être envoyées directement à votre instance Portainer.
 

@@ -1,5 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Slot } from 'expo-router';
+import { QueryClient } from '@tanstack/react-query';
 import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import { Alert, Text } from 'react-native';
 import ContainerDetailScreen from '../app/endpoints/[endpointId]/containers/[containerId]';
@@ -10,11 +9,9 @@ import {
   listEndpoints,
   recreateContainer,
 } from '../src/api/portainer';
-import { AuthProvider } from '../src/auth/AuthContext';
-import { CurrentEndpointProvider } from '../src/navigation/CurrentEndpoint';
-import { SettingsProvider } from '../src/settings/SettingsContext';
 import { makeContainerInspect, makeEndpoint } from '../src/testing/fixtures';
 import { memory } from '../src/testing/secureStoreMock';
+import { createTestLayout, seedSession } from '../src/testing/TestLayout';
 
 jest.mock(
   'expo-secure-store',
@@ -33,20 +30,7 @@ jest.mock('../src/api/portainer', () => ({
 }));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-function Layout() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <SettingsProvider>
-        <AuthProvider>
-          <CurrentEndpointProvider>
-            <Slot />
-          </CurrentEndpointProvider>
-        </AuthProvider>
-      </SettingsProvider>
-    </QueryClientProvider>
-  );
-}
+const Layout = createTestLayout(queryClient);
 
 const List = () => <Text>Liste</Text>;
 
@@ -64,10 +48,7 @@ async function renderContainer(containerId = 'old') {
 
 beforeEach(() => {
   memory.clear();
-  memory.set(
-    'portainer.session',
-    JSON.stringify({ baseUrl: 'https://portainer.lan', mode: 'apiKey', token: 'ptr_x' }),
-  );
+  seedSession();
   queryClient.clear();
   jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
   jest

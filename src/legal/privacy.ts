@@ -11,7 +11,7 @@ import { PRIVACY_POLICY_URL, PUBLISHER } from './publisher';
  */
 export const PRIVACY: LegalDocument = {
   title: 'Politique de confidentialité',
-  updatedAt: '16 septembre 2026',
+  updatedAt: '18 septembre 2026',
   intro:
     "Cette politique explique quelles données l'application mobile StackPilot (l'« Application ») utilise, où elles sont conservées et quels tiers peuvent y avoir accès. En résumé : l'éditeur ne collecte aucune donnée par l'intermédiaire de l'Application, qui communique directement avec votre instance Portainer.",
   sections: [
@@ -32,7 +32,7 @@ export const PRIVACY: LegalDocument = {
           "votre access token, ou le jeton de session obtenu avec votre mot de passe. Le mot de passe lui-même n'est jamais enregistré.",
         ],
         "Elle y enregistre aussi l'identifiant du dernier environnement consulté sur cette instance, pour rouvrir l'Application sur ses conteneurs, ainsi que vos réglages, comme l'intervalle de rafraîchissement choisi.",
-        "Les informations lues sur votre instance (environnements, conteneurs, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.",
+        "Les informations lues sur votre instance (environnements, conteneurs, stacks et leurs fichiers Compose, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.",
         "Ces données ne quittent l'appareil que pour être envoyées directement à votre instance Portainer.",
       ],
     },
