@@ -4,6 +4,7 @@ import type { ContainerSummary } from '../api/types';
 import { containerName } from '../lib/format';
 import { theme } from '../theme';
 import { Card } from './Card';
+import { ContainerImageStatus } from './ContainerImageStatus';
 import { StatusDot } from './StatusDot';
 
 export function ContainerRow({
@@ -22,6 +23,7 @@ export function ContainerRow({
             <Text style={styles.name} numberOfLines={1}>
               {containerName(container)}
             </Text>
+            <ContainerImageStatus endpointId={endpointId} containerId={container.Id} />
           </View>
           <Text style={styles.image} numberOfLines={1}>
             {container.Image}

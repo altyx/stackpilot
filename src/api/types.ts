@@ -36,6 +36,11 @@ export interface Endpoint {
   GroupId?: number;
   Status: number; // 1 = up, 2 = down
   Snapshots?: DockerSnapshot[];
+  /**
+   * "Image up to date indicator" toggle, set per environment. Only exists in
+   * Business Edition: the field is absent from Community Edition payloads.
+   */
+  EnableImageNotification?: boolean;
 }
 
 export interface DockerSnapshot {
@@ -138,6 +143,7 @@ export interface ContainerInspect {
   HostConfig: {
     RestartPolicy?: { Name: string; MaximumRetryCount: number };
     NetworkMode?: string;
+    AutoRemove?: boolean;
   };
   Mounts: {
     Type: string;
@@ -148,6 +154,20 @@ export interface ContainerInspect {
   NetworkSettings: {
     Networks: Record<string, { IPAddress: string; Gateway: string }>;
   };
+  /** Added by Portainer's proxy on the container running Portainer itself. */
+  IsPortainer?: boolean;
+}
+
+/**
+ * Whether a container's image matches the one in its registry, as reported
+ * by Portainer's "image up to date indicator" (Business Edition).
+ */
+export type ImageStatus = 'updated' | 'outdated' | 'processing' | 'unknown';
+
+/** Payload of `GET /docker/{env}/containers/{id}/image_status`. */
+export interface ImageStatusResponse {
+  Status: string;
+  Message?: string;
 }
 
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'pause' | 'unpause' | 'kill';

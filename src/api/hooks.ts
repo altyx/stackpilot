@@ -3,16 +3,25 @@ import { useAuth } from '../auth/AuthContext';
 import { useSettings } from '../settings/SettingsContext';
 import {
   fetchContainerLogs,
+  fetchImageStatus,
   inspectContainer,
   listContainers,
   listEndpoints,
   listImages,
   listVolumes,
+  recreateContainer,
   runContainerAction,
 } from './portainer';
 import { PortainerError } from './client';
 import { containerName } from '../lib/format';
-import type { ContainerAction, ContainerSummary, Session, StackAction } from './types';
+import type {
+  ContainerAction,
+  ContainerInspect,
+  ContainerSummary,
+  Endpoint,
+  Session,
+  StackAction,
+} from './types';
 
 /**
  * The session drops to null during sign-out, while screens are still
@@ -31,6 +40,8 @@ export const queryKeys = {
   container: (endpointId: number, containerId: string) =>
     ['container', endpointId, containerId] as const,
   logs: (endpointId: number, containerId: string) => ['logs', endpointId, containerId] as const,
+  imageStatus: (endpointId: number, containerId: string) =>
+    ['imageStatus', endpointId, containerId] as const,
   images: (endpointId: number) => ['images', endpointId] as const,
   volumes: (endpointId: number) => ['volumes', endpointId] as const,
 };
@@ -42,6 +53,24 @@ export function useEndpoints() {
     queryFn: () => listEndpoints(requireSession(session)),
     enabled: !!session,
   });
+}
+
+/**
+ * Whether Portainer compares this environment's images with their registry.
+ * Read from the environment list rather than a dedicated call: the list is
+ * already loaded, and the flag is absent (falsy) on Community Edition, where
+ * the status route doesn't exist.
+ */
+export function useImageIndicatorEnabled(endpointId: number): boolean {
+  const { session } = useAuth();
+  const { data } = useQuery({
+    queryKey: queryKeys.endpoints,
+    queryFn: () => listEndpoints(requireSession(session)),
+    enabled: !!session,
+    select: (endpoints: Endpoint[]) =>
+      endpoints.find((endpoint) => endpoint.Id === endpointId)?.EnableImageNotification === true,
+  });
+  return data === true;
 }
 
 export function useContainers(endpointId: number) {
@@ -81,6 +110,43 @@ export function useContainer(endpointId: number, containerId: string) {
     queryKey: queryKeys.container(endpointId, containerId),
     queryFn: () => inspectContainer(requireSession(session), endpointId, containerId),
     enabled: !!session,
+  });
+}
+
+export function useImageStatus(endpointId: number, containerId: string) {
+  const { session } = useAuth();
+  const enabled = useImageIndicatorEnabled(endpointId);
+  return useQuery({
+    queryKey: queryKeys.imageStatus(endpointId, containerId),
+    queryFn: () => fetchImageStatus(requireSession(session), endpointId, containerId),
+    enabled: !!session && enabled,
+    // Portainer caches the registry check on its side; asking again on every
+    // list refresh would only add a request per container.
+    staleTime: 10 * 60_000,
+    // A failure means the indicator is unavailable for this container, not a
+    // transient error worth hammering the registry for.
+    retry: false,
+  });
+}
+
+/**
+ * Recreates a container, pulling its image first: Portainer's way of
+ * updating it. The mutation resolves with the new container, whose id
+ * differs from the old one: the caller navigates to it.
+ */
+export function useRecreateContainer(endpointId: number, containerId: string) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ pullImage }: { pullImage: boolean }) =>
+      recreateContainer(requireSession(session), endpointId, containerId, pullImage),
+    onSuccess: (created: ContainerInspect) => {
+      // The new container's screen opens on data already in hand, and the
+      // list stops showing the removed one.
+      queryClient.setQueryData(queryKeys.container(endpointId, created.Id), created);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
+      queryClient.removeQueries({ queryKey: queryKeys.imageStatus(endpointId, containerId) });
+    },
   });
 }
 

@@ -4,6 +4,8 @@ import type {
   ContainerInspect,
   ContainerSummary,
   Endpoint,
+  ImageStatus,
+  ImageStatusResponse,
   ImageSummary,
   PortainerStatus,
   Session,
@@ -52,15 +54,28 @@ export function getEndpoint(session: Session, endpointId: number): Promise<Endpo
 }
 
 /**
- * Prefix of the Docker proxy Portainer exposes for an environment.
  * Portainer responds with "invalid environment identifier route variable" for
  * a non-integer id: caught here to point at the real cause.
  */
-function docker(endpointId: number, path: string): string {
+function assertEndpointId(endpointId: number): void {
   if (!Number.isInteger(endpointId)) {
     throw new PortainerError(`Identifiant d'environnement invalide (${String(endpointId)}).`);
   }
+}
+
+/** Prefix of the Docker proxy Portainer exposes for an environment. */
+function docker(endpointId: number, path: string): string {
+  assertEndpointId(endpointId);
   return `/endpoints/${endpointId}/docker${path}`;
+}
+
+/**
+ * Prefix of the routes Portainer serves itself for an environment, on top of
+ * Docker: image status, container recreation.
+ */
+function portainerDocker(endpointId: number, path: string): string {
+  assertEndpointId(endpointId);
+  return `/docker/${endpointId}${path}`;
 }
 
 export function listContainers(session: Session, endpointId: number): Promise<ContainerSummary[]> {
@@ -108,6 +123,61 @@ export function runContainerAction(
     // On a stack action, half the containers can be in that case: it's a
     // success, not an error.
     accept: [304],
+  });
+}
+
+/**
+ * Compares the container's image with its registry, through Portainer's
+ * "image up to date indicator". The route only exists in Business Edition,
+ * and only answers when the indicator is enabled on the environment: callers
+ * check `Endpoint.EnableImageNotification` before asking.
+ */
+export async function fetchImageStatus(
+  session: Session,
+  endpointId: number,
+  containerId: string,
+): Promise<ImageStatus> {
+  const response = await request<ImageStatusResponse>(session, {
+    path: portainerDocker(endpointId, `/containers/${containerId}/image_status`),
+    // Portainer queries the registry on a cache miss, which can be slow.
+    timeoutMs: 30_000,
+  });
+  return normalizeImageStatus(response?.Status);
+}
+
+/** Portainer's web UI has used both spellings for the in-progress state. */
+export function normalizeImageStatus(status: string | undefined): ImageStatus {
+  switch (status) {
+    case 'updated':
+    case 'outdated':
+      return status;
+    case 'processing':
+    case 'inprocess':
+      return 'processing';
+    default:
+      return 'unknown';
+  }
+}
+
+/**
+ * Removes the container and creates it again with the same configuration,
+ * optionally pulling its image first: this is how Portainer updates a
+ * container to a newer image. The new container gets a new id, returned
+ * here, and everything not persisted in a volume is lost.
+ */
+export function recreateContainer(
+  session: Session,
+  endpointId: number,
+  containerId: string,
+  pullImage: boolean,
+): Promise<ContainerInspect> {
+  return request<ContainerInspect>(session, {
+    method: 'POST',
+    path: portainerDocker(endpointId, `/containers/${containerId}/recreate`),
+    body: { PullImage: pullImage },
+    // Portainer pulls the image synchronously: a large image on a slow link
+    // takes minutes, and a timeout here would abandon a recreation in progress.
+    timeoutMs: 300_000,
   });
 }
 

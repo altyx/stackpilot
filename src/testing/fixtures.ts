@@ -1,5 +1,6 @@
 import {
   EndpointType,
+  type ContainerInspect,
   type ContainerSummary,
   type Endpoint,
   type ImageSummary,
@@ -19,6 +20,29 @@ export function makeContainer(overrides: Partial<ContainerSummary> = {}): Contai
     Status: 'Up 2 hours',
     Ports: [],
     Labels: {},
+    ...overrides,
+  };
+}
+
+export function makeContainerInspect(overrides: Partial<ContainerInspect> = {}): ContainerInspect {
+  return {
+    Id: 'a1b2c3d4e5f6a7b8c9d0',
+    Name: '/web',
+    Created: '2026-09-16T14:05:00Z',
+    Image: 'sha256:1111111111111111',
+    State: {
+      Status: 'running',
+      Running: true,
+      Paused: false,
+      Restarting: false,
+      ExitCode: 0,
+      StartedAt: '2026-09-16T14:05:00Z',
+      FinishedAt: '0001-01-01T00:00:00Z',
+    },
+    Config: { Image: 'nginx:1.27', Env: [], Cmd: null, Labels: {} },
+    HostConfig: { RestartPolicy: { Name: 'always', MaximumRetryCount: 0 } },
+    Mounts: [],
+    NetworkSettings: { Networks: {} },
     ...overrides,
   };
 }
