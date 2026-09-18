@@ -28,9 +28,7 @@ export default function EndpointsScreen() {
           tintColor={theme.colors.accent}
         />
       }
-      ListHeaderComponent={
-        session ? <Text style={styles.instance}>{session.baseUrl}</Text> : null
-      }
+      ListHeaderComponent={session ? <Text style={styles.instance}>{session.baseUrl}</Text> : null}
       ListEmptyComponent={
         <EmptyState
           title="Aucun environnement"

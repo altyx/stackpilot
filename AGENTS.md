@@ -1,6 +1,7 @@
 # StackPilot — notes pour agents
 
 ## Stack
+
 Expo SDK 57 / React Native 0.86 / React 19 / TypeScript, expo-router (file-based),
 TanStack Query, expo-secure-store.
 
@@ -8,6 +9,7 @@ TanStack Query, expo-secure-store.
 d'écrire du code touchant aux modules Expo.
 
 ## Conventions
+
 - Toutes les couleurs et espacements viennent de `src/theme.ts` — pas de valeur en dur.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
@@ -54,6 +56,7 @@ d'écrire du code touchant aux modules Expo.
   conservée sur l'appareil doit apparaître dans `src/legal/privacy.ts`.
 
 ## Vérifications avant commit
+
 ```bash
 npm run typecheck
 npx expo export --platform ios --output-dir /tmp/stackpilot-export-check

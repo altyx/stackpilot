@@ -34,7 +34,11 @@ export async function loginWithPassword(
 
 /** Validates a `ptr_...` access token by calling a protected route. */
 export async function loginWithApiKey(rawBaseUrl: string, token: string): Promise<Session> {
-  const session: Session = { baseUrl: normalizeBaseUrl(rawBaseUrl), mode: 'apiKey', token: token.trim() };
+  const session: Session = {
+    baseUrl: normalizeBaseUrl(rawBaseUrl),
+    mode: 'apiKey',
+    token: token.trim(),
+  };
   await listEndpoints(session);
   return session;
 }
@@ -54,9 +58,7 @@ export function getEndpoint(session: Session, endpointId: number): Promise<Endpo
  */
 function docker(endpointId: number, path: string): string {
   if (!Number.isInteger(endpointId)) {
-    throw new PortainerError(
-      `Identifiant d'environnement invalide (${String(endpointId)}).`,
-    );
+    throw new PortainerError(`Identifiant d'environnement invalide (${String(endpointId)}).`);
   }
   return `/endpoints/${endpointId}/docker${path}`;
 }

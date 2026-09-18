@@ -89,7 +89,7 @@ export const PRIVACY: LegalDocument = {
       title: 'Sécurité',
       body: [
         "Les identifiants sont chiffrés par le trousseau sécurisé du système et ne sont lisibles que par l'Application.",
-        "La confidentialité des échanges avec votre instance dépend de sa configuration : privilégiez une connexion chiffrée (HTTPS), et des access tokens limités aux droits nécessaires.",
+        'La confidentialité des échanges avec votre instance dépend de sa configuration : privilégiez une connexion chiffrée (HTTPS), et des access tokens limités aux droits nécessaires.',
       ],
     },
     {

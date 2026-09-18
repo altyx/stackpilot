@@ -24,7 +24,7 @@ export default function ChangelogScreen() {
         accessibilityRole="link"
         onPress={() =>
           Linking.openURL(RELEASES_URL).catch(() =>
-            Alert.alert('Lien inaccessible', "Aucune application ne peut ouvrir cette adresse."),
+            Alert.alert('Lien inaccessible', 'Aucune application ne peut ouvrir cette adresse.'),
           )
         }
         style={({ pressed }) => pressed && styles.pressed}>

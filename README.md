@@ -52,7 +52,7 @@ Côté application, trois prérequis :
    le SDK 53 ;
 3. un **appareil physique** : APNs ne délivre pas de jeton à un simulateur.
 
-L'écran *Notifications* (icône cloche, en haut de la liste des environnements)
+L'écran _Notifications_ (icône cloche, en haut de la liste des environnements)
 affiche le jeton de l'appareil à recopier dans la configuration du service.
 
 ## Architecture
@@ -116,12 +116,12 @@ s'appliquent donc telles quelles.
 
 ## Scripts
 
-| Commande | Rôle |
-| --- | --- |
-| `npm start` | serveur de développement Expo |
-| `npm run ios` / `npm run android` | lance sur simulateur / émulateur |
-| `npm run typecheck` | vérification TypeScript |
-| `npm run legal` | publie les textes légaux de `src/legal` dans `docs/legal` |
+| Commande                          | Rôle                                                      |
+| --------------------------------- | --------------------------------------------------------- |
+| `npm start`                       | serveur de développement Expo                             |
+| `npm run ios` / `npm run android` | lance sur simulateur / émulateur                          |
+| `npm run typecheck`               | vérification TypeScript                                   |
+| `npm run legal`                   | publie les textes légaux de `src/legal` dans `docs/legal` |
 
 ## Publication
 

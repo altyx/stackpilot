@@ -9,12 +9,12 @@ de Google.
 
 ## Déclencheurs
 
-| Événement | Destination |
-| --- | --- |
-| Fusion sur `main` | **Test** : TestFlight et piste interne Google Play |
-| *Run workflow* manuel | idem |
+| Événement                                       | Destination                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| Fusion sur `main`                               | **Test** : TestFlight et piste interne Google Play          |
+| _Run workflow_ manuel                           | idem                                                        |
 | Fusion sur `main` qui **change `expo.version`** | **Production**, et le tag `vX.Y.Z` est créé par le workflow |
-| Tag `vX.Y.Z` poussé à la main | **Production** (reprise d'une publication interrompue) |
+| Tag `vX.Y.Z` poussé à la main                   | **Production** (reprise d'une publication interrompue)      |
 
 C'est donc le **numéro de version** qui décide, pas un geste séparé : tant que
 `expo.version` ne bouge pas, chaque fusion produit un build de test de plus,
@@ -82,7 +82,7 @@ publication en poussant le tag à la main :
 git tag v1.0.0 && git push origin v1.0.0
 ```
 
-Ne relancez pas le run : un *Re-run* garde le même numéro de build, que les
+Ne relancez pas le run : un _Re-run_ garde le même numéro de build, que les
 stores refuseront. Et si le tag existe déjà, une nouvelle fusion sur cette même
 version est refusée dès la préparation : il faut alors bumper à nouveau.
 
@@ -159,17 +159,17 @@ privée disparaît avec la machine, et le run suivant échoue.
 
 Les lanes du [`Fastfile`](../fastlane/Fastfile) :
 
-| Lane | Lancée par | Rôle |
-| --- | --- | --- |
-| `certificates` | vous, sur un Mac | crée ou renouvelle le certificat et le profil |
-| `build` | le workflow | installe la signature, compile et exporte l'IPA |
-| `upload` | le workflow | envoie l'IPA à App Store Connect |
+| Lane           | Lancée par       | Rôle                                            |
+| -------------- | ---------------- | ----------------------------------------------- |
+| `certificates` | vous, sur un Mac | crée ou renouvelle le certificat et le profil   |
+| `build`        | le workflow      | installe la signature, compile et exporte l'IPA |
+| `upload`       | le workflow      | envoie l'IPA à App Store Connect                |
 
 `build` et `upload` sont deux étapes séparées du workflow : les scripts npm
 exécutés pendant la compilation n'ont pas accès à la clé App Store Connect.
 
 Apple réserve la création des certificats et des profils de distribution aux
-rôles *Account Holder* et *Admin*. D'où **deux clés API** :
+rôles _Account Holder_ et _Admin_. D'où **deux clés API** :
 
 - une clé **Admin**, qui reste sur votre Mac et ne sert qu'à `certificates` ;
 - une clé **App Manager**, dans les secrets GitHub, qui ne sert qu'à envoyer
@@ -177,15 +177,15 @@ rôles *Account Holder* et *Admin*. D'où **deux clés API** :
 
 ### Secrets iOS
 
-À définir dans *Settings → Secrets and variables → Actions* du dépôt.
+À définir dans _Settings → Secrets and variables → Actions_ du dépôt.
 
-| Secret | Contenu |
-| --- | --- |
-| `ASC_KEY_ID` | Identifiant de la clé API **App Manager** |
-| `ASC_ISSUER_ID` | *Issuer ID*, affiché au-dessus de la liste des clés |
-| `ASC_API_KEY_P8_BASE64` | Le `.p8` de cette clé, encodé en base64 |
-| `MATCH_PASSWORD` | La phrase de passe choisie au premier lancement de `certificates` |
-| `MATCH_DEPLOY_KEY` | La clé SSH privée de déploiement du dépôt des certificats, lignes `BEGIN` et `END` comprises |
+| Secret                  | Contenu                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `ASC_KEY_ID`            | Identifiant de la clé API **App Manager**                                                    |
+| `ASC_ISSUER_ID`         | _Issuer ID_, affiché au-dessus de la liste des clés                                          |
+| `ASC_API_KEY_P8_BASE64` | Le `.p8` de cette clé, encodé en base64                                                      |
+| `MATCH_PASSWORD`        | La phrase de passe choisie au premier lancement de `certificates`                            |
+| `MATCH_DEPLOY_KEY`      | La clé SSH privée de déploiement du dépôt des certificats, lignes `BEGIN` et `END` comprises |
 
 ```bash
 base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
@@ -195,21 +195,21 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
 
 Une seule fois, dans cet ordre :
 
-1. **Accès à l'API** : App Store Connect › *Users and Access* ›
-   *Integrations* › *Request Access*, depuis le compte *Account Holder*.
+1. **Accès à l'API** : App Store Connect › _Users and Access_ ›
+   _Integrations_ › _Request Access_, depuis le compte _Account Holder_.
    Apple examine la demande au cas par cas : à lancer en premier.
 2. **Accords** : accepter dans App Store Connect l'accord de licence en
    attente, sans quoi les envois sont refusés.
-3. **Identifiant** : *Certificates, Identifiers & Profiles › Identifiers*,
+3. **Identifiant** : _Certificates, Identifiers & Profiles › Identifiers_,
    App ID explicite `app.stackpilot` avec la capacité **Push Notifications**.
-4. **Fiche de l'app** : App Store Connect › *Apps* › *New App*, avec cet
+4. **Fiche de l'app** : App Store Connect › _Apps_ › _New App_, avec cet
    identifiant.
-5. **Clés API** : *Integrations › Team Keys*, une clé Admin et une clé App
+5. **Clés API** : _Integrations › Team Keys_, une clé Admin et une clé App
    Manager. Chaque `.p8` ne se télécharge **qu'une seule fois** : conservez-les
    dans un gestionnaire de mots de passe.
 6. **Clé de déploiement** : générer une paire de clés, puis ajouter la partie
-   publique (`.pub`) dans *Settings › Deploy keys* du dépôt des certificats,
-   **sans** cocher *Allow write access*. La partie privée devient
+   publique (`.pub`) dans _Settings › Deploy keys_ du dépôt des certificats,
+   **sans** cocher _Allow write access_. La partie privée devient
    `MATCH_DEPLOY_KEY`.
 
    ```bash
@@ -233,8 +233,9 @@ Une seule fois, dans cet ordre :
    `MATCH_PASSWORD`), éventuellement le mot de passe de session du Mac pour
    ranger le certificat dans le trousseau, puis pousse le tout dans le dépôt
    des certificats.
+
 8. **Secrets** : renseigner les cinq secrets ci-dessus.
-9. **TestFlight** : App Store Connect › *TestFlight* › *Internal Testing*,
+9. **TestFlight** : App Store Connect › _TestFlight_ › _Internal Testing_,
    créer un groupe, s'y ajouter et activer la distribution automatique. Le
    workflow n'attend pas la fin du traitement par Apple : c'est ce groupe qui
    reçoit chaque nouveau build.
@@ -247,13 +248,13 @@ certificat expiré et régénère le profil. Les secrets GitHub ne changent pas.
 
 ## Secrets Android
 
-| Secret | Contenu |
-| --- | --- |
-| `ANDROID_UPLOAD_KEYSTORE_BASE64` | Le keystore de la clé d'envoi, encodé en base64 |
-| `ANDROID_UPLOAD_KEYSTORE_PASSWORD` | Mot de passe du keystore |
-| `ANDROID_UPLOAD_KEY_ALIAS` | Alias de la clé |
-| `ANDROID_UPLOAD_KEY_PASSWORD` | Mot de passe de la clé |
-| `PLAY_SERVICE_ACCOUNT_JSON` | Le fichier JSON du compte de service, tel quel |
+| Secret                             | Contenu                                         |
+| ---------------------------------- | ----------------------------------------------- |
+| `ANDROID_UPLOAD_KEYSTORE_BASE64`   | Le keystore de la clé d'envoi, encodé en base64 |
+| `ANDROID_UPLOAD_KEYSTORE_PASSWORD` | Mot de passe du keystore                        |
+| `ANDROID_UPLOAD_KEY_ALIAS`         | Alias de la clé                                 |
+| `ANDROID_UPLOAD_KEY_PASSWORD`      | Mot de passe de la clé                          |
+| `PLAY_SERVICE_ACCOUNT_JSON`        | Le fichier JSON du compte de service, tel quel  |
 
 ### Clé d'envoi
 
@@ -275,10 +276,10 @@ Conservez `upload.jks` et ses mots de passe hors du dépôt.
 ### Compte de service
 
 1. Dans Google Cloud, créer un compte de service et lui générer une clé JSON.
-2. Dans la Play Console, *Users and permissions → Invite new users*, inviter
+2. Dans la Play Console, _Users and permissions → Invite new users_, inviter
    l'adresse du compte de service et lui donner, sur l'application, les
-   permissions de gestion des releases (*Release to production, exclude
-   devices, and use Play App Signing* et *Release apps to testing tracks*).
+   permissions de gestion des releases (_Release to production, exclude
+   devices, and use Play App Signing_ et _Release apps to testing tracks_).
 
 ### Premier envoi à la main
 
@@ -320,14 +321,14 @@ compilation iOS sont conservés en artefact quand le job échoue.
 
 ## Dépannage
 
-- **iOS ignoré / Android ignoré** dans le job *Préparation* : un secret manque.
+- **iOS ignoré / Android ignoré** dans le job _Préparation_ : un secret manque.
 - **`Permission denied (publickey)`** au clonage des certificats : la clé
-  publique n'est pas dans les *Deploy keys* du dépôt des certificats, ou
+  publique n'est pas dans les _Deploy keys_ du dépôt des certificats, ou
   `MATCH_DEPLOY_KEY` est incomplet.
 - **`Invalid password passed via 'MATCH_PASSWORD'`** : le secret ne correspond
   pas à la phrase de passe choisie au premier lancement de `certificates`.
 - **`No code signing identity found and cannot create a new one because you
-  enabled readonly`** : `certificates` n'a pas encore été lancée, ou l'a été
+enabled readonly`** : `certificates` n'a pas encore été lancée, ou l'a été
   sur un autre dépôt ou une autre branche que ceux du `Matchfile`.
 - **`Couldn't find app 'app.stackpilot'`** à l'envoi : la fiche App Store
   Connect n'existe pas, ou utilise un autre identifiant.
@@ -340,7 +341,7 @@ compilation iOS sont conservés en artefact quand le job échoue.
   `./plugins/withAndroidReleaseSigning` figure dans `app.json`.
 - **`Package not found`** à l'envoi Google Play : le premier envoi manuel n'a
   pas été fait, ou le compte de service n'a pas accès à l'application.
-- **Numéro de build déjà utilisé** : un run a été relancé (*Re-run*), ce qui
+- **Numéro de build déjà utilisé** : un run a été relancé (_Re-run_), ce qui
   réutilise le même `run_number`. Pour un test, refaire une fusion ; pour une
   production, supprimer le tag et retaguer.
 - **`Le tag vX.Y.Z ne correspond pas à la version`** : `app.json` n'a pas été
@@ -348,6 +349,6 @@ compilation iOS sont conservés en artefact quand le job échoue.
 - **`Des champs « À COMPLÉTER » restent dans src/legal`** : les mentions
   légales de [`src/legal/publisher.ts`](../src/legal/publisher.ts) n'ont pas
   été renseignées. Les compléter, fusionner, puis retaguer.
-- **`Textes légaux publiés à régénérer`** dans le job *Préparation* :
+- **`Textes légaux publiés à régénérer`** dans le job _Préparation_ :
   `src/legal` a changé sans que `docs/legal` suive. Lancer `npm run legal` et
   committer le résultat.

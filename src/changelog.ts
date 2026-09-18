@@ -21,9 +21,7 @@ export const CHANGELOG: readonly Release[] = [
   {
     version: '1.0.0',
     date: '16 septembre 2026',
-    changes: [
-      'Ajout d\'une page settings applicatif',
-    ],
+    changes: ["Ajout d'une page settings applicatif"],
   },
 ];
 

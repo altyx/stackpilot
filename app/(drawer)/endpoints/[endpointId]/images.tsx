@@ -28,7 +28,11 @@ export default function ImagesScreen() {
   const visible = useMemo(
     () =>
       usages.filter((usage) =>
-        filter === 'all' ? true : filter === 'used' ? usage.usedBy.length > 0 : usage.usedBy.length === 0,
+        filter === 'all'
+          ? true
+          : filter === 'used'
+            ? usage.usedBy.length > 0
+            : usage.usedBy.length === 0,
       ),
     [usages, filter],
   );
@@ -83,7 +87,9 @@ export default function ImagesScreen() {
           />
         </View>
       }
-      ListEmptyComponent={<EmptyState title="Aucune image" subtitle="Aucun résultat pour ce filtre." />}
+      ListEmptyComponent={
+        <EmptyState title="Aucune image" subtitle="Aucun résultat pour ce filtre." />
+      }
       renderItem={({ item }) => <ImageCard usage={item} />}
     />
   );

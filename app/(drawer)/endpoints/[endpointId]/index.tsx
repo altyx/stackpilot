@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  RefreshControl,
+  SectionList,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction, type StackActionResult } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
@@ -30,7 +38,11 @@ export default function ContainersScreen() {
     const needle = search.trim().toLowerCase();
     const isVisible = (c: ContainerSummary) => {
       const matchesState =
-        filter === 'all' ? true : filter === 'running' ? c.State === 'running' : c.State !== 'running';
+        filter === 'all'
+          ? true
+          : filter === 'running'
+            ? c.State === 'running'
+            : c.State !== 'running';
       const matchesSearch = needle
         ? containerName(c).toLowerCase().includes(needle) || c.Image.toLowerCase().includes(needle)
         : true;
@@ -77,7 +89,11 @@ export default function ContainersScreen() {
         keyboardShouldPersistTaps="handled"
         stickySectionHeadersEnabled
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.colors.accent} />
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            tintColor={theme.colors.accent}
+          />
         }
         ListHeaderComponent={
           <View style={styles.header}>

@@ -12,7 +12,9 @@ import http from 'node:http';
 import https from 'node:https';
 
 const config = {
-  portainerUrl: required('PORTAINER_URL').replace(/\/+$/, '').replace(/\/api$/i, ''),
+  portainerUrl: required('PORTAINER_URL')
+    .replace(/\/+$/, '')
+    .replace(/\/api$/i, ''),
   portainerToken: required('PORTAINER_TOKEN'),
   endpointId: Number(required('ENDPOINT_ID')),
   pushTokens: required('EXPO_PUSH_TOKENS')
@@ -242,7 +244,7 @@ async function main() {
   );
   if (config.insecureTls) {
     console.log(
-      'Vérification TLS désactivée pour le flux Portainer. L\'envoi vers Expo reste vérifié.',
+      "Vérification TLS désactivée pour le flux Portainer. L'envoi vers Expo reste vérifié.",
     );
   }
 

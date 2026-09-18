@@ -6,7 +6,13 @@ import { theme } from '../theme';
 import { Card } from './Card';
 import { StatusDot } from './StatusDot';
 
-export function ContainerRow({ endpointId, container }: { endpointId: number; container: ContainerSummary }) {
+export function ContainerRow({
+  endpointId,
+  container,
+}: {
+  endpointId: number;
+  container: ContainerSummary;
+}) {
   return (
     <Link href={`/endpoints/${endpointId}/containers/${container.Id}`} asChild>
       <Pressable style={({ pressed }) => pressed && styles.pressed}>

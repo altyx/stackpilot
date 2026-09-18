@@ -33,8 +33,8 @@ export default function NotificationsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.intro}>
-        Les alertes sont poussées par un service qui surveille le flux d&apos;événements Docker
-        sur votre serveur. Cet écran fournit le jeton dont ce service a besoin pour joindre cet
+        Les alertes sont poussées par un service qui surveille le flux d&apos;événements Docker sur
+        votre serveur. Cet écran fournit le jeton dont ce service a besoin pour joindre cet
         appareil.
       </Text>
 
@@ -73,7 +73,10 @@ export default function NotificationsScreen() {
 
       <Card style={styles.card}>
         <Text style={styles.sectionTitle}>Mise en service</Text>
-        <NotificationStep n={1} text="Déployez le service watcher/ sur votre serveur (voir son README)." />
+        <NotificationStep
+          n={1}
+          text="Déployez le service watcher/ sur votre serveur (voir son README)."
+        />
         <NotificationStep n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
         <NotificationStep
           n={3}

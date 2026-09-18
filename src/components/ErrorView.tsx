@@ -9,7 +9,9 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
   const { signOut } = useAuth();
   const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
   const detail =
-    error && typeof error === 'object' && 'detail' in error ? String((error as { detail?: string }).detail ?? '') : '';
+    error && typeof error === 'object' && 'detail' in error
+      ? String((error as { detail?: string }).detail ?? '')
+      : '';
   // An expired or revoked token returns 401 on every attempt: retrying leads
   // nowhere, only signing in again unblocks it. The root navigation guard
   // redirects to /login as soon as the session drops.

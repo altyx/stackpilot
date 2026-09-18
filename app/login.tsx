@@ -25,7 +25,9 @@ export default function LoginScreen() {
 
   const canSubmit =
     baseUrl.trim().length > 0 &&
-    (mode === 'apiKey' ? apiKey.trim().length > 0 : username.trim().length > 0 && password.length > 0);
+    (mode === 'apiKey'
+      ? apiKey.trim().length > 0
+      : username.trim().length > 0 && password.length > 0);
 
   async function handleSubmit() {
     setBusy(true);
@@ -79,8 +81,16 @@ export default function LoginScreen() {
           />
 
           <View style={styles.segmented}>
-            <LoginModeTab label="Access token" active={mode === 'apiKey'} onPress={() => setMode('apiKey')} />
-            <LoginModeTab label="Identifiants" active={mode === 'jwt'} onPress={() => setMode('jwt')} />
+            <LoginModeTab
+              label="Access token"
+              active={mode === 'apiKey'}
+              onPress={() => setMode('apiKey')}
+            />
+            <LoginModeTab
+              label="Identifiants"
+              active={mode === 'jwt'}
+              onPress={() => setMode('jwt')}
+            />
           </View>
 
           {mode === 'apiKey' ? (
@@ -114,7 +124,11 @@ export default function LoginScreen() {
           {error ? (
             <View style={styles.errorBlock}>
               <Text style={styles.error}>{error.message}</Text>
-              {error.detail ? <Text selectable style={styles.errorDetail}>{error.detail}</Text> : null}
+              {error.detail ? (
+                <Text selectable style={styles.errorDetail}>
+                  {error.detail}
+                </Text>
+              ) : null}
             </View>
           ) : null}
 

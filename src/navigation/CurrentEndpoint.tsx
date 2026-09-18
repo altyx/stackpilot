@@ -77,7 +77,9 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
     [endpointId, isRestoring, select],
   );
 
-  return <CurrentEndpointContext.Provider value={value}>{children}</CurrentEndpointContext.Provider>;
+  return (
+    <CurrentEndpointContext.Provider value={value}>{children}</CurrentEndpointContext.Provider>
+  );
 }
 
 export function useCurrentEndpoint(): CurrentEndpointState {

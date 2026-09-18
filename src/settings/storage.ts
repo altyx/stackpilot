@@ -36,9 +36,7 @@ export async function loadSettings(): Promise<Settings> {
     // A value written by a past version, or since removed, must not leave
     // the app with an interval no screen offers.
     const known = REFRESH_INTERVALS.some((option) => option.value === parsed.refreshIntervalMs);
-    return known
-      ? { refreshIntervalMs: parsed.refreshIntervalMs ?? null }
-      : DEFAULT_SETTINGS;
+    return known ? { refreshIntervalMs: parsed.refreshIntervalMs ?? null } : DEFAULT_SETTINGS;
   } catch {
     return DEFAULT_SETTINGS;
   }

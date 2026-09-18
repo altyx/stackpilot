@@ -19,6 +19,8 @@ export default function Index() {
   if (!session) return <Redirect href="/login" />;
   if (currentEndpoint.isRestoring || endpoints.isPending) return <Loader />;
 
-  const home = endpoints.data ? pickHomeEndpoint(endpoints.data, currentEndpoint.endpointId) : undefined;
+  const home = endpoints.data
+    ? pickHomeEndpoint(endpoints.data, currentEndpoint.endpointId)
+    : undefined;
   return <Redirect href={home ? `/endpoints/${home.Id}` : '/endpoints'} />;
 }

@@ -12,7 +12,11 @@ const STATE_COLORS: Record<string, string> = {
 };
 
 export function StatusDot({ state }: { state: string }) {
-  return <View style={[styles.dot, { backgroundColor: STATE_COLORS[state] ?? theme.colors.textMuted }]} />;
+  return (
+    <View
+      style={[styles.dot, { backgroundColor: STATE_COLORS[state] ?? theme.colors.textMuted }]}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
