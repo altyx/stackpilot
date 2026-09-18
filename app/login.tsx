@@ -2,12 +2,14 @@ import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, useRouter } from 'expo-router';
 import { PortainerError } from '../src/api/client';
 import { loginWithApiKey, loginWithPassword } from '../src/api/portainer';
@@ -94,9 +96,7 @@ export default function LoginScreen() {
               placeholder="ptr_…"
               value={apiKey}
               onChangeText={setApiKey}
-              autoCapitalize="none"
-              autoCorrect={false}
-              secureTextEntry
+              secret
             />
           ) : (
             <>
@@ -112,7 +112,7 @@ export default function LoginScreen() {
                 label="Mot de passe"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secret
                 textContentType="password"
               />
             </>
@@ -156,18 +156,44 @@ export default function LoginScreen() {
   );
 }
 
+/**
+ * Champ libellé. Un champ `secret` est masqué par défaut, avec un bouton pour
+ * l'afficher en clair le temps de vérifier la saisie.
+ */
 function Field({
   label,
+  secret = false,
   ...inputProps
-}: { label: string } & React.ComponentProps<typeof TextInput>) {
+}: { label: string; secret?: boolean } & Omit<React.ComponentProps<typeof TextInput>, 'secureTextEntry'>) {
+  const [revealed, setRevealed] = useState(false);
   return (
     <View style={styles.field}>
       <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        {...inputProps}
-        style={styles.input}
-        placeholderTextColor={theme.colors.textMuted}
-      />
+      <View style={styles.inputFrame}>
+        <TextInput
+          {...inputProps}
+          // Affiché en clair, un secret ne doit être ni capitalisé ni corrigé
+          // par le clavier.
+          {...(secret && { autoCapitalize: 'none', autoCorrect: false, spellCheck: false })}
+          secureTextEntry={secret && !revealed}
+          style={styles.input}
+          placeholderTextColor={theme.colors.textMuted}
+        />
+        {secret ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={revealed ? 'Masquer la saisie' : 'Afficher la saisie'}
+            hitSlop={theme.spacing(2)}
+            onPress={() => setRevealed((value) => !value)}
+            style={({ pressed }) => [styles.reveal, pressed && styles.revealPressed]}>
+            <Ionicons
+              name={revealed ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={theme.colors.textMuted}
+            />
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -203,16 +229,22 @@ const styles = StyleSheet.create({
   card: { gap: theme.spacing(4), marginTop: theme.spacing(2) },
   field: { gap: theme.spacing(1.5) },
   fieldLabel: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '600' },
-  input: {
+  inputFrame: {
+    flexDirection: 'row',
     backgroundColor: theme.colors.surfaceAlt,
     borderColor: theme.colors.border,
     borderWidth: 1,
     borderRadius: theme.radius.sm,
+  },
+  input: {
+    flex: 1,
     color: theme.colors.text,
     fontSize: 15,
     paddingHorizontal: theme.spacing(3),
     paddingVertical: theme.spacing(3),
   },
+  reveal: { justifyContent: 'center', paddingHorizontal: theme.spacing(3) },
+  revealPressed: { opacity: 0.6 },
   segmented: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surfaceAlt,
