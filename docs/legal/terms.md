@@ -2,7 +2,7 @@
 
 # Conditions générales d'utilisation
 
-_Dernière mise à jour : 15 septembre 2026_
+_Dernière mise à jour : 18 septembre 2026_
 
 Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'utilisation de l'application mobile StackPilot (l'« Application »). En utilisant l'Application, vous acceptez les CGU dans leur intégralité ; si vous ne les acceptez pas, n'utilisez pas l'Application.
 
@@ -18,7 +18,7 @@ L'Application est distribuée par l'App Store d'Apple et par Google Play. Elle n
 
 ## 2. Objet de l'Application
 
-StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks.
+StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, ou en recréant un conteneur pour mettre à jour son image.
 
 L'Application est un projet indépendant : elle n'est ni éditée, ni affiliée, ni approuvée par Portainer.io ou Docker, Inc. « Portainer » et « Docker » sont des marques de leurs titulaires respectifs.
 
@@ -45,7 +45,7 @@ Il vous appartient de protéger l'accès à votre instance : connexion chiffrée
 Vous êtes responsable :
 
 - de la sécurité de votre appareil (code de verrouillage, mises à jour du système) et de la confidentialité de vos identifiants ;
-- des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ;
+- des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ; mettre à jour l'image d'un conteneur le supprime et le recrée, ce qui efface les données qui ne sont pas conservées dans un volume ;
 - de la configuration, de la sécurité et des sauvegardes de votre instance Portainer et des services qu'elle gère ;
 - du service de surveillance que vous déployez pour recevoir des notifications.
 

@@ -8,6 +8,10 @@ import { VolumeCard } from './VolumeCard';
 
 // Links need a navigator; these cards only need their content rendered.
 jest.mock('expo-router', () => ({ Link: ({ children }: { children: ReactNode }) => children }));
+// The image status needs a session and a query client: an idle query here.
+jest.mock('../api/hooks', () => ({
+  useImageStatus: () => ({ data: undefined, isError: false, isPending: true, fetchStatus: 'idle' }),
+}));
 
 const created = Date.UTC(2026, 8, 16, 14, 5) / 1000;
 
