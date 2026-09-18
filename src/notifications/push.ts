@@ -26,7 +26,7 @@ export async function registerForPush(): Promise<PushRegistration> {
     return {
       status: 'unsupported',
       reason:
-        "Les notifications distantes exigent un appareil physique : APNs ne délivre pas de jeton à un simulateur.",
+        'Les notifications distantes exigent un appareil physique : APNs ne délivre pas de jeton à un simulateur.',
     };
   }
 
@@ -51,12 +51,15 @@ export async function registerForPush(): Promise<PushRegistration> {
   }
 
   const existing = await Notifications.getPermissionsAsync();
-  const granted =
-    existing.granted || (await Notifications.requestPermissionsAsync()).granted;
+  const granted = existing.granted || (await Notifications.requestPermissionsAsync()).granted;
   if (!granted) return { status: 'denied' };
 
-  const projectId =
-    Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
+  // `extra` is untyped on Expo's side: validate rather than trust.
+  const extra = Constants.expoConfig?.extra as { eas?: { projectId?: unknown } } | undefined;
+  const easConfig = Constants.easConfig as { projectId?: unknown } | null;
+  const projectId = [extra?.eas?.projectId, easConfig?.projectId].find(
+    (value): value is string => typeof value === 'string',
+  );
   if (!projectId) {
     return {
       status: 'unsupported',

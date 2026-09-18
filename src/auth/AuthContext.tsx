@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([loadSession(), loadLastLogin()])
+    void Promise.all([loadSession(), loadLastLogin()])
       .then(([restored, last]) => {
         if (cancelled) return;
         sessionRef.current = restored;

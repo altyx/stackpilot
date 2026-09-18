@@ -48,7 +48,11 @@ export function Button({
 
 const variantStyles = StyleSheet.create({
   primary: { backgroundColor: theme.colors.accent },
-  secondary: { backgroundColor: theme.colors.surfaceAlt, borderWidth: 1, borderColor: theme.colors.border },
+  secondary: {
+    backgroundColor: theme.colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
   danger: { backgroundColor: theme.colors.danger },
 });
 

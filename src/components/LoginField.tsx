@@ -11,7 +11,10 @@ export function LoginField({
   label,
   secret = false,
   ...inputProps
-}: { label: string; secret?: boolean } & Omit<ComponentProps<typeof TextInput>, 'secureTextEntry'>) {
+}: { label: string; secret?: boolean } & Omit<
+  ComponentProps<typeof TextInput>,
+  'secureTextEntry'
+>) {
   const [revealed, setRevealed] = useState(false);
   return (
     <View style={styles.field}>

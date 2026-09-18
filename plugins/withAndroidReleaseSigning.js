@@ -34,14 +34,19 @@ function addReleaseSigning(contents) {
   // The `debug { … }` block closes at 8 spaces, `signingConfigs` at 4.
   const signingConfigs = /(signingConfigs \{\n[\s\S]*?\n {8}\}\n)( {4}\})/;
   if (!signingConfigs.test(contents)) {
-    throw new Error("withAndroidReleaseSigning : bloc `signingConfigs` introuvable dans build.gradle.");
+    throw new Error(
+      'withAndroidReleaseSigning : bloc `signingConfigs` introuvable dans build.gradle.',
+    );
   }
   contents = contents.replace(signingConfigs, `$1${RELEASE_SIGNING_CONFIG}$2`);
 
   // In `buildTypes`, only the release must change signing key.
-  const releaseBuildType = /(buildTypes \{[\s\S]*?release \{[\s\S]*?)signingConfig signingConfigs\.debug/;
+  const releaseBuildType =
+    /(buildTypes \{[\s\S]*?release \{[\s\S]*?)signingConfig signingConfigs\.debug/;
   if (!releaseBuildType.test(contents)) {
-    throw new Error("withAndroidReleaseSigning : signature de la release introuvable dans build.gradle.");
+    throw new Error(
+      'withAndroidReleaseSigning : signature de la release introuvable dans build.gradle.',
+    );
   }
   return contents.replace(releaseBuildType, '$1signingConfig signingConfigs.release');
 }

@@ -36,7 +36,7 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!baseUrl) return;
     let cancelled = false;
-    loadLastEndpoint()
+    void loadLastEndpoint()
       .catch(() => null)
       .then((stored) => {
         if (cancelled) return;
@@ -77,7 +77,9 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
     [endpointId, isRestoring, select],
   );
 
-  return <CurrentEndpointContext.Provider value={value}>{children}</CurrentEndpointContext.Provider>;
+  return (
+    <CurrentEndpointContext.Provider value={value}>{children}</CurrentEndpointContext.Provider>
+  );
 }
 
 export function useCurrentEndpoint(): CurrentEndpointState {

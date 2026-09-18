@@ -52,7 +52,7 @@ Côté application, trois prérequis :
    le SDK 53 ;
 3. un **appareil physique** : APNs ne délivre pas de jeton à un simulateur.
 
-L'écran *Notifications* (icône cloche, en haut de la liste des environnements)
+L'écran _Notifications_ (icône cloche, en haut de la liste des environnements)
 affiche le jeton de l'appareil à recopier dans la configuration du service.
 
 ## Architecture
@@ -63,8 +63,9 @@ app/                                     routes expo-router (file-based)
   index.tsx                              aiguillage démarrage
   login.tsx                              connexion
   terms.tsx, privacy.tsx                 textes légaux, accessibles sans session
-  endpoints/index.tsx                    liste des environnements
-  endpoints/[endpointId]/(tabs)/         onglets conteneurs / images / volumes
+  (drawer)/endpoints/index.tsx           liste des environnements
+  (drawer)/endpoints/[endpointId]/       conteneurs / images / volumes, sous le menu latéral
+  (drawer)/settings.tsx                  réglages
   endpoints/[endpointId]/containers/     détail d'un conteneur
 src/
   api/client.ts                          fetch typé, timeouts, erreurs Portainer
@@ -73,13 +74,17 @@ src/
   api/types.ts                           types Portainer / Docker
   auth/                                  session sécurisée + contexte React
   legal/                                 CGU, confidentialité, identité de l'éditeur
-  components/ui.tsx                      composants partagés
+  components/                            composants partagés, un par fichier
+  navigation/                            menu latéral, pile racine, environnement courant
   lib/format.ts                          formatage (noms, dates, tailles)
   lib/usage.ts                           calcul utilisé / inutilisé
   lib/stacks.ts                          regroupement par stack
   notifications/                         enregistrement push + navigation au tap
-watcher/                                 service serveur qui émet les alertes
+  settings/                              préférences persistées + contexte React
+  testing/                               fixtures et mocks partagés par les tests
   theme.ts                               palette et espacements
+__tests__/                               tests des écrans (jamais sous app/)
+watcher/                                 service serveur qui émet les alertes
 fastlane/                                signature, compilation et envoi iOS
 ```
 
@@ -116,12 +121,15 @@ s'appliquent donc telles quelles.
 
 ## Scripts
 
-| Commande | Rôle |
-| --- | --- |
-| `npm start` | serveur de développement Expo |
-| `npm run ios` / `npm run android` | lance sur simulateur / émulateur |
-| `npm run typecheck` | vérification TypeScript |
-| `npm run legal` | publie les textes légaux de `src/legal` dans `docs/legal` |
+| Commande                          | Rôle                                                      |
+| --------------------------------- | --------------------------------------------------------- |
+| `npm start`                       | serveur de développement Expo                             |
+| `npm run ios` / `npm run android` | lance sur simulateur / émulateur                          |
+| `npm run typecheck`               | vérification TypeScript                                   |
+| `npm run lint`                    | ESLint (config Expo + règles typées)                      |
+| `npm run format`                  | Prettier ; `format:check` en CI                           |
+| `npm test`                        | tests Jest ; `test:watch` en développement                |
+| `npm run legal`                   | publie les textes légaux de `src/legal` dans `docs/legal` |
 
 ## Publication
 

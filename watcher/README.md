@@ -10,12 +10,12 @@ doit venir de l'extérieur.
 
 ## Ce qui déclenche une alerte
 
-| Événement Docker | Alerte |
-| --- | --- |
+| Événement Docker                 | Alerte                 |
+| -------------------------------- | ---------------------- |
 | `die` avec un code de sortie ≠ 0 | Arrêt anormal (code N) |
-| `health_status: unhealthy` | Passé en unhealthy |
-| `oom` | Mémoire épuisée |
-| `restart` | Redémarrage |
+| `health_status: unhealthy`       | Passé en unhealthy     |
+| `oom`                            | Mémoire épuisée        |
+| `restart`                        | Redémarrage            |
 
 Un `die` avec le code 0 est **ignoré volontairement** : c'est un arrêt demandé,
 typiquement depuis l'application. Sans ce filtre, chaque action volontaire
@@ -32,16 +32,16 @@ Partez de [`.env.example`](.env.example) :
 cp .env.example .env
 ```
 
-| Variable | Requis | Rôle |
-| --- | --- | --- |
-| `PORTAINER_NETWORK` | oui | Réseau Docker que le service rejoint |
-| `PORTAINER_URL` | oui | URL de Portainer vue depuis ce réseau, sans `/api` |
-| `PORTAINER_TOKEN` | oui | Access token Portainer (`ptr_…`) |
-| `ENDPOINT_ID` | oui | Identifiant de l'environnement à surveiller |
-| `EXPO_PUSH_TOKENS` | oui | Jetons des appareils, séparés par des virgules |
-| `PORTAINER_INSECURE_TLS` | non | Accepte le certificat auto-signé du flux, `0` par défaut |
-| `IGNORE_CONTAINERS` | non | Noms de conteneurs à ignorer, séparés par des virgules |
-| `DEDUPE_SECONDS` | non | Fenêtre anti-doublon, 120 par défaut |
+| Variable                 | Requis | Rôle                                                     |
+| ------------------------ | ------ | -------------------------------------------------------- |
+| `PORTAINER_NETWORK`      | oui    | Réseau Docker que le service rejoint                     |
+| `PORTAINER_URL`          | oui    | URL de Portainer vue depuis ce réseau, sans `/api`       |
+| `PORTAINER_TOKEN`        | oui    | Access token Portainer (`ptr_…`)                         |
+| `ENDPOINT_ID`            | oui    | Identifiant de l'environnement à surveiller              |
+| `EXPO_PUSH_TOKENS`       | oui    | Jetons des appareils, séparés par des virgules           |
+| `PORTAINER_INSECURE_TLS` | non    | Accepte le certificat auto-signé du flux, `0` par défaut |
+| `IGNORE_CONTAINERS`      | non    | Noms de conteneurs à ignorer, séparés par des virgules   |
+| `DEDUPE_SECONDS`         | non    | Fenêtre anti-doublon, 120 par défaut                     |
 
 ### Trouver `ENDPOINT_ID`
 
@@ -67,7 +67,7 @@ son port publié sur l'hôte.
 ### Trouver le jeton d'appareil
 
 Dans l'application : **Environnements → icône cloche → Autoriser les
-notifications**, puis *Copier le jeton*.
+notifications**, puis _Copier le jeton_.
 
 ## Aucun volume n'est nécessaire
 
@@ -99,7 +99,7 @@ elle tourne.
 
 Dans Portainer : **Stacks → Add stack → Web editor**, collez le contenu de
 `compose.yaml` en remplaçant `build: .` par une image déjà publiée, et
-renseignez les variables dans *Environment variables*. Le service apparaît
+renseignez les variables dans _Environment variables_. Le service apparaît
 ensuite comme n'importe quelle autre stack.
 
 ### Option 3 — publier sur un registry
@@ -198,7 +198,7 @@ reste utilisé, donc le certificat reste valide, mais il est résolu sans DNS.
 
 ```yaml
 extra_hosts:
-  - "portainer.exemple.ts.net:100.x.y.z"
+  - 'portainer.exemple.ts.net:100.x.y.z'
 ```
 
 ## Limites

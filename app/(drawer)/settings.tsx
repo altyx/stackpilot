@@ -21,8 +21,8 @@ export default function SettingsScreen() {
     <ScrollView contentContainerStyle={styles.content}>
       <SettingsSection title="Rafraîchissement">
         <Text style={styles.hint}>
-          La liste des conteneurs se met à jour seule. Un intervalle plus long ménage la batterie
-          et le forfait de données ; en mode manuel, tirez la liste vers le bas pour la rafraîchir.
+          La liste des conteneurs se met à jour seule. Un intervalle plus long ménage la batterie et
+          le forfait de données ; en mode manuel, tirez la liste vers le bas pour la rafraîchir.
         </Text>
         <Card style={styles.card}>
           {REFRESH_INTERVALS.map((option, index) => (
@@ -95,13 +95,18 @@ export default function SettingsScreen() {
 
 function openLink(url: string): void {
   Linking.openURL(url).catch(() =>
-    Alert.alert('Lien inaccessible', "Aucune application ne peut ouvrir cette adresse."),
+    Alert.alert('Lien inaccessible', 'Aucune application ne peut ouvrir cette adresse.'),
   );
 }
 
 const styles = StyleSheet.create({
   content: { padding: theme.spacing(4), gap: theme.spacing(6), paddingBottom: theme.spacing(8) },
-  hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18, paddingHorizontal: theme.spacing(1) },
+  hint: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
+    paddingHorizontal: theme.spacing(1),
+  },
   // The card carries the rows edge to edge: their own inner padding is enough.
   card: { padding: 0, overflow: 'hidden' },
 });

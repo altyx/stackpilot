@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { StackAction } from '../api/types';
 import type { StackSection } from '../lib/stacks';
 import { BottomSheet } from './BottomSheet';
@@ -33,9 +33,11 @@ export function StackActionSheet({
 
   // Every opening starts back at choosing the action.
   const openedKey = section?.key ?? null;
-  useEffect(() => {
+  const [lastOpenedKey, setLastOpenedKey] = useState(openedKey);
+  if (openedKey !== lastOpenedKey) {
+    setLastOpenedKey(openedKey);
     if (openedKey !== null) setStep('choose');
-  }, [openedKey]);
+  }
 
   if (!shown) return null;
 

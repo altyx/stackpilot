@@ -52,13 +52,7 @@ export interface DockerSnapshot {
 }
 
 export type ContainerState =
-  | 'created'
-  | 'running'
-  | 'paused'
-  | 'restarting'
-  | 'removing'
-  | 'exited'
-  | 'dead';
+  'created' | 'running' | 'paused' | 'restarting' | 'removing' | 'exited' | 'dead';
 
 export interface ContainerPort {
   IP?: string;
@@ -145,12 +139,12 @@ export interface ContainerInspect {
     RestartPolicy?: { Name: string; MaximumRetryCount: number };
     NetworkMode?: string;
   };
-  Mounts: Array<{
+  Mounts: {
     Type: string;
     Source: string;
     Destination: string;
     RW: boolean;
-  }>;
+  }[];
   NetworkSettings: {
     Networks: Record<string, { IPAddress: string; Gateway: string }>;
   };

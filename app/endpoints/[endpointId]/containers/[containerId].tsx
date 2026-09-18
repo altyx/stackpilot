@@ -63,7 +63,11 @@ export default function ContainerDetailScreen() {
     <ScrollView
       contentContainerStyle={styles.content}
       refreshControl={
-        <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.colors.accent} />
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={refetch}
+          tintColor={theme.colors.accent}
+        />
       }>
       <Stack.Screen options={{ title: '' }} />
 

@@ -27,7 +27,11 @@ export default function VolumesScreen() {
   const visible = useMemo(
     () =>
       usages.filter((usage) =>
-        filter === 'all' ? true : filter === 'used' ? usage.usedBy.length > 0 : usage.usedBy.length === 0,
+        filter === 'all'
+          ? true
+          : filter === 'used'
+            ? usage.usedBy.length > 0
+            : usage.usedBy.length === 0,
       ),
     [usages, filter],
   );
@@ -80,7 +84,9 @@ export default function VolumesScreen() {
           />
         </View>
       }
-      ListEmptyComponent={<EmptyState title="Aucun volume" subtitle="Aucun résultat pour ce filtre." />}
+      ListEmptyComponent={
+        <EmptyState title="Aucun volume" subtitle="Aucun résultat pour ce filtre." />
+      }
       renderItem={({ item }) => <VolumeCard usage={item} />}
     />
   );

@@ -46,8 +46,14 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
-  const progress = useRef(new Animated.Value(0)).current;
-  const drag = useRef(new Animated.Value(0)).current;
+  // Mounted during render as soon as `visible` flips: the modal exists on the
+  // same pass that starts the opening animation. Unmounting waits for the
+  // closing animation, in its completion callback.
+  if (visible && !mounted) setMounted(true);
+  // Lazily initialised state rather than refs: these are read during render
+  // (styles, pan handlers), which React reserves for state and props.
+  const [progress] = useState(() => new Animated.Value(0));
+  const [drag] = useState(() => new Animated.Value(0));
 
   // The gesture is created once: it reads the up-to-date callbacks here.
   const callbacks = useRef({ onRequestClose, onClosed });
@@ -57,7 +63,6 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
 
   useEffect(() => {
     if (visible) {
-      setMounted(true);
       drag.setValue(0);
       Animated.timing(progress, {
         toValue: 1,
@@ -88,7 +93,10 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
     }
   }, [mounted]);
 
-  const panResponder = useRef(
+  /* eslint-disable react-hooks/refs -- the handlers read `callbacks` at
+     gesture time; the rule can't tell that `PanResponder.create` never calls
+     them during render. */
+  const [panResponder] = useState(() =>
     PanResponder.create({
       // Only clearly vertical drags are captured: taps stay with the buttons.
       onMoveShouldSetPanResponder: (_, gesture) =>
@@ -105,7 +113,8 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
         Animated.spring(drag, { toValue: 0, useNativeDriver: true }).start();
       },
     }),
-  ).current;
+  );
+  /* eslint-enable react-hooks/refs */
 
   const translateY = useMemo(
     () =>
