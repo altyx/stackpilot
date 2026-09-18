@@ -3,7 +3,6 @@ import { Alert, RefreshControl, SectionList, StyleSheet, Text, TextInput, View }
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction, type StackActionResult } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
-import { Card } from '../../../../src/components/Card';
 import { ContainerRow } from '../../../../src/components/ContainerRow';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
 import { EmptyState } from '../../../../src/components/EmptyState';
