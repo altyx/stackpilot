@@ -139,12 +139,12 @@ export interface ContainerInspect {
     RestartPolicy?: { Name: string; MaximumRetryCount: number };
     NetworkMode?: string;
   };
-  Mounts: Array<{
+  Mounts: {
     Type: string;
     Source: string;
     Destination: string;
     RW: boolean;
-  }>;
+  }[];
   NetworkSettings: {
     Networks: Record<string, { IPAddress: string; Gateway: string }>;
   };

@@ -36,7 +36,7 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!baseUrl) return;
     let cancelled = false;
-    loadLastEndpoint()
+    void loadLastEndpoint()
       .catch(() => null)
       .then((stored) => {
         if (cancelled) return;

@@ -101,8 +101,10 @@ export function useContainerAction(endpointId: number, containerId: string) {
       runContainerAction(requireSession(session), endpointId, containerId, action),
     onSuccess: () => {
       // Docker applies the action asynchronously: we re-read the state afterward.
-      queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.container(endpointId, containerId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.container(endpointId, containerId),
+      });
     },
   });
 }
@@ -154,7 +156,7 @@ export function useStackAction(endpointId: number) {
       return { succeeded, failures };
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
     },
   });
 }

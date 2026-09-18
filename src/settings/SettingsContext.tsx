@@ -26,7 +26,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    loadSettings().then((stored) => {
+    void loadSettings().then((stored) => {
       // A setting changed while re-reading is more recent than the re-read.
       if (cancelled || changed.current) return;
       current.current = stored;

@@ -1,6 +1,10 @@
 import { execSync } from 'node:child_process';
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
+// Expo augments `NodeJS.ProcessEnv` so app code can read `process.env.*`
+// untyped; this file runs under Node, where values are strings or absent.
+const env = process.env as Record<string, string | undefined>;
+
 /**
  * Fills in `app.json` with what varies from build to build.
  *
@@ -13,7 +17,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
  * running, without going through GitHub or the store console.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const buildNumber = process.env.BUILD_NUMBER?.trim();
+  const buildNumber = env.BUILD_NUMBER?.trim();
   if (buildNumber && !/^\d+$/.test(buildNumber)) {
     throw new Error(`BUILD_NUMBER doit être un entier, reçu « ${buildNumber} ».`);
   }
@@ -30,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 };
 
 function currentCommit(): string | null {
-  const fromCi = process.env.GITHUB_SHA?.trim();
+  const fromCi = env.GITHUB_SHA?.trim();
   if (fromCi) return fromCi.slice(0, 7);
   try {
     return execSync('git rev-parse --short=7 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })

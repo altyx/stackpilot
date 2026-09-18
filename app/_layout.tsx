@@ -12,12 +12,13 @@ import { theme } from '../src/theme';
 
 // Without this handler, an alert received while the app is open stays invisible.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: () =>
+    Promise.resolve({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
 });
 
 const queryClient = new QueryClient({

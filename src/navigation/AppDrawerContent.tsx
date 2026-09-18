@@ -32,7 +32,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
         label={label}
         icon={icon}
         active={path !== null && pathname === path}
-        onPress={path === null ? undefined : () => go(path as Href)}
+        onPress={path === null ? undefined : () => go(path)}
       />
     );
   }

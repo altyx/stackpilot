@@ -123,7 +123,7 @@ export default function ContainersScreen() {
         }
         renderSectionHeader={({ section }) => (
           <StackHeader
-            section={section as StackSection}
+            section={section}
             busy={pendingStack === (section as StackSection).key}
             disabled={stackAction.isPending}
             onPressActions={(target) => setSheetKey(target.key)}

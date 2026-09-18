@@ -23,8 +23,25 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ['**/*.test.{ts,tsx}', '__tests__/**', 'jest.setup.ts'],
+    files: ['**/*.test.{ts,tsx}', '__tests__/**', 'src/testing/**', 'jest.setup.ts'],
     languageOptions: { globals: globals.jest },
+  },
+  {
+    // Runs under Node, not in the app bundle: build scripts, config plugins,
+    // the companion watcher service and the tooling config files themselves.
+    files: [
+      'scripts/**',
+      'plugins/**',
+      'watcher/**',
+      '*.config.js',
+      'jest.globalSetup.js',
+      'app.config.ts',
+    ],
+    languageOptions: { globals: globals.node },
+    rules: {
+      'expo/no-dynamic-env-var': 'off',
+      'expo/no-env-var-destructuring': 'off',
+    },
   },
   // Last on purpose: turns off every rule Prettier already enforces.
   prettierConfig,
