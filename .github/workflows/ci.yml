@@ -1,0 +1,42 @@
+name: CI
+
+# The checks listed in AGENTS.md, run on every pull request and on main.
+# Publishing is a separate workflow: mobile-release.yml reacts to version
+# bumps and tags, this one only guards code quality.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Vérifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Types
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: Tests
+        run: npm test -- --ci
+      - name: Textes légaux publiés
+        run: npm run legal -- --check
+      - name: Changelog
+        run: npm run changelog
