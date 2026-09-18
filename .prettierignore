@@ -1,0 +1,10 @@
+node_modules/
+ios/
+android/
+.expo/
+dist/
+build/
+coverage/
+# Generated from src/legal by `npm run legal`.
+docs/legal/
+package-lock.json

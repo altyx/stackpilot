@@ -53,3 +53,6 @@ fastlane/Preview.html
 fastlane/test_output/
 fastlane/.env*
 /build/
+
+# Jest
+coverage/
