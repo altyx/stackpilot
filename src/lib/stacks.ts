@@ -1,9 +1,9 @@
 import type { ContainerSummary } from '../api/types';
 import { containerName } from './format';
 
-/** Label posé par Docker Compose ; c'est le nom de la stack côté Portainer. */
+/** Label set by Docker Compose; it's the stack name on Portainer's side. */
 const COMPOSE_PROJECT = 'com.docker.compose.project';
-/** Équivalent pour les stacks Swarm. */
+/** Equivalent for Swarm stacks. */
 const SWARM_NAMESPACE = 'com.docker.stack.namespace';
 
 const UNGROUPED_KEY = ' sans-stack';
@@ -11,20 +11,20 @@ const UNGROUPED_KEY = ' sans-stack';
 export interface StackSection {
   key: string;
   title: string;
-  /** Membres visibles après filtrage : ce que la liste affiche. */
+  /** Visible members after filtering: what the list displays. */
   data: ContainerSummary[];
-  /** Tous les membres, filtre ignoré : la cible des actions groupées. */
+  /** All members, filter ignored: the target of grouped actions. */
   members: ContainerSummary[];
-  /** Membres en cours d'exécution, sur la stack complète. */
+  /** Running members, over the whole stack. */
   running: number;
-  /** Vrai pour le groupe des conteneurs hors stack, qui n'est pas actionnable. */
+  /** True for the group of containers outside any stack, which isn't actionable. */
   ungrouped: boolean;
 }
 
 /**
- * Le nom de la stack est déjà porté par les conteneurs : aucun appel à
- * `/api/stacks` n'est nécessaire, et le regroupement reste correct même avec un
- * token dont les droits ne couvrent pas les stacks Portainer.
+ * The stack name is already carried by the containers: no call to
+ * `/api/stacks` is needed, and the grouping stays correct even with a token
+ * whose permissions don't cover Portainer stacks.
  */
 export function stackOf(container: ContainerSummary): string | null {
   const labels = container.Labels ?? {};
@@ -32,10 +32,10 @@ export function stackOf(container: ContainerSummary): string | null {
 }
 
 /**
- * Regroupe tous les conteneurs, puis n'expose que ceux retenus par `isVisible`.
- * Les actions de stack portent sur `members`, donc sur la stack complète, alors
- * que la liste n'affiche que `data` : un filtre ne doit pas silencieusement
- * réduire la portée d'un arrêt de stack.
+ * Groups every container, then exposes only the ones `isVisible` keeps.
+ * Stack actions act on `members`, i.e. the whole stack, while the list only
+ * displays `data`: a filter must never silently narrow the scope of a stack
+ * stop.
  */
 export function groupByStack(
   containers: ContainerSummary[],
@@ -67,14 +67,14 @@ export function groupByStack(
     })
     .filter((section) => section.data.length > 0)
     .sort((a, b) => {
-      // Les conteneurs hors stack ferment la liste : ce sont les cas isolés.
+      // Containers outside any stack close out the list: they're the odd ones out.
       if (a.ungrouped) return 1;
       if (b.ungrouped) return -1;
       return a.title.localeCompare(b.title);
     });
 }
 
-/** Nombre de stacks réelles, en excluant le groupe des conteneurs isolés. */
+/** Number of real stacks, excluding the group of standalone containers. */
 export function countStacks(sections: StackSection[]): number {
   return sections.filter((section) => !section.ungrouped).length;
 }

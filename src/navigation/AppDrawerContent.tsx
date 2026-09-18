@@ -1,6 +1,4 @@
-import type { ComponentProps } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet, ScrollView, Text, View } from 'react-native';
 import { usePathname, useRouter, type Href } from 'expo-router';
 import type { DrawerContentComponentProps } from 'expo-router/drawer';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,10 +7,9 @@ import { useAuth } from '../auth/AuthContext';
 import { BuildInfo } from '../components/BuildInfo';
 import { theme } from '../theme';
 import { useCurrentEndpoint } from './CurrentEndpoint';
+import { DrawerLink, type IconName } from './DrawerLink';
 
-type IconName = ComponentProps<typeof Ionicons>['name'];
-
-/** Menu latéral : la navigation principale de l'application. */
+/** Side drawer: the app's main navigation. */
 export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
   const { session, signOut } = useAuth();
   const { endpointId } = useCurrentEndpoint();
@@ -80,43 +77,6 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
   );
 }
 
-function DrawerLink({
-  label,
-  icon,
-  active = false,
-  tone = 'default',
-  onPress,
-}: {
-  label: string;
-  icon: IconName;
-  active?: boolean;
-  tone?: 'default' | 'danger';
-  /** Absent quand la destination n'existe pas encore : l'entrée est désactivée. */
-  onPress?: () => void;
-}) {
-  const disabled = !onPress;
-  const color =
-    tone === 'danger' ? theme.colors.danger : active ? theme.colors.accent : theme.colors.text;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: active, disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.link,
-        active && styles.linkActive,
-        pressed && styles.pressed,
-        disabled && styles.disabled,
-      ]}>
-      <Ionicons name={icon} size={20} color={color} />
-      <Text style={[styles.linkLabel, { color }]} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.surface },
   brand: {
@@ -146,19 +106,6 @@ const styles = StyleSheet.create({
     marginVertical: theme.spacing(2),
     marginHorizontal: theme.spacing(3),
   },
-  // 48 pt minimum : la cible tactile recommandée sur Android comme sur iOS.
-  link: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing(4),
-    minHeight: theme.spacing(12),
-    paddingHorizontal: theme.spacing(3),
-    borderRadius: theme.radius.md,
-  },
-  linkActive: { backgroundColor: theme.colors.surfaceAlt },
-  linkLabel: { fontSize: 15, fontWeight: '600', flexShrink: 1 },
-  pressed: { opacity: 0.75 },
-  disabled: { opacity: 0.4 },
   footer: {
     paddingHorizontal: theme.spacing(3),
     paddingTop: theme.spacing(2),

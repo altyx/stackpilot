@@ -1,6 +1,6 @@
-# Certificat de distribution et profil App Store, chiffrés par match avec
-# MATCH_PASSWORD. Ils vivent dans un dépôt privé distinct : celui de l'app est
-# public. Voir docs/release.md.
+# Distribution certificate and App Store profile, encrypted by match with
+# MATCH_PASSWORD. They live in a separate private repo: the app's own repo is
+# public. See docs/release.md.
 git_url("git@github.com:altyx/stackpilot-certificates.git")
 git_branch("main")
 storage_mode("git")

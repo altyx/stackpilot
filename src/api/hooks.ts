@@ -15,10 +15,10 @@ import { containerName } from '../lib/format';
 import type { ContainerAction, ContainerSummary, Session, StackAction } from './types';
 
 /**
- * La session tombe à null pendant la déconnexion, alors que les écrans sont
- * encore montés. Les requêtes sont donc désactivées plutôt que de lever une
- * exception au rendu : `enabled` garantit que `queryFn` ne s'exécute pas sans
- * session, et ce garde-fou ne sert qu'à typer le cas.
+ * The session drops to null during sign-out, while screens are still
+ * mounted. Queries are disabled rather than throwing at render time:
+ * `enabled` guarantees `queryFn` never runs without a session, and this guard
+ * only serves to type that case.
  */
 function requireSession(session: Session | null): Session {
   if (!session) throw new PortainerError('Session expirée. Reconnectez-vous.');
@@ -46,8 +46,8 @@ export function useEndpoints() {
 
 export function useContainers(endpointId: number) {
   const { session } = useAuth();
-  // Les images et les volumes lisent aussi cette requête : l'intervalle réglé
-  // dans les réglages vaut donc pour les trois écrans.
+  // Images and volumes also read this query: the interval set in settings
+  // therefore applies to all three screens.
   const { settings } = useSettings();
   return useQuery({
     queryKey: queryKeys.containers(endpointId),
@@ -100,7 +100,7 @@ export function useContainerAction(endpointId: number, containerId: string) {
     mutationFn: (action: ContainerAction) =>
       runContainerAction(requireSession(session), endpointId, containerId, action),
     onSuccess: () => {
-      // Docker applique l'action de façon asynchrone : on relit l'état après coup.
+      // Docker applies the action asynchronously: we re-read the state afterward.
       queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.container(endpointId, containerId) });
     },
@@ -113,16 +113,16 @@ export interface StackActionResult {
 }
 
 /**
- * Applique une action à tous les conteneurs d'une stack.
+ * Applies an action to every container in a stack.
  *
- * Portainer expose bien `/api/stacks/{id}/start`, mais cette route ne couvre
- * que les stacks qu'il gère lui-même et dépend de droits distincts. Le
- * regroupement de l'app venant des labels Docker, on agit ici conteneur par
- * conteneur : ça marche pour tout groupe affiché, avec les seuls droits déjà
- * nécessaires aux actions unitaires.
+ * Portainer does expose `/api/stacks/{id}/start`, but that route only covers
+ * stacks it manages itself and depends on separate permissions. Since the
+ * app's grouping comes from Docker labels, we act here container by
+ * container: it works for any group shown, with only the permissions already
+ * required for single-container actions.
  *
- * Séquentiel et volontairement tolérant : un conteneur en échec n'interrompt
- * pas les suivants, et le détail des échecs remonte à l'appelant.
+ * Sequential and deliberately tolerant: a failing container doesn't stop the
+ * rest, and the failure detail bubbles up to the caller.
  */
 export function useStackAction(endpointId: number) {
   const { session } = useAuth();

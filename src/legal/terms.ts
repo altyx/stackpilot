@@ -2,11 +2,11 @@ import type { LegalDocument } from './document';
 import { PRIVACY_POLICY_URL, PUBLISHER, SOURCE_CODE_URL } from './publisher';
 
 /**
- * Conditions générales d'utilisation.
+ * Terms of use.
  *
- * Le texte décrit le fonctionnement réel de l'application : connexion directe à
- * l'instance, jetons dans le trousseau, notifications relayées par Expo. Toute
- * évolution de ces points doit s'y refléter, avec une nouvelle date.
+ * The text describes how the app actually behaves: direct connection to the
+ * instance, tokens in the keychain, notifications relayed by Expo. Any
+ * change to these points must be reflected here, with a new date.
  */
 export const TERMS: LegalDocument = {
   title: "Conditions générales d'utilisation",

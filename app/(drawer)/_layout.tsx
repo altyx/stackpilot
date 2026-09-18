@@ -3,13 +3,13 @@ import { AppDrawerContent } from '../../src/navigation/AppDrawerContent';
 import { theme } from '../../src/theme';
 
 /**
- * Écrans principaux, réunis sous le menu latéral. Les écrans de détail restent
- * dans la pile racine : ils s'empilent par-dessus le menu, avec un bouton retour.
+ * Main screens, grouped under the side drawer. Detail screens stay in the
+ * root stack: they stack on top of the drawer, with a back button.
  */
 export default function DrawerLayout() {
   return (
     <Drawer
-      // Le retour Android revient à l'écran précédent plutôt qu'au premier du menu.
+      // Android back returns to the previous screen rather than the drawer's first one.
       backBehavior="history"
       drawerContent={(props) => <AppDrawerContent {...props} />}
       screenOptions={{

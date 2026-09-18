@@ -15,11 +15,11 @@ import { clearSession, loadLastLogin, loadSession, saveSession, type LastLogin }
 
 interface AuthState {
   session: Session | null;
-  /** true tant que la session persistée n'a pas été relue au démarrage. */
+  /** true until the persisted session has been re-read at startup. */
   isRestoring: boolean;
-  /** Dernière connexion réussie, pour pré-remplir le formulaire. */
+  /** Last successful login, to pre-fill the form. */
   lastLogin: LastLogin | null;
-  /** true si la session a été fermée parce que Portainer a refusé son token. */
+  /** true if the session was closed because Portainer rejected its token. */
   sessionExpired: boolean;
   signIn: (session: Session) => Promise<void>;
   signOut: () => Promise<void>;
@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isRestoring, setIsRestoring] = useState(true);
   const [lastLogin, setLastLogin] = useState<LastLogin | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
-  // Lu par l'écouteur de 401, qui ne doit pas attendre un rendu pour voir la
-  // session changer : plusieurs requêtes peuvent échouer dans la même rafale.
+  // Read by the 401 listener, which must not wait for a render to see the
+  // session change: several requests can fail in the same burst.
   const sessionRef = useRef<Session | null>(null);
   const queryClient = useQueryClient();
 
@@ -68,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSessionExpired(expired);
       await clearSession();
       setSession(null);
-      // Sinon une reconnexion sur une autre instance afficherait brièvement les
-      // conteneurs de la précédente, servis depuis le cache.
+      // Otherwise, signing in again on a different instance would briefly show
+      // the previous one's containers, served from cache.
       queryClient.clear();
     },
     [queryClient],
@@ -77,11 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => endSession(false), [endSession]);
 
-  // Un token expiré ou révoqué ne redeviendra pas valide : on ferme la session
-  // et la garde de navigation racine renvoie vers /login. La comparaison du
-  // token écarte les 401 étrangers à la session courante — validation d'un
-  // access token depuis l'écran de connexion, réponse tardive d'une session
-  // déjà remplacée.
+  // An expired or revoked token won't become valid again: we close the
+  // session and the root navigation guard redirects to /login. Comparing the
+  // token filters out 401s unrelated to the current session — validating an
+  // access token from the login screen, a late response from a session
+  // already replaced.
   useEffect(
     () =>
       setUnauthorizedListener((token) => {

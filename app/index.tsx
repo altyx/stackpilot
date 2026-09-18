@@ -1,14 +1,14 @@
 import { Redirect } from 'expo-router';
 import { useEndpoints } from '../src/api/hooks';
 import { useAuth } from '../src/auth/AuthContext';
-import { Loader } from '../src/components/ui';
+import { Loader } from '../src/components/Loader';
 import { pickHomeEndpoint } from '../src/lib/endpoints';
 import { useCurrentEndpoint } from '../src/navigation/CurrentEndpoint';
 
 /**
- * Aiguillage au démarrage : les conteneurs du dernier environnement consulté,
- * à défaut ceux du premier environnement accessible, à défaut la liste des
- * environnements — qui explique aussi une erreur de chargement.
+ * Startup routing: the last environment's containers, failing that the first
+ * reachable environment's, failing that the environment list — which also
+ * explains a loading error.
  */
 export default function Index() {
   const { session, isRestoring } = useAuth();

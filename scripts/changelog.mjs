@@ -1,20 +1,20 @@
-// Contrôle et publication des notes de version de src/changelog.ts.
+// Checks and publishes the release notes from src/changelog.ts.
 //
-// Le changelog est embarqué dans le binaire : une note ajoutée après le tag
-// n'atteindrait jamais les utilisateurs de la version compilée. C'est aussi la
-// source unique des notes publiées — GitHub Release, TestFlight, Google Play —
-// pour que l'app, le dépôt et les stores racontent la même chose.
+// The changelog is bundled in the binary: a note added after the tag would
+// never reach users of the compiled version. It's also the single source of
+// published notes — GitHub Release, TestFlight, Google Play — so the app, the
+// repo and the stores all tell the same story.
 //
-//   npm run changelog                        vérifie le changelog (CI)
-//   npm run changelog -- --notes             imprime les notes de la version courante
-//   npm run changelog -- --notes --max=500   idem, tronqué à la limite d'un store
+//   npm run changelog                        checks the changelog (CI)
+//   npm run changelog -- --notes             prints the current version's notes
+//   npm run changelog -- --notes --max=500   same, truncated to a store's limit
 
 import { readFile } from 'node:fs/promises';
 import { registerHooks } from 'node:module';
 import path from 'node:path';
 
-// Node exécute les .ts en retirant les types, mais exige l'extension dans les
-// imports ; src importe sans, comme le permet Metro.
+// Node runs .ts files by stripping types, but requires the extension in
+// imports; src imports without one, as Metro allows.
 registerHooks({
   resolve(specifier, context, nextResolve) {
     if (specifier.startsWith('.') && path.extname(specifier) === '') {
@@ -64,10 +64,10 @@ console.log(
 );
 
 /**
- * Les notes en texte simple, une puce par ligne.
+ * Plain-text notes, one bullet per line.
  *
- * Google Play refuse au-delà de 500 caractères : on coupe aux puces entières
- * plutôt qu'en plein milieu d'une phrase, quitte à en perdre les dernières.
+ * Google Play rejects anything past 500 characters: we cut at whole bullets
+ * rather than mid-sentence, even if it means dropping the last ones.
  */
 function notes(release, max) {
   const lines = release.changes.map((change) => `- ${change}`);
@@ -81,7 +81,7 @@ function notes(release, max) {
     kept.push(line);
     length = added;
   }
-  // Une première puce déjà trop longue vaut mieux tronquée qu'absente.
+  // A first bullet that's already too long is better truncated than absent.
   if (kept.length === 0) return `${lines[0].slice(0, Math.max(max - 1, 0))}…`;
   return kept.join('\n');
 }

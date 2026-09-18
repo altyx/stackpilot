@@ -2,24 +2,13 @@ import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useImages } from '../../../../src/api/hooks';
-import type { ImageSummary } from '../../../../src/api/types';
-import {
-  Card,
-  EmptyState,
-  ErrorView,
-  Loader,
-  Segmented,
-  UsageBadge,
-} from '../../../../src/components/ui';
-import { formatBytes, formatDate } from '../../../../src/lib/format';
-import {
-  imageLabel,
-  imagesWithUsage,
-  isDangling,
-  reclaimableBytes,
-  shortImageId,
-  type Usage,
-} from '../../../../src/lib/usage';
+import { EmptyState } from '../../../../src/components/EmptyState';
+import { ErrorView } from '../../../../src/components/ErrorView';
+import { ImageCard } from '../../../../src/components/ImageCard';
+import { Loader } from '../../../../src/components/Loader';
+import { Segmented } from '../../../../src/components/Segmented';
+import { formatBytes } from '../../../../src/lib/format';
+import { imagesWithUsage, reclaimableBytes } from '../../../../src/lib/usage';
 import { theme } from '../../../../src/theme';
 
 type Filter = 'all' | 'used' | 'unused';
@@ -100,46 +89,8 @@ export default function ImagesScreen() {
   );
 }
 
-function ImageCard({ usage }: { usage: Usage<ImageSummary> }) {
-  const { item: image, usedBy } = usage;
-  return (
-    <Card style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.name} numberOfLines={2}>
-          {imageLabel(image)}
-        </Text>
-        <UsageBadge usedBy={usedBy} />
-      </View>
-
-      <Text style={styles.meta}>
-        {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
-      </Text>
-
-      {isDangling(image) ? (
-        <Text style={styles.dangling}>Image sans tag (dangling)</Text>
-      ) : null}
-
-      {usedBy.length > 0 ? (
-        <Text style={styles.usedBy} numberOfLines={2}>
-          {usedBy.join(', ')}
-        </Text>
-      ) : null}
-
-      {(image.RepoTags ?? []).length > 1 ? (
-        <Text style={styles.meta}>{image.RepoTags!.length} tags</Text>
-      ) : null}
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   list: { padding: theme.spacing(4), gap: theme.spacing(3) },
   header: { gap: theme.spacing(2) },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-  card: { gap: theme.spacing(1) },
-  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
-  name: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flex: 1 },
-  meta: { color: theme.colors.textMuted, fontSize: 12 },
-  dangling: { color: theme.colors.warning, fontSize: 12 },
-  usedBy: { color: theme.colors.text, fontSize: 12 },
 });

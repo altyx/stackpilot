@@ -2,12 +2,12 @@ import type { LegalDocument } from './document';
 import { PRIVACY_POLICY_URL, PUBLISHER } from './publisher';
 
 /**
- * Politique de confidentialité.
+ * Privacy policy.
  *
- * Chaque affirmation correspond au code : ce que `src/auth/storage.ts` garde
- * dans le trousseau, ce que `expo-notifications` envoie à Expo pour obtenir un
- * jeton, ce que le watcher met dans une alerte. Si l'un de ces points change,
- * le texte et sa date doivent suivre.
+ * Every statement matches the code: what `src/auth/storage.ts` keeps in the
+ * keychain, what `expo-notifications` sends to Expo to get a token, what the
+ * watcher puts in an alert. If any of these points change, the text and its
+ * date must follow.
  */
 export const PRIVACY: LegalDocument = {
   title: 'Politique de confidentialité',

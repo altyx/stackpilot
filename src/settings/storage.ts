@@ -3,18 +3,17 @@ import * as SecureStore from 'expo-secure-store';
 const SETTINGS_KEY = 'app.settings';
 
 /**
- * Préférences de l'application — rien à voir avec l'authentification, mais
- * `expo-secure-store` est le seul stockage embarqué : inutile d'ajouter une
- * dépendance pour deux valeurs.
+ * App preferences — unrelated to authentication, but `expo-secure-store` is
+ * the only storage bundled: not worth adding a dependency for two values.
  */
 export interface Settings {
-  /** Intervalle de rafraîchissement des conteneurs en millisecondes ; `null` = manuel. */
+  /** Container refresh interval in milliseconds; `null` = manual. */
   refreshIntervalMs: number | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = { refreshIntervalMs: 15_000 };
 
-/** Les seuls intervalles proposés, et donc les seuls acceptés à la relecture. */
+/** The only intervals offered, and therefore the only ones accepted on re-read. */
 export const REFRESH_INTERVALS: readonly { value: number | null; label: string }[] = [
   { value: 10_000, label: 'Toutes les 10 secondes' },
   { value: 15_000, label: 'Toutes les 15 secondes' },
@@ -34,8 +33,8 @@ export async function loadSettings(): Promise<Settings> {
   if (!raw) return DEFAULT_SETTINGS;
   try {
     const parsed = JSON.parse(raw) as Partial<Settings>;
-    // Une valeur écrite par une version passée, ou retirée depuis, ne doit pas
-    // laisser l'application avec un intervalle qu'aucun écran ne propose.
+    // A value written by a past version, or since removed, must not leave
+    // the app with an interval no screen offers.
     const known = REFRESH_INTERVALS.some((option) => option.value === parsed.refreshIntervalMs);
     return known
       ? { refreshIntervalMs: parsed.refreshIntervalMs ?? null }
