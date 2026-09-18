@@ -1,18 +1,18 @@
 /**
- * Notes de version affichées dans Réglages › Nouveautés.
+ * Release notes shown in Settings › What's new.
  *
- * L'entrée en tête doit porter la version d'`app.json` : `npm run changelog`
- * le vérifie, et le workflow de publication refuse de compiler sinon. Le
- * changelog s'écrit donc **avant** de bumper la version et de poser le tag,
- * puisque c'est le binaire compilé qui l'embarque.
+ * The top entry must carry `app.json`'s version: `npm run changelog` checks
+ * it, and the publish workflow refuses to build otherwise. So the changelog
+ * is written **before** bumping the version and cutting the tag, since it's
+ * the compiled binary that bundles it.
  *
- * Les lignes décrivent ce que l'utilisateur voit changer, pas le détail
- * technique : celui-ci vit dans l'historique Git.
+ * The lines describe what the user sees change, not the technical detail:
+ * that lives in the Git history.
  */
 export interface Release {
-  /** Version au format `X.Y.Z`, identique à `app.json`. */
+  /** Version in `X.Y.Z` format, matching `app.json`. */
   version: string;
-  /** Date de publication, dans le même format que les textes légaux. */
+  /** Release date, in the same format as the legal texts. */
   date: string;
   changes: string[];
 }
@@ -27,5 +27,5 @@ export const CHANGELOG: readonly Release[] = [
   },
 ];
 
-/** Version décrite en tête du changelog, celle que l'application embarque. */
+/** Version described at the top of the changelog, the one the app bundles. */
 export const LATEST_RELEASE: Release = CHANGELOG[0];

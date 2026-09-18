@@ -1,14 +1,14 @@
-/** Types de l'API Portainer et de l'API Docker exposée via son proxy. */
+/** Types for the Portainer API and the Docker API exposed through its proxy. */
 
 export type AuthMode = 'apiKey' | 'jwt';
 
 export interface Session {
-  /** URL de base de l'instance, sans le suffixe `/api` (ex: https://portainer.lan:9443). */
+  /** Instance base URL, without the `/api` suffix (e.g. https://portainer.lan:9443). */
   baseUrl: string;
   mode: AuthMode;
-  /** Access token `ptr_...` en mode apiKey, JWT en mode jwt. */
+  /** `ptr_...` access token in apiKey mode, JWT in jwt mode. */
   token: string;
-  /** Renseigné en mode jwt, pour l'affichage uniquement. */
+  /** Set in jwt mode only, for display purposes. */
   username?: string;
 }
 
@@ -17,7 +17,7 @@ export interface PortainerStatus {
   InstanceID?: string;
 }
 
-/** Types d'environnement Portainer (`EndpointType`). */
+/** Portainer environment types (`EndpointType`). */
 export enum EndpointType {
   DockerLocal = 1,
   DockerAgent = 2,
@@ -69,14 +69,14 @@ export interface ContainerPort {
 
 export interface ContainerMount {
   Type: string;
-  /** Renseigné uniquement pour les montages de type `volume`. */
+  /** Set only for `volume`-type mounts. */
   Name?: string;
   Source: string;
   Destination: string;
   RW: boolean;
 }
 
-/** Élément de `GET /containers/json`. */
+/** Item from `GET /containers/json`. */
 export interface ContainerSummary {
   Id: string;
   Names: string[];
@@ -91,7 +91,7 @@ export interface ContainerSummary {
   Mounts?: ContainerMount[];
 }
 
-/** Élément de `GET /images/json`. */
+/** Item from `GET /images/json`. */
 export interface ImageSummary {
   Id: string;
   ParentId: string;
@@ -103,7 +103,7 @@ export interface ImageSummary {
   Labels: Record<string, string> | null;
 }
 
-/** Élément de `GET /volumes`. */
+/** Item from `GET /volumes`. */
 export interface VolumeSummary {
   Name: string;
   Driver: string;
@@ -119,7 +119,7 @@ export interface VolumeListResponse {
   Warnings: string[] | null;
 }
 
-/** Sous-ensemble de `GET /containers/{id}/json` utilisé par l'app. */
+/** Subset of `GET /containers/{id}/json` used by the app. */
 export interface ContainerInspect {
   Id: string;
   Name: string;
@@ -158,5 +158,5 @@ export interface ContainerInspect {
 
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'pause' | 'unpause' | 'kill';
 
-/** Actions groupées proposées au niveau d'une stack. */
+/** Grouped actions offered at the stack level. */
 export type StackAction = Extract<ContainerAction, 'start' | 'stop'>;

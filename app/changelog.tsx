@@ -6,8 +6,8 @@ import { RELEASES_URL } from '../src/lib/support';
 import { theme } from '../src/theme';
 
 /**
- * Notes de version embarquées : elles décrivent la version installée, même hors
- * ligne, et sans appel à GitHub.
+ * Release notes bundled in the app: they describe the installed version even
+ * offline, with no call to GitHub.
  */
 export default function ChangelogScreen() {
   return (

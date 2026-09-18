@@ -14,14 +14,14 @@ export function isOnline(endpoint: Endpoint): boolean {
   return endpoint.Status === 1;
 }
 
-/** Un environnement dont l'application sait afficher les conteneurs. */
+/** An environment the app knows how to display containers for. */
 export function isBrowsable(endpoint: Endpoint): boolean {
   return isOnline(endpoint) && !isKubernetes(endpoint);
 }
 
 /**
- * Environnement ouvert à l'arrivée : le dernier consulté s'il est encore
- * accessible, sinon le premier qui le soit. `undefined` si aucun ne l'est.
+ * Environment opened on arrival: the last one viewed if still reachable,
+ * otherwise the first reachable one. `undefined` if none are.
  */
 export function pickHomeEndpoint(
   endpoints: readonly Endpoint[],

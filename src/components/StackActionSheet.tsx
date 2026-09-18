@@ -12,17 +12,17 @@ type Step = 'choose' | StackAction;
 type Outcome = StackAction | 'cancel';
 
 /**
- * Choix puis confirmation d'une action de stack, dans une seule feuille : passer
- * d'une étape à l'autre change le contenu sans refermer ni rouvrir la modale.
+ * Choosing then confirming a stack action, in a single sheet: moving from one
+ * step to the next changes the content without closing and reopening the modal.
  */
 export function StackActionSheet({
   section,
   onConfirm,
   onClose,
 }: {
-  /** Stack ciblée, ou null pour fermer la feuille. */
+  /** Targeted stack, or null to close the sheet. */
   section: StackSection | null;
-  /** Appelé après la fermeture complète, pour que le compte rendu puisse s'afficher. */
+  /** Called after the sheet has fully closed, so the report can display. */
   onConfirm: (section: StackSection, action: StackAction) => void;
   onClose: () => void;
 }) {
@@ -31,7 +31,7 @@ export function StackActionSheet({
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const close = (next: Outcome) => setOutcome((current) => current ?? next);
 
-  // Chaque ouverture repart du choix de l'action.
+  // Every opening starts back at choosing the action.
   const openedKey = section?.key ?? null;
   useEffect(() => {
     if (openedKey !== null) setStep('choose');

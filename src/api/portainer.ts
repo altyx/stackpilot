@@ -11,12 +11,12 @@ import type {
   VolumeSummary,
 } from './types';
 
-/** Ping public : confirme qu'une instance Portainer répond à cette URL. */
+/** Public ping: confirms a Portainer instance responds at this URL. */
 export function fetchStatus(baseUrl: string): Promise<PortainerStatus> {
   return requestAnonymous<PortainerStatus>(normalizeBaseUrl(baseUrl), { path: '/status' });
 }
 
-/** Échange identifiants contre un JWT (valable ~8 h côté Portainer). */
+/** Exchanges credentials for a JWT (valid ~8h on Portainer's side). */
 export async function loginWithPassword(
   rawBaseUrl: string,
   username: string,
@@ -32,7 +32,7 @@ export async function loginWithPassword(
   return { baseUrl, mode: 'jwt', token: jwt, username };
 }
 
-/** Valide un access token `ptr_...` en appelant une route protégée. */
+/** Validates a `ptr_...` access token by calling a protected route. */
 export async function loginWithApiKey(rawBaseUrl: string, token: string): Promise<Session> {
   const session: Session = { baseUrl: normalizeBaseUrl(rawBaseUrl), mode: 'apiKey', token: token.trim() };
   await listEndpoints(session);
@@ -48,9 +48,9 @@ export function getEndpoint(session: Session, endpointId: number): Promise<Endpo
 }
 
 /**
- * Préfixe du proxy Docker exposé par Portainer pour un environnement.
- * Portainer répond « invalid environment identifier route variable » sur un
- * identifiant non entier : on l'attrape ici pour pointer la vraie cause.
+ * Prefix of the Docker proxy Portainer exposes for an environment.
+ * Portainer responds with "invalid environment identifier route variable" for
+ * a non-integer id: caught here to point at the real cause.
  */
 function docker(endpointId: number, path: string): string {
   if (!Number.isInteger(endpointId)) {
@@ -75,7 +75,7 @@ export function listImages(session: Session, endpointId: number): Promise<ImageS
 }
 
 export async function listVolumes(session: Session, endpointId: number): Promise<VolumeSummary[]> {
-  // Docker répond `{ Volumes: null }` plutôt qu'une liste vide quand il n'y en a aucun.
+  // Docker responds with `{ Volumes: null }` rather than an empty list when there are none.
   const response = await request<VolumeListResponse>(session, {
     path: docker(endpointId, '/volumes'),
   });
@@ -102,9 +102,9 @@ export function runContainerAction(
     method: 'POST',
     path: docker(endpointId, `/containers/${containerId}/${action}`),
     timeoutMs: 30_000,
-    // Docker répond 304 quand le conteneur est déjà dans l'état visé. Sur une
-    // action de stack, la moitié des conteneurs peut être dans ce cas : c'est
-    // un succès, pas une erreur.
+    // Docker responds 304 when the container is already in the target state.
+    // On a stack action, half the containers can be in that case: it's a
+    // success, not an error.
     accept: [304],
   });
 }
@@ -124,9 +124,9 @@ export async function fetchContainerLogs(
 }
 
 /**
- * Sans TTY, Docker préfixe chaque bloc de log d'un en-tête de 8 octets
- * (1 octet de flux, 3 de padding, 4 de taille big-endian). On le retire pour
- * ne garder que le texte.
+ * Without a TTY, Docker prefixes each log block with an 8-byte header
+ * (1 stream byte, 3 padding, 4 big-endian size). Stripped here to keep only
+ * the text.
  */
 export function demultiplexDockerLogs(raw: string): string {
   const looksMultiplexed = raw.length > 8 && raw.charCodeAt(0) <= 2 && raw.charCodeAt(1) === 0;

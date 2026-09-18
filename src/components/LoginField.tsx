@@ -4,8 +4,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { theme } from '../theme';
 
 /**
- * Champ libellé. Un champ `secret` est masqué par défaut, avec un bouton pour
- * l'afficher en clair le temps de vérifier la saisie.
+ * Labeled field. A `secret` field is masked by default, with a button to
+ * reveal it in clear while checking what was typed.
  */
 export function LoginField({
   label,
@@ -19,8 +19,8 @@ export function LoginField({
       <View style={styles.inputFrame}>
         <TextInput
           {...inputProps}
-          // Affiché en clair, un secret ne doit être ni capitalisé ni corrigé
-          // par le clavier.
+          // Shown in clear, a secret must be neither auto-capitalized nor
+          // auto-corrected by the keyboard.
           {...(secret && { autoCapitalize: 'none', autoCorrect: false, spellCheck: false })}
           secureTextEntry={secret && !revealed}
           style={styles.input}

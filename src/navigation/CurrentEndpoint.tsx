@@ -14,11 +14,11 @@ import { loadLastEndpoint, saveLastEndpoint } from '../auth/storage';
 
 interface CurrentEndpointState {
   /**
-   * Environnement de l'écran consulté en dernier sur l'instance connectée :
-   * c'est lui que visent les entrées Conteneurs, Images et Volumes du menu.
+   * Environment for the screen last viewed on the connected instance: it's
+   * the one the Containers, Images and Volumes drawer entries target.
    */
   endpointId: number | null;
-  /** true tant que le dernier environnement persisté n'a pas été relu. */
+  /** true until the last persisted environment has been re-read. */
   isRestoring: boolean;
   select: (endpointId: number) => void;
 }
@@ -28,8 +28,8 @@ const CurrentEndpointContext = createContext<CurrentEndpointState | null>(null);
 export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth();
   const baseUrl = session?.baseUrl ?? null;
-  // L'état retient l'instance pour laquelle il vaut : après un changement
-  // d'instance, il est caduc dès le rendu, sans attendre la relecture.
+  // The state remembers which instance it's valid for: after an instance
+  // change, it's stale as of render, without waiting for the re-read.
   const [state, setState] = useState<{ baseUrl: string; endpointId: number | null } | null>(null);
   const saved = useRef<string | null>(null);
 
@@ -40,8 +40,8 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
       .catch(() => null)
       .then((stored) => {
         if (cancelled) return;
-        // Un écran ouvert par lien profond a pu choisir l'environnement pendant
-        // la lecture : ce choix récent l'emporte sur la valeur persistée.
+        // A screen opened via deep link may have chosen the environment while
+        // this was reading: that recent choice wins over the persisted value.
         setState((previous) =>
           previous?.baseUrl === baseUrl
             ? previous
@@ -57,8 +57,8 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
     (endpointId: number) => {
       if (!baseUrl) return;
       setState({ baseUrl, endpointId });
-      // Chaque retour sur un écran le resélectionne : on n'écrit dans le
-      // trousseau que si la valeur change.
+      // Every return to a screen re-selects it: we only write to the
+      // keychain when the value changes.
       const key = `${baseUrl}#${endpointId}`;
       if (saved.current === key) return;
       saved.current = key;
@@ -87,12 +87,12 @@ export function useCurrentEndpoint(): CurrentEndpointState {
 }
 
 /**
- * Identifiant d'environnement porté par la route de l'écran, retenu comme
- * environnement courant à chaque fois que l'écran reprend le focus.
+ * Environment id carried by the screen's route, kept as the current
+ * environment every time the screen regains focus.
  *
- * Le focus, et non le montage : les écrans du menu restent montés. Revenir sur
- * les conteneurs d'un environnement après avoir consulté ceux d'un autre doit
- * réaligner le menu sur l'écran affiché.
+ * Focus, not mount: the drawer's screens stay mounted. Returning to one
+ * environment's containers after viewing another's must realign the drawer
+ * with the screen shown.
  */
 export function useEndpointParam(): number {
   const { endpointId } = useLocalSearchParams<{ endpointId: string }>();

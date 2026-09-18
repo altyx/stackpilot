@@ -26,8 +26,8 @@ const ACTION_LABELS: Record<ContainerAction, string> = {
 
 export default function ContainerDetailScreen() {
   const { containerId } = useLocalSearchParams<{ containerId: string }>();
-  // Ouvert par une alerte au démarrage, le conteneur n'a que l'aiguillage
-  // d'accueil sous lui : retenir son environnement ramène à ses voisins au retour.
+  // Opened from an alert at launch, the container has only the home redirect
+  // under it: remembering its environment returns to its siblings on back.
   const id = useEndpointParam();
 
   const { data, error, isPending, refetch, isRefetching } = useContainer(id, containerId);
@@ -53,7 +53,7 @@ export default function ContainerDetailScreen() {
     });
   }
 
-  /** Les actions destructrices passent par une confirmation explicite. */
+  /** Destructive actions go through an explicit confirmation. */
   function run(next: ContainerAction) {
     if (next === 'start') execute(next);
     else setConfirming(next);

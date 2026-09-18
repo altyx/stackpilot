@@ -4,7 +4,7 @@ import type { StackSection } from '../lib/stacks';
 import { theme } from '../theme';
 import { StatusDot } from './StatusDot';
 
-/** Au-delà, la liste des conteneurs est résumée pour garder la feuille compacte. */
+/** Beyond this, the container list is summarized to keep the sheet compact. */
 const MAX_LISTED = 6;
 
 export function StackMemberList({ section }: { section: StackSection }) {

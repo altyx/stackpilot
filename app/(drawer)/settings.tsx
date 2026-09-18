@@ -12,7 +12,7 @@ import { useSettings } from '../../src/settings/SettingsContext';
 import { REFRESH_INTERVALS } from '../../src/settings/storage';
 import { theme } from '../../src/theme';
 
-/** Réglages de l'application — ceux de Portainer restent dans Portainer. */
+/** App settings — Portainer's own settings stay in Portainer. */
 export default function SettingsScreen() {
   const { settings, update } = useSettings();
   const router = useRouter();
@@ -102,6 +102,6 @@ function openLink(url: string): void {
 const styles = StyleSheet.create({
   content: { padding: theme.spacing(4), gap: theme.spacing(6), paddingBottom: theme.spacing(8) },
   hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18, paddingHorizontal: theme.spacing(1) },
-  // La carte porte les lignes bord à bord : leur marge intérieure suffit.
+  // The card carries the rows edge to edge: their own inner padding is enough.
   card: { padding: 0, overflow: 'hidden' },
 });

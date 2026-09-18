@@ -10,9 +10,9 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
   const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
   const detail =
     error && typeof error === 'object' && 'detail' in error ? String((error as { detail?: string }).detail ?? '') : '';
-  // Un token expiré ou révoqué renvoie 401 à chaque essai : réessayer ne mène
-  // nulle part, seule une nouvelle connexion débloque. La garde de navigation
-  // racine renvoie vers /login dès que la session tombe.
+  // An expired or revoked token returns 401 on every attempt: retrying leads
+  // nowhere, only signing in again unblocks it. The root navigation guard
+  // redirects to /login as soon as the session drops.
   const unauthorized = error instanceof PortainerError && error.status === 401;
   return (
     <Centered>

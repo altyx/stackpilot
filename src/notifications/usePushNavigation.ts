@@ -4,11 +4,11 @@ import { useRouter } from 'expo-router';
 import { readAlertPayload } from './push';
 
 /**
- * Ouvre le conteneur concerné quand l'utilisateur tape une alerte.
+ * Opens the relevant container when the user taps an alert.
  *
- * `useLastNotificationResponse` couvre aussi le démarrage à froid : l'app lancée
- * depuis une notification reçoit la réponse dès le premier rendu. On mémorise
- * l'identifiant déjà traité, sinon chaque re-rendu relancerait la navigation.
+ * `useLastNotificationResponse` also covers cold start: an app launched from
+ * a notification gets the response on the very first render. We remember the
+ * id already handled, otherwise every re-render would re-trigger the navigation.
  */
 export function usePushNavigation(isAuthenticated: boolean): void {
   const response = Notifications.useLastNotificationResponse();

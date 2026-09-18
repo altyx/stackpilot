@@ -48,7 +48,7 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
 
 const styles = StyleSheet.create({
   card: { gap: theme.spacing(1.5) },
-  // Repère l'environnement que visent les entrées du menu.
+  // Marks the environment the drawer entries point to.
   cardCurrent: { borderColor: theme.colors.accent },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   name: { color: theme.colors.text, fontSize: 16, fontWeight: '600', flex: 1 },

@@ -42,7 +42,7 @@ export function StackHeader({
 }
 
 const styles = StyleSheet.create({
-  // Fond opaque obligatoire : l'en-tête reste collé au-dessus des cartes.
+  // Opaque background required: the header stays pinned above the cards.
   sectionHeader: {
     backgroundColor: theme.colors.bg,
     flexDirection: 'row',

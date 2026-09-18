@@ -3,7 +3,7 @@ import type { LegalDocument } from '../legal/document';
 import { theme } from '../theme';
 import { LegalDocumentBlock } from './LegalDocumentBlock';
 
-/** Affiche un texte légal : titre, date de mise à jour, puis sections numérotées. */
+/** Displays a legal text: title, last-updated date, then numbered sections. */
 export function LegalDocumentView({ document }: { document: LegalDocument }) {
   return (
     <ScrollView contentContainerStyle={styles.content}>

@@ -5,7 +5,7 @@ import { Loader } from '../components/Loader';
 import { usePushNavigation } from '../notifications/usePushNavigation';
 import { theme } from '../theme';
 
-// Écrans lisibles sans session : la connexion, et les textes légaux qu'elle lie.
+// Screens readable without a session: login, and the legal texts it links to.
 const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy']);
 
 export function RootNavigator() {
@@ -31,7 +31,7 @@ export function RootNavigator() {
         headerTintColor: theme.colors.text,
         headerTitleStyle: { color: theme.colors.text },
         contentStyle: { backgroundColor: theme.colors.bg },
-        // Sans quoi iOS affiche le titre de l'écran précédent, « (drawer) » compris.
+        // Without this, iOS shows the previous screen's title, "(drawer)" included.
         headerBackButtonDisplayMode: 'minimal',
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />

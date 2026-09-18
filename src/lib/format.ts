@@ -1,6 +1,6 @@
 import type { ContainerInspect, ContainerSummary } from '../api/types';
 
-/** Docker préfixe les noms d'un `/` ; un conteneur peut en avoir plusieurs. */
+/** Docker prefixes names with a `/`; a container can have several. */
 export function containerName(container: ContainerSummary): string {
   const raw = container.Names?.[0] ?? container.Id.slice(0, 12);
   return raw.replace(/^\//, '');
@@ -40,7 +40,7 @@ export function stateLabel(state: string): string {
   return STATE_LABELS[state] ?? state;
 }
 
-/** Tailles Docker en base 1000, comme l'affiche `docker system df`. */
+/** Docker sizes in base 1000, as `docker system df` displays them. */
 export function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 o';
   const units = ['o', 'ko', 'Mo', 'Go', 'To'];

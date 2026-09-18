@@ -3,7 +3,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-/** Charge utile envoyée par le watcher, pour ouvrir le bon écran au tap. */
+/** Payload sent by the watcher, to open the right screen on tap. */
 export interface ContainerAlertPayload {
   endpointId: number;
   containerId: string;
@@ -17,9 +17,9 @@ export type PushRegistration =
   | { status: 'unsupported'; reason: string };
 
 /**
- * Le jeton Expo identifie l'appareil auprès du service de push. Il est copié
- * manuellement dans la configuration du watcher : pour un usage personnel, cela
- * évite d'exposer un backend supplémentaire juste pour enregistrer un jeton.
+ * The Expo token identifies the device to the push service. It's copied
+ * manually into the watcher's configuration: for personal use, this avoids
+ * exposing an extra backend just to register a token.
  */
 export async function registerForPush(): Promise<PushRegistration> {
   if (!Device.isDevice) {
@@ -30,8 +30,8 @@ export async function registerForPush(): Promise<PushRegistration> {
     };
   }
 
-  // Expo Go ne reçoit plus les notifications distantes depuis le SDK 53 ;
-  // sans ce test, l'appel natif échouerait sur une erreur peu explicite.
+  // Expo Go no longer receives remote notifications since SDK 53; without
+  // this check, the native call would fail with a cryptic error.
   if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
     return {
       status: 'unsupported',
@@ -41,8 +41,8 @@ export async function registerForPush(): Promise<PushRegistration> {
   }
 
   if (Platform.OS === 'android') {
-    // Sans canal explicite, Android range les alertes en importance par défaut,
-    // sans son ni bannière.
+    // Without an explicit channel, Android files alerts at default importance,
+    // with no sound or banner.
     await Notifications.setNotificationChannelAsync('containers', {
       name: 'Alertes conteneurs',
       importance: Notifications.AndroidImportance.HIGH,
@@ -69,7 +69,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   return { status: 'granted', token: data };
 }
 
-/** Lit la charge utile d'une notification, en écartant tout ce qui n'est pas conforme. */
+/** Reads a notification's payload, discarding anything that doesn't conform. */
 export function readAlertPayload(data: unknown): ContainerAlertPayload | null {
   if (!data || typeof data !== 'object') return null;
   const { endpointId, containerId, containerName, reason } = data as Record<string, unknown>;

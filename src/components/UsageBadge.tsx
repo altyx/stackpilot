@@ -1,7 +1,7 @@
 import { StyleSheet, Text } from 'react-native';
 import { theme } from '../theme';
 
-/** Pastille « utilisé par N » / « inutilisé ». */
+/** "used by N" / "unused" badge. */
 export function UsageBadge({ usedBy }: { usedBy: string[] }) {
   const used = usedBy.length > 0;
   return (

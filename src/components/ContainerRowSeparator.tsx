@@ -2,9 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import { theme } from '../theme';
 
 /**
- * L'espace entre cartes vient d'un séparateur et non d'une marge sur la carte :
- * `Link asChild` fusionne le style de son enfant par étalement d'objet, et un
- * style fonction de `Pressable` y est perdu, marge comprise.
+ * The gap between cards comes from a separator, not a margin on the card:
+ * `Link asChild` merges its child's style by object spread, and a
+ * `Pressable` function style is lost there, margin included.
  */
 export function ContainerRowSeparator() {
   return <View style={styles.rowSeparator} />;

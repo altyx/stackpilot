@@ -2,15 +2,15 @@ import { execSync } from 'node:child_process';
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 /**
- * Complète `app.json` avec ce qui varie d'un build à l'autre.
+ * Fills in `app.json` with what varies from build to build.
  *
- * Les stores exigent un numéro de build strictement croissant à chaque envoi.
- * En CI, `BUILD_NUMBER` vient du compteur d'exécutions du workflow ; en local,
- * il est absent et les valeurs de `app.json` s'appliquent.
+ * The stores require a strictly increasing build number on every submission.
+ * In CI, `BUILD_NUMBER` comes from the workflow run counter; locally, it's
+ * absent and `app.json`'s values apply.
  *
- * Le commit est gravé dans `extra.build` : un testeur qui lit
- * « 1.0.0 (57) · a1d8e36 » dans l'app désigne le code exact qu'il fait tourner,
- * sans passer par GitHub ni par la console du store.
+ * The commit is stamped into `extra.build`: a tester reading
+ * "1.0.0 (57) · a1d8e36" in the app can point to the exact code they're
+ * running, without going through GitHub or the store console.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
   const buildNumber = process.env.BUILD_NUMBER?.trim();

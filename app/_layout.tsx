@@ -10,7 +10,7 @@ import { RootNavigator } from '../src/navigation/RootNavigator';
 import { SettingsProvider } from '../src/settings/SettingsContext';
 import { theme } from '../src/theme';
 
-// Sans ce gestionnaire, une alerte reçue app ouverte reste invisible.
+// Without this handler, an alert received while the app is open stays invisible.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -32,8 +32,8 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   return (
-    // Le menu latéral s'ouvre au glissement : sans cette racine, ses gestes
-    // restent inertes.
+    // The side drawer opens by swipe: without this root, its gestures
+    // stay inert.
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>

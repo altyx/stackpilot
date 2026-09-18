@@ -40,8 +40,8 @@ export default function ContainersScreen() {
     return groupByStack(data ?? [], isVisible);
   }, [data, search, filter]);
 
-  // La feuille suit la stack par sa clé, sur la liste non filtrée : ses membres
-  // restent à jour au fil des rafraîchissements, et un filtre n'en réduit pas la portée.
+  // The sheet tracks the stack by its key, over the unfiltered list: its
+  // members stay current across refreshes, and a filter never narrows the scope.
   const sheetSection = useMemo(
     () => (sheetKey ? (groupByStack(data ?? []).find((s) => s.key === sheetKey) ?? null) : null),
     [data, sheetKey],

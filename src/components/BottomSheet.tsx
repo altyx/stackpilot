@@ -14,34 +14,33 @@ import { theme } from '../theme';
 
 const OPEN_MS = 260;
 const CLOSE_MS = 200;
-/** Glissement vers le bas au-delà duquel relâcher ferme la feuille. */
+/** Downward drag distance beyond which releasing closes the sheet. */
 const DISMISS_DISTANCE = 80;
-/** Vitesse de lancer, en px/ms, qui ferme la feuille même sur une courte distance. */
+/** Flick velocity, in px/ms, that closes the sheet even over a short distance. */
 const DISMISS_VELOCITY = 0.8;
 
 export interface BottomSheetProps {
   visible: boolean;
-  /** Fond tapé, feuille glissée vers le bas, ou bouton retour Android. */
+  /** Backdrop tapped, sheet dragged down, or Android back button. */
   onRequestClose: () => void;
   /**
-   * Appelé une fois la feuille entièrement retirée. C'est là qu'une action
-   * confirmée doit partir : sur iOS, une alerte présentée pendant la fermeture
-   * d'une modale disparaît avec elle.
+   * Called once the sheet has fully retracted. This is where a confirmed
+   * action should fire: on iOS, an alert presented while a modal is closing
+   * disappears with it.
    */
   onClosed?: () => void;
   children: ReactNode;
 }
 
 /**
- * Feuille modale qui monte depuis le bas de l'écran.
+ * Modal sheet that rises from the bottom of the screen.
  *
- * Construite sur `Modal` et `Animated` plutôt que sur une bibliothèque : rien à
- * installer, et elle fonctionne aussi dans Expo Go.
+ * Built on `Modal` and `Animated` rather than a library: nothing to install,
+ * and it also works in Expo Go.
  *
- * Une seule feuille à la fois : iOS refuse de présenter une modale pendant
- * qu'une autre se retire, et la seconde n'apparaît tout simplement pas.
- * Enchaîner deux étapes se fait donc dans la même feuille, comme
- * `StackActionSheet`.
+ * Only one sheet at a time: iOS refuses to present a modal while another is
+ * retracting, and the second one simply never appears. Chaining two steps
+ * therefore happens within the same sheet, as in `StackActionSheet`.
  */
 export function BottomSheet({ visible, onRequestClose, onClosed, children }: BottomSheetProps) {
   const { height } = useWindowDimensions();
@@ -50,7 +49,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
   const progress = useRef(new Animated.Value(0)).current;
   const drag = useRef(new Animated.Value(0)).current;
 
-  // Le geste est créé une seule fois : il lit ici les rappels à jour.
+  // The gesture is created once: it reads the up-to-date callbacks here.
   const callbacks = useRef({ onRequestClose, onClosed });
   useEffect(() => {
     callbacks.current = { onRequestClose, onClosed };
@@ -74,7 +73,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
     }).start(({ finished }) => {
-      // Une réouverture pendant la fermeture interrompt l'animation : on garde la modale.
+      // Reopening during close interrupts the animation: we keep the modal mounted.
       if (finished) setMounted(false);
     });
   }, [visible, progress, drag]);
@@ -91,7 +90,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
 
   const panResponder = useRef(
     PanResponder.create({
-      // Seuls les glissements franchement verticaux sont capturés : les taps restent aux boutons.
+      // Only clearly vertical drags are captured: taps stay with the buttons.
       onMoveShouldSetPanResponder: (_, gesture) =>
         gesture.dy > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
       onPanResponderMove: (_, gesture) => drag.setValue(Math.max(0, gesture.dy)),

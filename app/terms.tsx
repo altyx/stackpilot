@@ -1,7 +1,7 @@
 import { LegalDocumentView } from '../src/components/LegalDocumentView';
 import { TERMS } from '../src/legal/terms';
 
-/** CGU, consultables avec ou sans session : la garde de navigation les laisse passer. */
+/** Terms of use, readable with or without a session: the navigation guard lets them through. */
 export default function TermsScreen() {
   return <LegalDocumentView document={TERMS} />;
 }

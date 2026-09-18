@@ -3,14 +3,14 @@ import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 
-/** Version de l'application installée, telle qu'affichée par les stores. */
+/** Installed app version, as shown by the stores. */
 export function appVersion(): string {
   return Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? '?';
 }
 
 /**
- * Identité de la version installée : version et numéro de build lus dans le
- * binaire, commit gravé par `app.config.ts`.
+ * Identity of the installed build: version and build number read from the
+ * binary, commit stamped by `app.config.ts`.
  */
 export function versionLine(): string {
   const version = appVersion();
@@ -24,9 +24,9 @@ export function versionLine(): string {
 }
 
 /**
- * Contexte joint à un signalement de bogue. Volontairement limité au binaire et
- * à l'appareil : ni adresse d'instance, ni jeton, ni nom de conteneur ne doivent
- * partir vers un dépôt public.
+ * Context attached to a bug report. Deliberately limited to the binary and
+ * the device: no instance address, token, or container name should ever go
+ * to a public repo.
  */
 export function diagnostics(): string {
   const system = `${Device.osName ?? Platform.OS} ${Device.osVersion ?? String(Platform.Version)}`;

@@ -16,7 +16,7 @@ export function DrawerLink({
   icon: IconName;
   active?: boolean;
   tone?: 'default' | 'danger';
-  /** Absent quand la destination n'existe pas encore : l'entrée est désactivée. */
+  /** Absent when the destination doesn't exist yet: the entry is disabled. */
   onPress?: () => void;
 }) {
   const disabled = !onPress;
@@ -43,7 +43,7 @@ export function DrawerLink({
 }
 
 const styles = StyleSheet.create({
-  // 48 pt minimum : la cible tactile recommandée sur Android comme sur iOS.
+  // 48 pt minimum: the recommended touch target on both Android and iOS.
   link: {
     flexDirection: 'row',
     alignItems: 'center',

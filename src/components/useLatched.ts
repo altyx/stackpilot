@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/** Garde la dernière valeur non nulle, pour que le contenu reste affiché pendant la fermeture. */
+/** Keeps the last non-null value, so content stays displayed while closing. */
 export function useLatched<T>(value: T | null): T | null {
   const [latched, setLatched] = useState<T | null>(value);
   useEffect(() => {

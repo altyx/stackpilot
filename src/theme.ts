@@ -1,4 +1,4 @@
-/** Palette dérivée de l'identité Portainer, déclinée en thème sombre. */
+/** Palette derived from Portainer's brand identity, in a dark theme. */
 export const theme = {
   colors: {
     bg: '#0d1117',
@@ -12,7 +12,7 @@ export const theme = {
     success: '#3fb950',
     warning: '#d29922',
     danger: '#f85149',
-    /** Voile posé derrière les feuilles modales. */
+    /** Backdrop laid behind modal sheets. */
     backdrop: 'rgba(1, 4, 9, 0.6)',
   },
   radius: { sm: 6, md: 10, lg: 14, xl: 20 },

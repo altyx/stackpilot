@@ -10,7 +10,7 @@ export interface ConfirmSheetProps {
   message?: string;
   confirmLabel: string;
   destructive?: boolean;
-  /** Appelé après la fermeture complète de la feuille. */
+  /** Called once the sheet has fully closed. */
   onConfirm: () => void;
   onCancel: () => void;
   children?: ReactNode;
@@ -26,7 +26,7 @@ export function ConfirmSheet({
   onCancel,
   children,
 }: ConfirmSheetProps) {
-  // Retient pourquoi la feuille se ferme : le rappel ne part qu'une fois l'animation finie.
+  // Remembers why the sheet is closing: the callback only fires once the animation ends.
   const [outcome, setOutcome] = useState<'confirm' | 'cancel' | null>(null);
   const close = (next: 'confirm' | 'cancel') => setOutcome((current) => current ?? next);
 

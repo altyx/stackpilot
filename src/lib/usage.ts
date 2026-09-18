@@ -3,14 +3,14 @@ import { containerName } from './format';
 
 export interface Usage<T> {
   item: T;
-  /** Noms des conteneurs qui référencent la ressource, arrêtés compris. */
+  /** Names of containers referencing the resource, stopped ones included. */
   usedBy: string[];
 }
 
 /**
- * Docker ne renseigne pas de compteur d'utilisation fiable sur `/images/json`
- * ni sur `/volumes` : on le dérive de la liste des conteneurs, qui inclut les
- * conteneurs arrêtés. C'est la même approche que l'interface web de Portainer.
+ * Docker doesn't provide a reliable usage count on `/images/json` or
+ * `/volumes`: it's derived from the container list, which includes stopped
+ * containers. Same approach as Portainer's web UI.
  */
 export function imagesWithUsage(
   images: ImageSummary[],
@@ -22,8 +22,8 @@ export function imagesWithUsage(
   for (const container of containers) {
     const name = containerName(container);
     push(byImageId, container.ImageID, name);
-    // Un conteneur créé depuis un tag garde ce tag dans `Image` ; l'ID reste
-    // la référence sûre, le tag ne sert que de repli.
+    // A container created from a tag keeps that tag in `Image`; the id
+    // remains the safe reference, the tag only serves as a fallback.
     push(byTag, container.Image, name);
   }
 
@@ -58,7 +58,7 @@ export function volumesWithUsage(
     .sort((a, b) => a.item.Name.localeCompare(b.item.Name));
 }
 
-/** Image sans tag : reliquat d'un `docker build` ou d'un `pull` remplacé. */
+/** Untagged image: a leftover from a `docker build` or a replaced `pull`. */
 export function isDangling(image: ImageSummary): boolean {
   const tags = image.RepoTags ?? [];
   return tags.length === 0 || tags.every((tag) => tag === '<none>:<none>');
@@ -73,7 +73,7 @@ export function shortImageId(id: string): string {
   return id.replace(/^sha256:/, '').slice(0, 12);
 }
 
-/** Octets récupérables si l'on supprimait tout ce qui n'est référencé nulle part. */
+/** Bytes reclaimable if everything unreferenced anywhere were deleted. */
 export function reclaimableBytes(usages: Usage<ImageSummary>[]): number {
   return usages
     .filter((usage) => usage.usedBy.length === 0)

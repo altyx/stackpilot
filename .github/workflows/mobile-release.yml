@@ -1,8 +1,8 @@
 name: Mobile release
 
-# Test sur chaque fusion dans main, production sur un tag `vX.Y.Z`. Un seul
-# fichier pour les deux : le numéro de build est `run_number`, que les stores
-# exigent strictement croissant, et deux workflows auraient deux compteurs.
+# Test on every merge to main, production on a `vX.Y.Z` tag. One file for
+# both: the build number is `run_number`, which the stores require strictly
+# increasing, and two workflows would mean two counters.
 on:
   push:
     branches: [main]
@@ -30,30 +30,30 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          # Le commit précédent sert à repérer un changement de version, les
-          # tags à refuser de republier une version déjà partie.
+          # The previous commit is used to spot a version change, the tags to
+          # refuse republishing a version that already shipped.
           fetch-depth: 2
           fetch-tags: true
       - uses: actions/setup-node@v5
         with:
           node-version: 24
 
-      # docs/legal est la version publique des textes affichés dans l'app, et
-      # son URL est déclarée dans les stores : les deux doivent rester
-      # identiques. Le script n'a aucune dépendance, pas besoin de `npm ci`.
+      # docs/legal is the public version of the texts shown in the app, and
+      # its URL is declared in the stores: the two must stay identical. The
+      # script has no dependency, no need for `npm ci`.
       - name: Vérifier que les textes légaux publiés sont à jour
         run: npm run legal -- --check
 
-      # Le changelog est embarqué dans le binaire : s'il ne décrit pas la
-      # version compilée, les utilisateurs de cette version ne verront jamais
-      # ses nouveautés, et aucun envoi ultérieur ne les leur apportera.
+      # The changelog is bundled in the binary: if it doesn't describe the
+      # compiled version, that version's users will never see what's new, and
+      # no later release will bring it to them.
       - name: Vérifier que le changelog décrit la version compilée
         run: npm run changelog
 
-      # `expo.version` ne bouge que dans une PR de release : le voir changer sur
-      # `main` vaut donc décision de publier, et le tag est posé par le job
-      # `release`, une fois les envois réussis. Pousser un tag à la main reste
-      # accepté, pour reprendre une publication interrompue.
+      # `expo.version` only moves in a release PR: seeing it change on `main`
+      # therefore counts as the decision to publish, and the tag is set by the
+      # `release` job, once the submissions succeed. Pushing a tag by hand is
+      # still accepted, to resume an interrupted release.
       - name: Déterminer la destination
         id: version
         env:
@@ -65,10 +65,10 @@ jobs:
           create_tag=false
 
           if [ "$REF_TYPE" = tag ]; then
-            # Un tag `v1.0.0` doit désigner une app dont `app.json` dit `1.0.0`.
-            # Vérifié ici, avant vingt minutes de compilation : sinon Apple
-            # refuserait l'envoi, ou pire, l'accepterait sous une version qu'on
-            # ne voulait pas.
+            # A `v1.0.0` tag must name an app whose `app.json` says `1.0.0`.
+            # Checked here, before twenty minutes of build time: otherwise
+            # Apple would reject the submission, or worse, accept it under a
+            # version we didn't intend.
             if [ "$REF_NAME" != "v$version" ]; then
               echo "::error::Le tag $REF_NAME ne correspond pas à la version $version de app.json. Bumpez la version, fusionnez, puis retaguez."
               exit 1
@@ -77,8 +77,9 @@ jobs:
           else
             previous=$(git show HEAD~1:app.json 2>/dev/null | jq -r .expo.version || true)
             if [ -n "$previous" ] && [ "$previous" != "$version" ]; then
-              # Une version déjà taguée a déjà été envoyée : les stores
-              # refuseraient le doublon, et la Release écraserait l'existante.
+              # A version already tagged has already been submitted: the
+              # stores would reject the duplicate, and the Release would
+              # overwrite the existing one.
               if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
                 echo "::error::Le tag v$version existe déjà : cette version est publiée. Bumpez à nouveau expo.version dans app.json."
                 exit 1
@@ -96,8 +97,8 @@ jobs:
             echo "create_tag=$create_tag"
           } >> "$GITHUB_OUTPUT"
 
-      # Les builds de test peuvent partir avec des mentions légales provisoires,
-      # pas une version de production : les CGU affichées doivent être complètes.
+      # Test builds can ship with placeholder legal notices, a production
+      # version can't: the terms of use shown must be complete.
       - name: Vérifier que les mentions légales sont complétées
         if: steps.version.outputs.track == 'production'
         run: |
@@ -106,9 +107,9 @@ jobs:
             exit 1
           fi
 
-      # Les secrets ne sont pas lisibles dans un `if` de job : ce job les
-      # traduit en sorties, et chaque plateforme est ignorée tant que les
-      # siens manquent, sans faire échouer le workflow.
+      # Secrets aren't readable in a job's `if`: this job translates them into
+      # outputs, and each platform is skipped while its own are missing,
+      # without failing the workflow.
       - id: plan
         env:
           TRACK: ${{ steps.version.outputs.track }}
@@ -127,9 +128,10 @@ jobs:
           [ "$HAS_ANDROID" = true ] || echo "::warning::Android ignoré : secrets Google Play absents (voir docs/release.md)."
 
   ios:
-    # Pour iOS, test et production sont le même envoi vers App Store Connect :
-    # un build y arrive dans TestFlight, et c'est depuis la console Apple qu'on
-    # le soumet à l'App Store. Seul le numéro de build distingue les envois.
+    # For iOS, test and production are the same submission to App Store
+    # Connect: a build lands in TestFlight, and it's from the Apple console
+    # that it gets submitted to the App Store. Only the build number
+    # distinguishes submissions.
     name: iOS → App Store Connect
     needs: prepare
     if: needs.prepare.outputs.ios == 'true'
@@ -138,8 +140,8 @@ jobs:
     env:
       CI: 1
       BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
-      # fastlane l'exige : sans locale UTF-8, il avertit et peut mal lire la
-      # sortie de xcodebuild.
+      # fastlane requires it: without a UTF-8 locale, it warns and can misread
+      # xcodebuild's output.
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
     steps:
@@ -157,9 +159,9 @@ jobs:
       - name: Générer le projet natif
         run: npx expo prebuild --platform ios --clean
 
-      # match lit le dépôt des certificats en SSH, avec une clé de déploiement
-      # en lecture seule. Les clés d'hôte de GitHub viennent de son API plutôt
-      # que d'un `ssh-keyscan`, qui accepterait n'importe quel serveur.
+      # match reads the certificates repo over SSH, with a read-only deploy
+      # key. GitHub's host keys come from its API rather than an
+      # `ssh-keyscan`, which would accept any server.
       - name: Préparer l'accès au dépôt des certificats
         env:
           GH_TOKEN: ${{ github.token }}
@@ -170,16 +172,16 @@ jobs:
           install -m 600 /dev/null "$RUNNER_TEMP/match_deploy_key"
           printf '%s\n' "$MATCH_DEPLOY_KEY" > "$RUNNER_TEMP/match_deploy_key"
 
-      # Compilation et envoi sont deux étapes distinctes : les scripts npm que
-      # la compilation exécute ne voient jamais la clé App Store Connect.
+      # Build and upload are two separate steps: the npm scripts the build
+      # runs never see the App Store Connect key.
       - name: Signer et compiler
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_PRIVATE_KEY: ${{ runner.temp }}/match_deploy_key
         run: bundle exec fastlane ios build
 
-      # « What to Test » de TestFlight : les testeurs lisent ce que l'app
-      # affichera dans Réglages › Nouveautés, pas une liste de commits.
+      # TestFlight's "What to Test": testers read what the app will show in
+      # Settings › What's new, not a list of commits.
       - name: Préparer les notes de version
         run: |
           {
@@ -233,8 +235,8 @@ jobs:
           ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
         run: echo "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
 
-      # Les propriétés sont lues par plugins/withAndroidReleaseSigning.js ;
-      # Gradle les prend depuis les variables ORG_GRADLE_PROJECT_*.
+      # The properties are read by plugins/withAndroidReleaseSigning.js;
+      # Gradle picks them up from the ORG_GRADLE_PROJECT_* variables.
       - name: Construire le bundle signé
         env:
           ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_STORE_FILE: ${{ runner.temp }}/upload.jks
@@ -243,7 +245,7 @@ jobs:
           ORG_GRADLE_PROJECT_STACKPILOT_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
         run: cd android && ./gradlew bundleRelease --no-daemon
 
-      # Sortie forcée en anglais : keytool suit la langue du système.
+      # Output forced to English: keytool follows the system language.
       - name: Vérifier la signature
         run: |
           cert=$(keytool -J-Duser.language=en -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab)
@@ -253,8 +255,8 @@ jobs:
           fi
           echo "$cert" | grep -E "^Owner|SHA256:" | head -2 || true
 
-      # Conservé même si l'envoi échoue : le tout premier envoi vers Google
-      # Play doit se faire à la main depuis la console, avec ce fichier.
+      # Kept even if the upload fails: the very first submission to Google
+      # Play must be done by hand from the console, with this file.
       - name: Conserver le bundle
         if: always()
         uses: actions/upload-artifact@v4
@@ -263,11 +265,11 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
-      # Test : piste interne, publiée aux testeurs. Production : déposé en
-      # brouillon, à lancer depuis la console pour ne rien publier sans un clic.
-      # Google Play refuse au-delà de 500 caractères par langue, et n'accepte
-      # que les langues déclarées sur la fiche du store : PLAY_NOTES_LANGUAGE
-      # doit en être une (voir docs/release.md).
+      # Test: internal track, published to testers. Production: uploaded as a
+      # draft, to be launched from the console so nothing publishes without a
+      # click. Google Play rejects more than 500 characters per language, and
+      # only accepts languages declared on the store listing:
+      # PLAY_NOTES_LANGUAGE must be one of them (see docs/release.md).
       - name: Préparer les notes de version
         env:
           PLAY_NOTES_LANGUAGE: fr-FR
@@ -287,9 +289,9 @@ jobs:
           status: ${{ needs.prepare.outputs.track == 'production' && 'draft' || 'completed' }}
 
   release:
-    # Une GitHub Release par tag, créée seulement une fois les envois faits :
-    # elle atteste ce qui est parti aux stores, pas ce qu'on comptait envoyer.
-    # `!cancelled()` la laisse s'évaluer même si une plateforme a été ignorée.
+    # One GitHub Release per tag, created only once submissions are done: it
+    # attests to what actually shipped to the stores, not what we intended to
+    # ship. `!cancelled()` lets it evaluate even if a platform was skipped.
     name: GitHub Release
     needs: [prepare, ios, android]
     if: ${{ !cancelled() && !failure() && needs.prepare.outputs.track == 'production' && (needs.ios.result == 'success' || needs.android.result == 'success') }}
@@ -323,9 +325,9 @@ jobs:
           notes="$notes"$'\n'"iOS : ${IOS} · Android : ${ANDROID}"
           assets=()
           [ -f dist/app-release.aab ] && assets+=("dist/app-release.aab#StackPilot-${TAG}-${BUILD_NUMBER}.aab")
-          # Le tag naît avec la release, donc seulement si les envois ont
-          # réussi : rien ne prétend publié ce qui n'est pas parti. Posé avec
-          # GITHUB_TOKEN, il ne redéclenche pas ce workflow.
+          # The tag is created with the release, so only if the submissions
+          # succeeded: nothing claims as published what didn't ship. Set with
+          # GITHUB_TOKEN, it doesn't re-trigger this workflow.
           if [ "$CREATE_TAG" = true ]; then
             ref=(--target "$GITHUB_SHA")
           else

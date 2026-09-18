@@ -3,8 +3,8 @@ import { versionLine } from '../lib/appInfo';
 import { theme } from '../theme';
 
 /**
- * « StackPilot 1.0.0 (57) · a1d8e36 » : la ligne à demander à un testeur qui
- * signale un problème — et celle que « Signaler un problème » joint tout seul.
+ * "StackPilot 1.0.0 (57) · a1d8e36": the line to ask a tester who reports an
+ * issue for — and the one "Report an issue" attaches on its own.
  */
 export function BuildInfo() {
   return (

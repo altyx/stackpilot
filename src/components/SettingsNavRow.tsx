@@ -6,8 +6,8 @@ import { theme } from '../theme';
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 /**
- * Les lignes sont séparées par une bordure haute plutôt que par un séparateur
- * intercalé : `first` évite un trait juste sous le bord de la carte.
+ * Rows are separated by a top border rather than an interleaved divider:
+ * `first` avoids a line right under the card's edge.
  */
 export function SettingsNavRow({
   icon,
@@ -20,7 +20,7 @@ export function SettingsNavRow({
   icon: IconName;
   label: string;
   hint?: string;
-  /** Sort de l'application : l'icône de droite le dit avant le tap. */
+  /** Leaves the app: the right-hand icon says so before the tap. */
   external?: boolean;
   first?: boolean;
   onPress: () => void;

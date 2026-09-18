@@ -18,8 +18,8 @@ interface SettingsState {
 const SettingsContext = createContext<SettingsState | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  // Les valeurs par défaut s'appliquent le temps de la relecture : un réglage
-  // d'affichage ne justifie pas de retarder le premier écran.
+  // Default values apply while the stored ones are re-read: a display
+  // preference doesn't justify delaying the first screen.
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const current = useRef(settings);
   const changed = useRef(false);
@@ -27,7 +27,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     loadSettings().then((stored) => {
-      // Un réglage modifié pendant la relecture est plus récent qu'elle.
+      // A setting changed while re-reading is more recent than the re-read.
       if (cancelled || changed.current) return;
       current.current = stored;
       setSettings(stored);
@@ -43,8 +43,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     current.current = next;
     setSettings(next);
     saveSettings(next).catch(() => {
-      // Le réglage reste appliqué pour cette session : rien à dire à
-      // l'utilisateur, qui n'y peut rien.
+      // The setting stays applied for this session: nothing to tell the
+      // user, who can't do anything about it anyway.
     });
   }, []);
 

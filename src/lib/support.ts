@@ -4,12 +4,12 @@ import { diagnostics } from './appInfo';
 export const RELEASES_URL = `${SOURCE_CODE_URL}/releases`;
 
 /**
- * Formulaire d'issue GitHub pré-rempli : le rapport part avec la version exacte
- * et l'appareil, que l'utilisateur ne sait généralement pas retrouver.
+ * Pre-filled GitHub issue form: the report starts with the exact version and
+ * device, which the user usually can't find on their own.
  *
- * Le corps est pré-rempli, pas envoyé : l'utilisateur le relit, le complète et
- * le publie lui-même. Il ne contient donc que ce que `diagnostics` autorise —
- * rien de son instance Portainer.
+ * The body is pre-filled, not sent: the user reviews it, completes it and
+ * publishes it themselves. It therefore only contains what `diagnostics`
+ * allows — nothing about their Portainer instance.
  */
 export function newIssueUrl(): string {
   const body = [

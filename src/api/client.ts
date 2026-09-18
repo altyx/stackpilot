@@ -11,7 +11,7 @@ export class PortainerError extends Error {
   }
 }
 
-/** Retire le `/` final et un éventuel suffixe `/api` saisi par l'utilisateur. */
+/** Strips the trailing `/` and any `/api` suffix the user typed. */
 export function normalizeBaseUrl(raw: string): string {
   let url = raw.trim();
   if (!url) throw new PortainerError("L'URL de l'instance est requise.");
@@ -29,13 +29,13 @@ function authHeaders(session: Session): Record<string, string> {
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  /** Chemin relatif à `/api`, ex: `/endpoints`. */
+  /** Path relative to `/api`, e.g. `/endpoints`. */
   path: string;
   query?: Record<string, string | number | boolean | undefined>;
   body?: unknown;
   signal?: AbortSignal;
   timeoutMs?: number;
-  /** Codes non-2xx à considérer comme un succès (voir `runContainerAction`). */
+  /** Non-2xx codes to treat as success (see `runContainerAction`). */
   accept?: number[];
 }
 
@@ -55,9 +55,9 @@ type UnauthorizedListener = (token: string) => void;
 let unauthorizedListener: UnauthorizedListener | null = null;
 
 /**
- * Prévient d'un 401 sur une requête authentifiée, avec le token refusé.
- * Détecté ici plutôt que dans React Query : certaines mutations (actions de
- * stack) interceptent leurs erreurs et ne les laisseraient jamais remonter.
+ * Reports a 401 on an authenticated request, with the rejected token.
+ * Detected here rather than in React Query: some mutations (stack actions)
+ * catch their own errors and would never let them bubble up.
  */
 export function setUnauthorizedListener(listener: UnauthorizedListener): () => void {
   unauthorizedListener = listener;
@@ -104,9 +104,9 @@ async function rawRequest(
 }
 
 /**
- * iOS et Android renvoient le même « Network request failed » pour un refus de
- * connexion et pour un rejet TLS. En HTTPS, le certificat auto-signé est de loin
- * la cause la plus fréquente : on la nomme pour éviter de chercher côté réseau.
+ * iOS and Android return the same "Network request failed" for a refused
+ * connection and for a TLS rejection. Over HTTPS, a self-signed certificate is
+ * by far the most frequent cause: naming it saves chasing the network instead.
  */
 function unreachableMessage(url: string): string {
   if (url.startsWith('https://')) {
@@ -131,7 +131,7 @@ async function toError(response: Response): Promise<PortainerError> {
     const parsed = JSON.parse(body) as { message?: string; details?: string };
     detail = parsed.message ?? parsed.details ?? body;
   } catch {
-    // corps non-JSON : on garde le texte brut
+    // non-JSON body: keep the raw text
   }
   const messages: Record<number, string> = {
     401: 'Authentification refusée : token invalide ou expiré.',
@@ -146,7 +146,7 @@ async function toError(response: Response): Promise<PortainerError> {
   );
 }
 
-/** Requête JSON authentifiée. */
+/** Authenticated JSON request. */
 export async function request<T>(session: Session, opts: RequestOptions): Promise<T> {
   const response = await rawRequest(session, opts);
   if (response.status === 204) return undefined as T;
@@ -154,13 +154,13 @@ export async function request<T>(session: Session, opts: RequestOptions): Promis
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
-/** Requête authentifiée dont la réponse est du texte (logs Docker). */
+/** Authenticated request whose response is plain text (Docker logs). */
 export async function requestText(session: Session, opts: RequestOptions): Promise<string> {
   const response = await rawRequest(session, opts);
   return response.text();
 }
 
-/** Requête non authentifiée, pour tester une URL avant de stocker des identifiants. */
+/** Unauthenticated request, to test a URL before storing credentials. */
 export async function requestAnonymous<T>(baseUrl: string, opts: RequestOptions): Promise<T> {
   const response = await rawRequest({ baseUrl }, opts);
   const text = await response.text();

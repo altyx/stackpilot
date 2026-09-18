@@ -9,7 +9,7 @@ import { theme } from '../theme';
 import { useCurrentEndpoint } from './CurrentEndpoint';
 import { DrawerLink, type IconName } from './DrawerLink';
 
-/** Menu latéral : la navigation principale de l'application. */
+/** Side drawer: the app's main navigation. */
 export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
   const { session, signOut } = useAuth();
   const { endpointId } = useCurrentEndpoint();
