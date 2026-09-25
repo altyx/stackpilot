@@ -11,7 +11,9 @@ import {
   listImages,
   listStacks,
   listVolumes,
+  pruneImages,
   recreateContainer,
+  removeImage,
   runContainerAction,
 } from './portainer';
 import { PortainerError } from './client';
@@ -21,6 +23,7 @@ import type {
   ContainerInspect,
   ContainerSummary,
   Endpoint,
+  ImagePruneScope,
   Session,
   StackAction,
 } from './types';
@@ -148,6 +151,30 @@ export function useImageStatus(endpointId: number, containerId: string) {
     // A failure means the indicator is unavailable for this container, not a
     // transient error worth hammering the registry for.
     retry: false,
+  });
+}
+
+export function useRemoveImage(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ imageId, force }: { imageId: string; force: boolean }) =>
+      removeImage(requireSession(session), endpointId, imageId, force),
+    onSettled: () => {
+      // Refetched even on failure: a 409 often means the list was stale.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.images(endpointId) });
+    },
+  });
+}
+
+export function usePruneImages(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (scope: ImagePruneScope) => pruneImages(requireSession(session), endpointId, scope),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.images(endpointId) });
+    },
   });
 }
 

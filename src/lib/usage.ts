@@ -1,4 +1,10 @@
-import type { ContainerSummary, ImageSummary, VolumeSummary } from '../api/types';
+import type {
+  ContainerSummary,
+  ImageDeleteItem,
+  ImagePruneScope,
+  ImageSummary,
+  VolumeSummary,
+} from '../api/types';
 import { containerName } from './format';
 
 export interface Usage<T> {
@@ -78,6 +84,31 @@ export function reclaimableBytes(usages: Usage<ImageSummary>[]): number {
   return usages
     .filter((usage) => usage.usedBy.length === 0)
     .reduce((total, usage) => total + usage.item.Size, 0);
+}
+
+/**
+ * Images a cleanup of this scope should delete, to preview it before
+ * confirming. A dangling image a container still runs on is kept by Docker,
+ * hence the usage check in both scopes.
+ */
+export function pruneCandidates(
+  usages: Usage<ImageSummary>[],
+  scope: ImagePruneScope,
+): ImageSummary[] {
+  return usages
+    .filter((usage) => usage.usedBy.length === 0)
+    .filter((usage) => scope === 'unused' || isDangling(usage.item))
+    .map((usage) => usage.item);
+}
+
+/**
+ * How many listed images a deletion actually removed. Docker reports every
+ * untagged reference and every deleted layer: only ids matching a listed
+ * image count as images.
+ */
+export function countDeletedImages(images: ImageSummary[], deleted: ImageDeleteItem[]): number {
+  const ids = new Set(deleted.map((item) => item.Deleted).filter(Boolean));
+  return images.filter((image) => ids.has(image.Id)).length;
 }
 
 function push(map: Map<string, string[]>, key: string, value: string): void {

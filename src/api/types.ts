@@ -102,6 +102,30 @@ export interface ImageSummary {
   Labels: Record<string, string> | null;
 }
 
+/** Item from `DELETE /images/{id}`: one entry per tag removed or layer deleted. */
+export interface ImageDeleteItem {
+  Untagged?: string;
+  Deleted?: string;
+}
+
+/** Response from `POST /images/prune`. */
+export interface ImagePruneResponse {
+  ImagesDeleted: ImageDeleteItem[] | null;
+  SpaceReclaimed: number;
+}
+
+/** Outcome of an image cleanup, with Docker's `null` turned into a list. */
+export interface ImagePruneResult {
+  deleted: ImageDeleteItem[];
+  spaceReclaimed: number;
+}
+
+/**
+ * Scope of an image cleanup, mirroring `docker image prune`: untagged images
+ * only, or every image no container references (`--all`).
+ */
+export type ImagePruneScope = 'dangling' | 'unused';
+
 /** Item from `GET /volumes`. */
 export interface VolumeSummary {
   Name: string;
