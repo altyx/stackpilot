@@ -1,8 +1,10 @@
 import { makeContainer, makeImage, makeVolume } from '../testing/fixtures';
 import {
+  countDeletedImages,
   imageLabel,
   imagesWithUsage,
   isDangling,
+  pruneCandidates,
   reclaimableBytes,
   shortImageId,
   volumesWithUsage,
@@ -103,5 +105,46 @@ describe('reclaimableBytes', () => {
       { item: makeImage({ Size: 700 }), usedBy: [] },
     ];
     expect(reclaimableBytes(usages)).toBe(1_200);
+  });
+});
+
+describe('pruneCandidates', () => {
+  const tagged = makeImage({ Id: 'sha256:tagged', RepoTags: ['app:1'] });
+  const dangling = makeImage({ Id: 'sha256:dangling', RepoTags: [] });
+  const danglingInUse = makeImage({ Id: 'sha256:running', RepoTags: null });
+  const usages = [
+    { item: tagged, usedBy: [] },
+    { item: dangling, usedBy: [] },
+    { item: danglingInUse, usedBy: ['web'] },
+    { item: makeImage({ Id: 'sha256:used' }), usedBy: ['api'] },
+  ];
+
+  it('keeps unused untagged images for a dangling cleanup', () => {
+    expect(pruneCandidates(usages, 'dangling')).toEqual([dangling]);
+  });
+
+  it('keeps every unused image for a full cleanup', () => {
+    expect(pruneCandidates(usages, 'unused')).toEqual([tagged, dangling]);
+  });
+
+  it('treats a <none>:<none> tag as untagged', () => {
+    const none = makeImage({ RepoTags: ['<none>:<none>'] });
+    expect(pruneCandidates([{ item: none, usedBy: [] }], 'dangling')).toEqual([none]);
+  });
+
+  it('returns nothing when every image is in use', () => {
+    expect(pruneCandidates([{ item: tagged, usedBy: ['web'] }], 'unused')).toEqual([]);
+  });
+});
+
+describe('countDeletedImages', () => {
+  it('counts listed images only, not untagged references or layers', () => {
+    const images = [makeImage({ Id: 'sha256:a' }), makeImage({ Id: 'sha256:b' })];
+    const deleted = [{ Untagged: 'app:1' }, { Deleted: 'sha256:a' }, { Deleted: 'sha256:layer' }];
+    expect(countDeletedImages(images, deleted)).toBe(1);
+  });
+
+  it('counts nothing when Docker deleted nothing', () => {
+    expect(countDeletedImages([makeImage()], [])).toBe(0);
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { makeContainer, makeEndpoint, makeImage, makeVolume } from '../testing/fixtures';
 import { ContainerRow } from './ContainerRow';
@@ -54,6 +54,17 @@ describe('ImageCard', () => {
     expect(screen.getByText('abcdef012345')).toBeOnTheScreen();
     expect(screen.getByText('Image sans tag (dangling)')).toBeOnTheScreen();
     expect(screen.getByText('inutilisé')).toBeOnTheScreen();
+  });
+
+  it('offers deletion only when given a handler', () => {
+    const image = makeImage({ RepoTags: ['app:1'] });
+    const onDelete = jest.fn();
+    render(<ImageCard usage={{ item: image, usedBy: [] }} onDelete={onDelete} />);
+    fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
+    expect(onDelete).toHaveBeenCalledTimes(1);
+
+    screen.rerender(<ImageCard usage={{ item: image, usedBy: [] }} />);
+    expect(screen.queryByRole('button', { name: 'Supprimer app:1' })).toBeNull();
   });
 });
 

@@ -10,7 +10,7 @@ import { PRIVACY_POLICY_URL, PUBLISHER, SOURCE_CODE_URL } from './publisher';
  */
 export const TERMS: LegalDocument = {
   title: "Conditions générales d'utilisation",
-  updatedAt: '18 septembre 2026',
+  updatedAt: '25 septembre 2026',
   intro:
     "Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'utilisation de l'application mobile StackPilot (l'« Application »). En utilisant l'Application, vous acceptez les CGU dans leur intégralité ; si vous ne les acceptez pas, n'utilisez pas l'Application.",
   sections: [
@@ -26,7 +26,7 @@ export const TERMS: LegalDocument = {
     {
       title: "Objet de l'Application",
       body: [
-        "StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, ou en recréant un conteneur pour mettre à jour son image.",
+        "StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, en recréant un conteneur pour mettre à jour son image, ou en supprimant les images qu'aucun conteneur n'utilise.",
         "L'Application est un projet indépendant : elle n'est ni éditée, ni affiliée, ni approuvée par Portainer.io ou Docker, Inc. « Portainer » et « Docker » sont des marques de leurs titulaires respectifs.",
       ],
     },
@@ -53,7 +53,7 @@ export const TERMS: LegalDocument = {
         'Vous êtes responsable :',
         [
           'de la sécurité de votre appareil (code de verrouillage, mises à jour du système) et de la confidentialité de vos identifiants ;',
-          "des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ; mettre à jour l'image d'un conteneur le supprime et le recrée, ce qui efface les données qui ne sont pas conservées dans un volume ;",
+          "des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ; mettre à jour l'image d'un conteneur le supprime et le recrée, ce qui efface les données qui ne sont pas conservées dans un volume ; supprimer une image impose de la retélécharger pour s'en resservir, et une image construite localement ne peut pas être récupérée ;",
           "de la configuration, de la sécurité et des sauvegardes de votre instance Portainer et des services qu'elle gère ;",
           'du service de surveillance que vous déployez pour recevoir des notifications.',
         ],

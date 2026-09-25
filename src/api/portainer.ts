@@ -4,6 +4,10 @@ import type {
   ContainerInspect,
   ContainerSummary,
   Endpoint,
+  ImageDeleteItem,
+  ImagePruneResponse,
+  ImagePruneResult,
+  ImagePruneScope,
   ImageStatus,
   ImageStatusResponse,
   ImageSummary,
@@ -91,6 +95,62 @@ export function listImages(session: Session, endpointId: number): Promise<ImageS
   return request<ImageSummary[]>(session, {
     path: docker(endpointId, '/images/json'),
   });
+}
+
+/**
+ * Deletes an image by id. An image carrying several tags is only removed with
+ * `force`: without it, Docker refuses to pick which tag to drop. Even forced,
+ * Docker still refuses an image a running container uses.
+ */
+export async function removeImage(
+  session: Session,
+  endpointId: number,
+  imageId: string,
+  force: boolean,
+): Promise<ImageDeleteItem[]> {
+  try {
+    return await request<ImageDeleteItem[]>(session, {
+      method: 'DELETE',
+      path: docker(endpointId, `/images/${encodeURIComponent(imageId)}`),
+      query: { force: force || undefined },
+      timeoutMs: 60_000,
+    });
+  } catch (error) {
+    // The generic 409 message ("already in that state") misleads here: for
+    // an image, a conflict means a container still depends on it.
+    if (error instanceof PortainerError && error.status === 409) {
+      throw new PortainerError(
+        "Image utilisée : un conteneur, peut-être arrêté, en dépend encore. Supprimez-le d'abord.",
+        409,
+        error.detail,
+      );
+    }
+    throw error;
+  }
+}
+
+/**
+ * Deletes, in one call, the images no container references: untagged ones
+ * only, or all of them. Docker decides what is unused on its side, stopped
+ * containers included, exactly like `docker image prune`.
+ */
+export async function pruneImages(
+  session: Session,
+  endpointId: number,
+  scope: ImagePruneScope,
+): Promise<ImagePruneResult> {
+  const response = await request<ImagePruneResponse>(session, {
+    method: 'POST',
+    path: docker(endpointId, '/images/prune'),
+    query: { filters: JSON.stringify({ dangling: [scope === 'dangling' ? 'true' : 'false'] }) },
+    // Deleting many layers on a slow disk takes a while, and aborting would
+    // leave the prune running on the host anyway.
+    timeoutMs: 180_000,
+  });
+  return {
+    deleted: response?.ImagesDeleted ?? [],
+    spaceReclaimed: response?.SpaceReclaimed ?? 0,
+  };
 }
 
 export async function listVolumes(session: Session, endpointId: number): Promise<VolumeSummary[]> {

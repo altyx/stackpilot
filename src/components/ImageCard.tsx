@@ -6,7 +6,14 @@ import { theme } from '../theme';
 import { Card } from './Card';
 import { UsageBadge } from './UsageBadge';
 
-export function ImageCard({ usage }: { usage: Usage<ImageSummary> }) {
+export function ImageCard({
+  usage,
+  onDelete,
+}: {
+  usage: Usage<ImageSummary>;
+  /** Offered on unused images only: Docker refuses to delete the others. */
+  onDelete?: () => void;
+}) {
   const { item: image, usedBy } = usage;
   return (
     <Card style={styles.card}>
@@ -32,6 +39,16 @@ export function ImageCard({ usage }: { usage: Usage<ImageSummary> }) {
       {(image.RepoTags ?? []).length > 1 ? (
         <Text style={styles.meta}>{image.RepoTags!.length} tags</Text>
       ) : null}
+
+      {onDelete ? (
+        <Text
+          accessibilityRole="button"
+          accessibilityLabel={`Supprimer ${imageLabel(image)}`}
+          onPress={onDelete}
+          style={styles.delete}>
+          Supprimer…
+        </Text>
+      ) : null}
     </Card>
   );
 }
@@ -43,4 +60,11 @@ const styles = StyleSheet.create({
   meta: { color: theme.colors.textMuted, fontSize: 12 },
   dangling: { color: theme.colors.warning, fontSize: 12 },
   usedBy: { color: theme.colors.text, fontSize: 12 },
+  delete: {
+    alignSelf: 'flex-start',
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '600',
+    paddingTop: theme.spacing(1),
+  },
 });
