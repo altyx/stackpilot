@@ -126,6 +126,15 @@ describe('pruneCandidates', () => {
   it('keeps every unused image for a full cleanup', () => {
     expect(pruneCandidates(usages, 'unused')).toEqual([tagged, dangling]);
   });
+
+  it('treats a <none>:<none> tag as untagged', () => {
+    const none = makeImage({ RepoTags: ['<none>:<none>'] });
+    expect(pruneCandidates([{ item: none, usedBy: [] }], 'dangling')).toEqual([none]);
+  });
+
+  it('returns nothing when every image is in use', () => {
+    expect(pruneCandidates([{ item: tagged, usedBy: ['web'] }], 'unused')).toEqual([]);
+  });
 });
 
 describe('countDeletedImages', () => {
@@ -133,5 +142,9 @@ describe('countDeletedImages', () => {
     const images = [makeImage({ Id: 'sha256:a' }), makeImage({ Id: 'sha256:b' })];
     const deleted = [{ Untagged: 'app:1' }, { Deleted: 'sha256:a' }, { Deleted: 'sha256:layer' }];
     expect(countDeletedImages(images, deleted)).toBe(1);
+  });
+
+  it('counts nothing when Docker deleted nothing', () => {
+    expect(countDeletedImages([makeImage()], [])).toBe(0);
   });
 });
