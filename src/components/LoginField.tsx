@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   inputFrame: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surfaceAlt,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     borderWidth: 1,
     borderRadius: theme.radius.sm,
   },

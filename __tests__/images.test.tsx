@@ -70,7 +70,7 @@ describe('images screen', () => {
 
     fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
     expect(screen.getByText(/avec ses 2 tags/)).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+    fireEvent.press(screen.getByRole('button', { name: "Supprimer l'image" }));
 
     await waitFor(() =>
       expect(removeImage).toHaveBeenCalledWith(expect.anything(), 1, 'sha256:old', true),
@@ -83,7 +83,7 @@ describe('images screen', () => {
     await renderImages();
 
     fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+    fireEvent.press(screen.getByRole('button', { name: "Supprimer l'image" }));
 
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith('Suppression échouée', 'Image utilisée'),

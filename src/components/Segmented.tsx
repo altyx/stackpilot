@@ -47,5 +47,5 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surfaceAlt,
     overflow: 'hidden',
   },
-  segmentActive: { backgroundColor: theme.colors.accent, color: theme.colors.text },
+  segmentActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.text },
 });

@@ -4,6 +4,7 @@ import { formatBytes, formatDate } from '../lib/format';
 import { imageLabel, isDangling, shortImageId, type Usage } from '../lib/usage';
 import { theme } from '../theme';
 import { Card } from './Card';
+import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
 
 export function ImageCard({
@@ -17,54 +18,49 @@ export function ImageCard({
   const { item: image, usedBy } = usage;
   return (
     <Card style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.name} numberOfLines={2}>
-          {imageLabel(image)}
+      <View style={styles.content}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.name} numberOfLines={2}>
+            {imageLabel(image)}
+          </Text>
+          <UsageBadge usedBy={usedBy} />
+        </View>
+
+        <Text style={styles.meta}>
+          {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
         </Text>
-        <UsageBadge usedBy={usedBy} />
+
+        {isDangling(image) ? <Text style={styles.dangling}>Image sans tag (dangling)</Text> : null}
+
+        {usedBy.length > 0 ? (
+          <Text style={styles.usedBy} numberOfLines={2}>
+            {usedBy.join(', ')}
+          </Text>
+        ) : null}
+
+        {(image.RepoTags ?? []).length > 1 ? (
+          <Text style={styles.meta}>{image.RepoTags!.length} tags</Text>
+        ) : null}
       </View>
 
-      <Text style={styles.meta}>
-        {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
-      </Text>
-
-      {isDangling(image) ? <Text style={styles.dangling}>Image sans tag (dangling)</Text> : null}
-
-      {usedBy.length > 0 ? (
-        <Text style={styles.usedBy} numberOfLines={2}>
-          {usedBy.join(', ')}
-        </Text>
-      ) : null}
-
-      {(image.RepoTags ?? []).length > 1 ? (
-        <Text style={styles.meta}>{image.RepoTags!.length} tags</Text>
-      ) : null}
-
       {onDelete ? (
-        <Text
-          accessibilityRole="button"
+        <IconButton
+          icon="trash-outline"
+          variant="danger"
           accessibilityLabel={`Supprimer ${imageLabel(image)}`}
           onPress={onDelete}
-          style={styles.delete}>
-          Supprimer…
-        </Text>
+        />
       ) : null}
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { gap: theme.spacing(1) },
+  card: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(3) },
+  content: { flex: 1, gap: theme.spacing(1) },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
   name: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flex: 1 },
   meta: { color: theme.colors.textMuted, fontSize: 12 },
   dangling: { color: theme.colors.warning, fontSize: 12 },
   usedBy: { color: theme.colors.text, fontSize: 12 },
-  delete: {
-    alignSelf: 'flex-start',
-    color: theme.colors.danger,
-    fontSize: 13,
-    fontWeight: '600',
-    paddingTop: theme.spacing(1),
-  },
 });
