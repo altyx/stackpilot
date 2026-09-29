@@ -10,7 +10,7 @@ import { PRIVACY_POLICY_URL, PUBLISHER, SOURCE_CODE_URL } from './publisher';
  */
 export const TERMS: LegalDocument = {
   title: "Conditions générales d'utilisation",
-  updatedAt: '25 septembre 2026',
+  updatedAt: '29 septembre 2026',
   intro:
     "Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'utilisation de l'application mobile StackPilot (l'« Application »). En utilisant l'Application, vous acceptez les CGU dans leur intégralité ; si vous ne les acceptez pas, n'utilisez pas l'Application.",
   sections: [
@@ -44,6 +44,7 @@ export const TERMS: LegalDocument = {
         "L'Application communique directement avec l'instance Portainer dont vous saisissez l'adresse : vos données ne transitent par aucun serveur de l'éditeur.",
         "Votre access token, ou le jeton de session obtenu avec votre mot de passe, est conservé dans le trousseau sécurisé de l'appareil (Keychain sur iOS, Keystore sur Android). Le mot de passe lui-même n'est jamais enregistré.",
         "Les actions déclenchées depuis l'Application s'exécutent avec les droits du compte Portainer utilisé ; l'Application ne permet pas de les dépasser.",
+        "L'Application vérifie toujours le certificat de votre instance en HTTPS. Elle accepte les autorités de certification reconnues par le système et celles que vous avez vous-même installées sur l'appareil ; elle n'accepte pas un certificat auto-signé qui ne remonte à aucune d'elles. Installer une autorité de certification sur l'appareil engage votre responsabilité : ne le faites que pour une autorité que vous contrôlez.",
         "Il vous appartient de protéger l'accès à votre instance : connexion chiffrée (HTTPS), jetons limités aux droits nécessaires, révocation des jetons inutilisés.",
       ],
     },

@@ -20,7 +20,11 @@ export default function LoginScreen() {
   const [apiKey, setApiKey] = useState('');
   const [username, setUsername] = useState(lastLogin?.username ?? '');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<{ message: string; detail?: string } | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    detail?: string;
+    certificate?: boolean;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const canSubmit =
@@ -44,6 +48,7 @@ export default function LoginScreen() {
       setError({
         message: e instanceof Error ? e.message : 'Connexion impossible.',
         detail: e instanceof PortainerError ? e.detail : undefined,
+        certificate: e instanceof PortainerError && e.reason === 'certificate',
       });
     } finally {
       setBusy(false);
@@ -129,6 +134,11 @@ export default function LoginScreen() {
                   {error.detail}
                 </Text>
               ) : null}
+              {error.certificate ? (
+                <Link href="/certificates" style={styles.errorLink}>
+                  Résoudre un problème de certificat
+                </Link>
+              ) : null}
             </View>
           ) : null}
 
@@ -190,6 +200,12 @@ const styles = StyleSheet.create({
   errorBlock: { gap: theme.spacing(1) },
   error: { color: theme.colors.danger, fontSize: 13, lineHeight: 18 },
   errorDetail: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 15 },
+  errorLink: {
+    color: theme.colors.accent,
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: theme.spacing(1),
+  },
   submit: { marginTop: theme.spacing(1) },
   legal: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
   legalLink: { color: theme.colors.accent, fontWeight: '600' },

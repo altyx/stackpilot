@@ -59,6 +59,12 @@ export default function SettingsScreen() {
             onPress={() => openLink(newIssueUrl())}
           />
           <SettingsNavRow
+            icon="lock-closed-outline"
+            label="Certificat HTTPS"
+            hint="Faire accepter à ce téléphone un certificat auto-signé ou privé"
+            onPress={() => router.push('/certificates')}
+          />
+          <SettingsNavRow
             icon="logo-github"
             label="Code source"
             external
