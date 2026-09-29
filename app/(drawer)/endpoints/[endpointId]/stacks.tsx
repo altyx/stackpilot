@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   header: { gap: theme.spacing(2), marginBottom: theme.spacing(2) },
   search: {
     backgroundColor: theme.colors.surfaceAlt,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.borderStrong,
     borderWidth: 1,
     borderRadius: theme.radius.sm,
     color: theme.colors.text,

@@ -32,5 +32,5 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.sm,
     overflow: 'hidden',
   },
-  modeTabActive: { backgroundColor: theme.colors.accent, color: theme.colors.text },
+  modeTabActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.text },
 });

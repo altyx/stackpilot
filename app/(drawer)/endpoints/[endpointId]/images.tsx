@@ -170,7 +170,7 @@ export default function ImagesScreen() {
         visible={deleting !== null}
         title="Supprimer l'image ?"
         message={shownDeleting ? describeRemoval(shownDeleting) : undefined}
-        confirmLabel="Supprimer"
+        confirmLabel="Supprimer l'image"
         destructive
         onConfirm={() => {
           const image = deleting;

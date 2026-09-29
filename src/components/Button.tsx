@@ -47,13 +47,13 @@ export function Button({
 }
 
 const variantStyles = StyleSheet.create({
-  primary: { backgroundColor: theme.colors.accent },
+  primary: { backgroundColor: theme.colors.accentFill },
   secondary: {
     backgroundColor: theme.colors.surfaceAlt,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
-  danger: { backgroundColor: theme.colors.danger },
+  danger: { backgroundColor: theme.colors.dangerFill },
 });
 
 const styles = StyleSheet.create({
