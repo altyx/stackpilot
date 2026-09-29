@@ -5,8 +5,9 @@ import { Loader } from '../components/Loader';
 import { usePushNavigation } from '../notifications/usePushNavigation';
 import { theme } from '../theme';
 
-// Screens readable without a session: login, and the legal texts it links to.
-const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy']);
+// Screens readable without a session: login, and the legal texts and
+// certificate help it links to.
+const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy', 'certificates']);
 
 export function RootNavigator() {
   const { session, isRestoring } = useAuth();
@@ -41,6 +42,7 @@ export function RootNavigator() {
       <Stack.Screen name="privacy" options={{ title: '' }} />
       <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
       <Stack.Screen name="changelog" options={{ title: 'Nouveautés' }} />
+      <Stack.Screen name="certificates" options={{ title: 'Certificat HTTPS' }} />
       {/* Le menu porte ses propres en-têtes, avec le bouton qui l'ouvre. */}
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
