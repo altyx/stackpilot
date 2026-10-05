@@ -3,7 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
-import { NotificationStep } from '../src/components/NotificationStep';
+import { NumberedStep } from '../src/components/NumberedStep';
 import { registerForPush, type PushRegistration } from '../src/notifications/push';
 import { theme } from '../src/theme';
 
@@ -73,12 +73,12 @@ export default function NotificationsScreen() {
 
       <Card style={styles.card}>
         <Text style={styles.sectionTitle}>Mise en service</Text>
-        <NotificationStep
+        <NumberedStep
           n={1}
           text="Déployez le service watcher/ sur votre serveur (voir son README)."
         />
-        <NotificationStep n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
-        <NotificationStep
+        <NumberedStep n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
+        <NumberedStep
           n={3}
           text="Le service vous alerte sur un arrêt anormal, un passage en unhealthy, un redémarrage ou un dépassement mémoire."
         />

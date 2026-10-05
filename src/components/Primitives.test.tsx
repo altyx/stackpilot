@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react-native';
 import { theme } from '../theme';
 import { EmptyState } from './EmptyState';
 import { Loader } from './Loader';
-import { NotificationStep } from './NotificationStep';
+import { NumberedStep } from './NumberedStep';
 import { ReleaseCard } from './ReleaseCard';
 import { Row } from './Row';
 import { StatusDot } from './StatusDot';
@@ -70,10 +70,17 @@ describe('ReleaseCard', () => {
   });
 });
 
-describe('NotificationStep', () => {
+describe('NumberedStep', () => {
   it('numbers its instruction', () => {
-    render(<NotificationStep n={2} text="Collez le jeton." />);
+    render(<NumberedStep n={2} text="Collez le jeton." />);
     expect(screen.getByText('2')).toBeOnTheScreen();
     expect(screen.getByText('Collez le jeton.')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Copier' })).toBeNull();
+  });
+
+  it('shows the command to type, copyable', () => {
+    render(<NumberedStep n={1} text="Récupérez l'autorité :" code="mkcert -CAROOT" />);
+    expect(screen.getByText('mkcert -CAROOT')).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Copier' })).toBeOnTheScreen();
   });
 });

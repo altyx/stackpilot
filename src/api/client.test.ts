@@ -144,10 +144,14 @@ describe('request', () => {
     await expect(request(session, { path: '/x' })).rejects.toThrow(/certificat TLS/);
     await expect(request(session, { path: '/x' })).rejects.toMatchObject({
       detail: 'https://portainer.lan/api/x\nNetwork request failed',
+      reason: 'certificate',
     });
     await expect(
       request({ ...session, baseUrl: 'http://portainer.lan' }, { path: '/x' }),
     ).rejects.toThrow("Impossible de joindre l'instance Portainer. Vérifiez l'URL et le réseau.");
+    await expect(
+      request({ ...session, baseUrl: 'http://portainer.lan' }, { path: '/x' }),
+    ).rejects.toMatchObject({ reason: undefined });
   });
 });
 

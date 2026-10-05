@@ -39,9 +39,15 @@ d'écrire du code touchant aux modules Expo.
   un bouton retour. L'environnement visé par le menu est celui du dernier écran
   focalisé (`src/navigation/CurrentEndpoint.tsx`), persisté par instance.
 - Les écrans annexes (`app/notifications.tsx`, `app/changelog.tsx`,
-  `app/terms.tsx`, `app/privacy.tsx`) vivent dans la pile racine et s'ouvrent
-  depuis les réglages, avec un bouton retour. Les textes légaux servent aussi
-  l'écran de connexion, hors session.
+  `app/terms.tsx`, `app/privacy.tsx`, `app/certificates.tsx`) vivent dans la
+  pile racine et s'ouvrent depuis les réglages, avec un bouton retour. Les
+  textes légaux et l'aide sur les certificats servent aussi l'écran de
+  connexion, hors session.
+- Certificats : l'app ne contourne jamais la vérification TLS. Sur Android,
+  `plugins/withUserCertificates.js` lui fait accepter les autorités installées
+  par l'utilisateur (iOS le fait seul) ; l'aide `src/help/certificates.ts` en
+  dépend. Ce plugin remplace `usesCleartextTraffic` : le HTTP en clair reste
+  coupé en release et ouvert en debug, pour Metro.
 - `src/changelog.ts` est embarqué dans le binaire : son entrée de tête doit
   porter la version d'`app.json`. `npm run changelog` le vérifie, et le workflow
   de publication refuse de compiler sinon. C'est aussi la source des notes

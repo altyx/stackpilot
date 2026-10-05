@@ -1,10 +1,17 @@
 import type { Session } from './types';
 
+/**
+ * Cause the client could narrow down, so screens can offer the matching help
+ * rather than parsing the message.
+ */
+export type PortainerErrorReason = 'certificate';
+
 export class PortainerError extends Error {
   constructor(
     message: string,
     readonly status?: number,
     readonly detail?: string,
+    readonly reason?: PortainerErrorReason,
   ) {
     super(message);
     this.name = 'PortainerError';
@@ -97,7 +104,14 @@ async function rawRequest(
     if (error instanceof Error && error.name === 'AbortError') {
       throw new PortainerError("L'instance Portainer n'a pas répondu à temps.", undefined, url);
     }
-    throw new PortainerError(unreachableMessage(url), undefined, describeCause(url, error));
+    throw new PortainerError(
+      unreachableMessage(url),
+      undefined,
+      describeCause(url, error),
+      // Only a suspicion: the platforms report a refused connection the same
+      // way. Offering the certificate help costs nothing if it's the network.
+      url.startsWith('https://') ? 'certificate' : undefined,
+    );
   } finally {
     clearTimeout(timeout);
   }

@@ -3,6 +3,7 @@ import { Slot } from 'expo-router';
 import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import { Text } from 'react-native';
 import LoginScreen from '../app/login';
+import { PortainerError } from '../src/api/client';
 import { loginWithApiKey } from '../src/api/portainer';
 import { AuthProvider } from '../src/auth/AuthContext';
 import { memory } from '../src/testing/secureStoreMock';
@@ -32,9 +33,13 @@ function Layout() {
 }
 
 const Home = () => <Text>Accueil</Text>;
+const Certificates = () => <Text>Aide certificat</Text>;
 
 async function renderLogin() {
-  renderRouter({ _layout: Layout, login: LoginScreen, index: Home }, { initialUrl: '/login' });
+  renderRouter(
+    { _layout: Layout, login: LoginScreen, index: Home, certificates: Certificates },
+    { initialUrl: '/login' },
+  );
   // Lets the provider finish restoring the (empty) session.
   await screen.findByText('Connexion à Portainer');
 }
@@ -82,5 +87,36 @@ describe('login screen', () => {
     await waitFor(() => expect(screen).toHavePathname('/'));
     expect(loginWithApiKey).toHaveBeenCalledWith('portainer.lan', 'ptr_abc');
     expect(memory.get('portainer.session')).toContain('ptr_abc');
+  });
+
+  function submitToken() {
+    fireEvent.changeText(
+      screen.getByPlaceholderText('https://portainer.local:9443'),
+      'portainer.lan',
+    );
+    fireEvent.changeText(screen.getByPlaceholderText('ptr_…'), 'ptr_abc');
+    fireEvent.press(screen.getByRole('button', { name: 'Se connecter' }));
+  }
+
+  it('points at the certificate help when the HTTPS connection is refused', async () => {
+    jest
+      .mocked(loginWithApiKey)
+      .mockRejectedValue(new PortainerError('Connexion refusée.', undefined, 'x', 'certificate'));
+    await renderLogin();
+    submitToken();
+
+    fireEvent.press(await screen.findByText('Résoudre un problème de certificat'));
+    await waitFor(() => expect(screen).toHavePathname('/certificates'));
+  });
+
+  it('offers no certificate help for other errors', async () => {
+    jest
+      .mocked(loginWithApiKey)
+      .mockRejectedValue(new PortainerError('Authentification refusée.', 401));
+    await renderLogin();
+    submitToken();
+
+    expect(await screen.findByText('Authentification refusée.')).toBeOnTheScreen();
+    expect(screen.queryByText('Résoudre un problème de certificat')).toBeNull();
   });
 });
