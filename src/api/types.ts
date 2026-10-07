@@ -122,7 +122,7 @@ export interface DiskUsageResponse {
   LayersSize?: number;
   Images?: { Size: number; SharedSize: number; Containers: number }[] | null;
   Containers?: { SizeRw?: number; State: string }[] | null;
-  Volumes?: { UsageData?: { Size: number; RefCount: number } | null }[] | null;
+  Volumes?: { Name: string; UsageData?: { Size: number; RefCount: number } | null }[] | null;
   BuildCache?: { Size: number; InUse: boolean }[] | null;
 }
 
@@ -172,6 +172,24 @@ export interface VolumeSummary {
   Labels: Record<string, string> | null;
   Options: Record<string, string> | null;
 }
+
+/** Response from `POST /volumes/prune`. */
+export interface VolumePruneResponse {
+  VolumesDeleted: string[] | null;
+  SpaceReclaimed: number;
+}
+
+/** Outcome of a volume cleanup, with Docker's `null` turned into a list. */
+export interface VolumePruneResult {
+  deleted: string[];
+  spaceReclaimed: number;
+}
+
+/**
+ * Scope of a volume cleanup: anonymous volumes only (Docker's default since
+ * Engine 23), or every unused volume, named ones included (`--all`).
+ */
+export type VolumePruneScope = 'anonymous' | 'all';
 
 export interface VolumeListResponse {
   Volumes: VolumeSummary[] | null;

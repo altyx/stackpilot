@@ -26,7 +26,7 @@ export const TERMS: LegalDocument = {
     {
       title: "Objet de l'Application",
       body: [
-        "StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux, consommation des ressources et espace disque) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, en recréant un conteneur pour mettre à jour son image, ou en supprimant les images qu'aucun conteneur n'utilise.",
+        "StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux, consommation des ressources et espace disque) et d'y agir, notamment en démarrant, arrêtant, redémarrant, mettant en pause, tuant ou supprimant des conteneurs, en démarrant ou arrêtant des stacks, en recréant un conteneur pour mettre à jour son image, ou en supprimant les images et les volumes qu'aucun conteneur n'utilise.",
         "L'Application est un projet indépendant : elle n'est ni éditée, ni affiliée, ni approuvée par Portainer.io ou Docker, Inc. « Portainer » et « Docker » sont des marques de leurs titulaires respectifs.",
       ],
     },
@@ -54,7 +54,7 @@ export const TERMS: LegalDocument = {
         'Vous êtes responsable :',
         [
           'de la sécurité de votre appareil (code de verrouillage, mises à jour du système) et de la confidentialité de vos identifiants ;',
-          "des actions effectuées depuis l'Application : démarrer, arrêter ou redémarrer un conteneur ou une stack peut interrompre les services qui en dépendent ; mettre à jour l'image d'un conteneur le supprime et le recrée, ce qui efface les données qui ne sont pas conservées dans un volume ; supprimer une image impose de la retélécharger pour s'en resservir, et une image construite localement ne peut pas être récupérée ;",
+          "des actions effectuées depuis l'Application : démarrer, arrêter, redémarrer, mettre en pause ou tuer un conteneur ou une stack peut interrompre les services qui en dépendent, et tuer un conteneur peut perdre ses écritures en cours ; supprimer un conteneur efface tout ce qui n'est pas conservé dans un volume ; mettre à jour l'image d'un conteneur le supprime et le recrée, ce qui efface les données qui ne sont pas conservées dans un volume ; supprimer une image impose de la retélécharger pour s'en resservir, et une image construite localement ne peut pas être récupérée ; supprimer un volume efface définitivement les données qu'il contient ;",
           "de la configuration, de la sécurité et des sauvegardes de votre instance Portainer et des services qu'elle gère ;",
           'du service de surveillance que vous déployez pour recevoir des notifications.',
         ],

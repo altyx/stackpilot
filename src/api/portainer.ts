@@ -20,6 +20,9 @@ import type {
   Session,
   StackFile,
   VolumeListResponse,
+  VolumePruneResponse,
+  VolumePruneResult,
+  VolumePruneScope,
   VolumeSummary,
 } from './types';
 
@@ -197,6 +200,55 @@ export async function listVolumes(session: Session, endpointId: number): Promise
   return response.Volumes ?? [];
 }
 
+/**
+ * Deletes a volume and the data it holds. Docker refuses (409) while any
+ * container references it, stopped ones included: never forced here.
+ */
+export async function removeVolume(
+  session: Session,
+  endpointId: number,
+  name: string,
+): Promise<void> {
+  try {
+    await request<void>(session, {
+      method: 'DELETE',
+      path: docker(endpointId, `/volumes/${encodeURIComponent(name)}`),
+      timeoutMs: 60_000,
+    });
+  } catch (error) {
+    if (error instanceof PortainerError && error.status === 409) {
+      throw new PortainerError(
+        "Volume utilisé : un conteneur, peut-être arrêté, s'en sert encore. Supprimez-le d'abord.",
+        409,
+        error.detail,
+      );
+    }
+    throw error;
+  }
+}
+
+/**
+ * Deletes the volumes no container references. Since Engine 23, Docker only
+ * prunes anonymous volumes unless `all` is set; older engines ignore the
+ * filter and prune every unused volume, which callers must account for.
+ */
+export async function pruneVolumes(
+  session: Session,
+  endpointId: number,
+  scope: VolumePruneScope,
+): Promise<VolumePruneResult> {
+  const response = await request<VolumePruneResponse>(session, {
+    method: 'POST',
+    path: docker(endpointId, '/volumes/prune'),
+    query: scope === 'all' ? { filters: JSON.stringify({ all: ['true'] }) } : undefined,
+    timeoutMs: 180_000,
+  });
+  return {
+    deleted: response?.VolumesDeleted ?? [],
+    spaceReclaimed: response?.SpaceReclaimed ?? 0,
+  };
+}
+
 export function inspectContainer(
   session: Session,
   endpointId: number,
@@ -221,6 +273,24 @@ export function runContainerAction(
     // On a stack action, half the containers can be in that case: it's a
     // success, not an error.
     accept: [304],
+  });
+}
+
+/**
+ * Deletes a container. `force` stops it first when it runs; `removeVolumes`
+ * also deletes its anonymous volumes, never the named ones.
+ */
+export function removeContainer(
+  session: Session,
+  endpointId: number,
+  containerId: string,
+  options: { force: boolean; removeVolumes: boolean },
+): Promise<void> {
+  return request<void>(session, {
+    method: 'DELETE',
+    path: docker(endpointId, `/containers/${containerId}`),
+    query: { force: options.force || undefined, v: options.removeVolumes || undefined },
+    timeoutMs: 60_000,
   });
 }
 

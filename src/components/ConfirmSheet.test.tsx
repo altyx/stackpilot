@@ -51,4 +51,43 @@ describe('ConfirmSheet', () => {
     await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
     expect(onConfirm).not.toHaveBeenCalled();
   });
+
+  it('waits for the phrase before confirming, then starts empty again', async () => {
+    const { onConfirm, onCancel } = renderSheet({ confirmPhrase: 'pgdata' });
+    const confirm = screen.getByRole('button', { name: 'Arrêter' });
+    expect(confirm).toBeDisabled();
+
+    const field = screen.getByLabelText('Saisissez pgdata pour confirmer');
+    fireEvent.changeText(field, 'pgdat');
+    expect(confirm).toBeDisabled();
+    // Auto-capitalisation and a stray space must not block the user.
+    fireEvent.changeText(field, ' PGdata ');
+    expect(confirm).toBeEnabled();
+
+    fireEvent.press(confirm);
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
+    expect(onCancel).not.toHaveBeenCalled();
+
+    screen.rerender(
+      <ConfirmSheet
+        visible={false}
+        title="t"
+        confirmLabel="Arrêter"
+        confirmPhrase="pgdata"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
+    );
+    screen.rerender(
+      <ConfirmSheet
+        visible
+        title="t"
+        confirmLabel="Arrêter"
+        confirmPhrase="pgdata"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Arrêter' })).toBeDisabled();
+  });
 });

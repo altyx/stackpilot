@@ -15,8 +15,11 @@ import {
   loginWithPassword,
   normalizeImageStatus,
   pruneImages,
+  pruneVolumes,
   recreateContainer,
+  removeContainer,
   removeImage,
+  removeVolume,
   runContainerAction,
 } from './portainer';
 import type { Session } from './types';
@@ -309,6 +312,76 @@ describe('overview readings', () => {
       path: '/endpoints/2/docker/containers/abc/stats',
       query: { stream: false },
       timeoutMs: 20_000,
+    });
+  });
+});
+
+describe('removeContainer', () => {
+  it('forces and removes volumes only when asked', async () => {
+    requestMock.mockResolvedValue(undefined);
+    await removeContainer(session, 1, 'abc', { force: false, removeVolumes: false });
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      method: 'DELETE',
+      path: '/endpoints/1/docker/containers/abc',
+      query: { force: undefined, v: undefined },
+      timeoutMs: 60_000,
+    });
+
+    await removeContainer(session, 1, 'abc', { force: true, removeVolumes: true });
+    expect(requestMock).toHaveBeenLastCalledWith(
+      session,
+      expect.objectContaining({ query: { force: true, v: true } }),
+    );
+  });
+});
+
+describe('removeVolume', () => {
+  it('deletes the volume, never forcing it', async () => {
+    requestMock.mockResolvedValue(undefined);
+    await removeVolume(session, 1, 'pg data');
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      method: 'DELETE',
+      path: '/endpoints/1/docker/volumes/pg%20data',
+      timeoutMs: 60_000,
+    });
+  });
+
+  it('explains a conflict as a container still using the volume', async () => {
+    requestMock.mockRejectedValue(new PortainerError('Conflit', 409, 'volume is in use'));
+    await expect(removeVolume(session, 1, 'pgdata')).rejects.toMatchObject({
+      status: 409,
+      message: expect.stringContaining('Volume utilisé') as unknown,
+      detail: 'volume is in use',
+    });
+  });
+});
+
+describe('pruneVolumes', () => {
+  it('prunes anonymous volumes by default and named ones with all', async () => {
+    requestMock.mockResolvedValue({ VolumesDeleted: ['a'], SpaceReclaimed: 10 });
+    await expect(pruneVolumes(session, 1, 'anonymous')).resolves.toEqual({
+      deleted: ['a'],
+      spaceReclaimed: 10,
+    });
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      method: 'POST',
+      path: '/endpoints/1/docker/volumes/prune',
+      query: undefined,
+      timeoutMs: 180_000,
+    });
+
+    await pruneVolumes(session, 1, 'all');
+    expect(requestMock).toHaveBeenLastCalledWith(
+      session,
+      expect.objectContaining({ query: { filters: '{"all":["true"]}' } }),
+    );
+  });
+
+  it('treats a null list as nothing deleted', async () => {
+    requestMock.mockResolvedValue({ VolumesDeleted: null, SpaceReclaimed: 0 });
+    await expect(pruneVolumes(session, 1, 'all')).resolves.toEqual({
+      deleted: [],
+      spaceReclaimed: 0,
     });
   });
 });

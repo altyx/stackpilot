@@ -9,6 +9,8 @@ import {
   inspectContainer,
   listEndpoints,
   recreateContainer,
+  removeContainer,
+  runContainerAction,
 } from '../src/api/portainer';
 import { makeContainerInspect, makeEndpoint } from '../src/testing/fixtures';
 import { memory } from '../src/testing/secureStoreMock';
@@ -29,10 +31,11 @@ jest.mock('../src/api/portainer', () => ({
   fetchContainerLogs: jest.fn(),
   recreateContainer: jest.fn(),
   runContainerAction: jest.fn(),
+  removeContainer: jest.fn(),
 }));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-const Layout = createTestLayout(queryClient);
+const Layout = createTestLayout(queryClient, { withHeader: true });
 
 const List = () => <Text>Liste</Text>;
 
@@ -102,6 +105,94 @@ describe('container detail screen', () => {
     await renderContainer();
     expect(screen.queryByRole('button', { name: "Mettre à jour l'image" })).toBeNull();
     expect(screen.getByText(/son propre conteneur/)).toBeOnTheScreen();
+  });
+
+  function openMenu() {
+    fireEvent.press(screen.getByRole('button', { name: "Plus d'actions" }));
+  }
+
+  it('keeps rarer actions behind the header menu and kills after confirmation', async () => {
+    jest.mocked(runContainerAction).mockResolvedValue(undefined);
+    await renderContainer();
+    expect(screen.queryByRole('button', { name: 'Tuer' })).toBeNull();
+
+    openMenu();
+    expect(await screen.findByRole('button', { name: 'Mettre en pause' })).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Tuer' }));
+
+    expect(await screen.findByText('Tuer le conteneur ?')).toBeOnTheScreen();
+    fireEvent.press(screen.getAllByRole('button', { name: 'Tuer' }).at(-1)!);
+    await waitFor(() =>
+      expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'old', 'kill'),
+    );
+  });
+
+  it('removes a running container by forcing it, then returns to the list', async () => {
+    jest.mocked(removeContainer).mockResolvedValue(undefined);
+    await renderContainer();
+
+    openMenu();
+    fireEvent.press(await screen.findByRole('button', { name: 'Supprimer le conteneur' }));
+    expect(await screen.findByText(/sera arrêté puis supprimé/)).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+
+    await waitFor(() =>
+      expect(removeContainer).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
+        force: true,
+        removeVolumes: false,
+      }),
+    );
+    await waitFor(() => expect(screen).toHavePathname('/endpoints/1'));
+  });
+
+  it('offers to take anonymous volumes along when the container has some', async () => {
+    jest.mocked(removeContainer).mockResolvedValue(undefined);
+    jest.mocked(inspectContainer).mockResolvedValue(
+      makeContainerInspect({
+        Id: 'old',
+        Mounts: [{ Type: 'volume', Source: '/v', Destination: '/data', RW: true }],
+      }),
+    );
+    await renderContainer();
+
+    openMenu();
+    fireEvent.press(await screen.findByRole('button', { name: 'Supprimer le conteneur' }));
+    fireEvent(
+      await screen.findByLabelText('Supprimer aussi ses volumes anonymes'),
+      'valueChange',
+      true,
+    );
+    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+    await waitFor(() =>
+      expect(removeContainer).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
+        force: true,
+        removeVolumes: true,
+      }),
+    );
+  });
+
+  it('resumes a paused container from its main button, without confirmation', async () => {
+    jest.mocked(runContainerAction).mockResolvedValue(undefined);
+    jest.mocked(inspectContainer).mockResolvedValue(
+      makeContainerInspect({
+        Id: 'old',
+        State: { ...makeContainerInspect().State, Status: 'paused', Paused: true },
+      }),
+    );
+    await renderContainer();
+    expect(screen.queryByRole('button', { name: 'Redémarrer' })).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: 'Reprendre' }));
+    await waitFor(() =>
+      expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'old', 'unpause'),
+    );
+  });
+
+  it("hides the menu on Portainer's own container", async () => {
+    jest
+      .mocked(inspectContainer)
+      .mockResolvedValue(makeContainerInspect({ Id: 'old', IsPortainer: true }));
+    await renderContainer();
+    expect(screen.queryByRole('button', { name: "Plus d'actions" })).toBeNull();
   });
 
   describe('logs', () => {

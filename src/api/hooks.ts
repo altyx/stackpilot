@@ -16,8 +16,11 @@ import {
   listStacks,
   listVolumes,
   pruneImages,
+  pruneVolumes,
   recreateContainer,
+  removeContainer,
   removeImage,
+  removeVolume,
   runContainerAction,
 } from './portainer';
 import { PortainerError } from './client';
@@ -31,6 +34,7 @@ import type {
   ContainerSummary,
   Endpoint,
   ImagePruneScope,
+  VolumePruneScope,
   Session,
   StackAction,
 } from './types';
@@ -188,6 +192,31 @@ export function usePruneImages(endpointId: number) {
     mutationFn: (scope: ImagePruneScope) => pruneImages(requireSession(session), endpointId, scope),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.images(endpointId) });
+    },
+  });
+}
+
+export function useRemoveVolume(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => removeVolume(requireSession(session), endpointId, name),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.volumes(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diskUsage(endpointId) });
+    },
+  });
+}
+
+export function usePruneVolumes(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (scope: VolumePruneScope) =>
+      pruneVolumes(requireSession(session), endpointId, scope),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.volumes(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diskUsage(endpointId) });
     },
   });
 }
@@ -371,6 +400,22 @@ export function useContainerAction(endpointId: number, containerId: string) {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.container(endpointId, containerId),
       });
+    },
+  });
+}
+
+export function useRemoveContainer(endpointId: number, containerId: string) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (options: { force: boolean; removeVolumes: boolean }) =>
+      removeContainer(requireSession(session), endpointId, containerId, options),
+    onSuccess: () => {
+      // The screen leaves right after: nothing should refetch a container
+      // that no longer exists.
+      queryClient.removeQueries({ queryKey: queryKeys.container(endpointId, containerId) });
+      queryClient.removeQueries({ queryKey: queryKeys.logs(endpointId, containerId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
     },
   });
 }
