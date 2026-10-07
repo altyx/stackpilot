@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Slot } from 'expo-router';
+import { Slot, Stack } from 'expo-router';
 import { AuthProvider } from '../auth/AuthContext';
 import { CurrentEndpointProvider } from '../navigation/CurrentEndpoint';
 import { SettingsProvider } from '../settings/SettingsContext';
@@ -9,16 +9,17 @@ import { memory } from './secureStoreMock';
  * Root layout for screen tests under `renderRouter`: the app's providers,
  * minus the navigator. Tests mock `expo-secure-store` with `secureStoreMock`
  * and seed a session with `seedSession` so `AuthProvider` restores it.
+ *
+ * `withHeader` renders a real stack instead of a bare slot, for screens whose
+ * header carries controls (`headerRight`): a slot draws no header.
  */
-export function createTestLayout(queryClient: QueryClient) {
+export function createTestLayout(queryClient: QueryClient, { withHeader = false } = {}) {
   return function TestLayout() {
     return (
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
           <AuthProvider>
-            <CurrentEndpointProvider>
-              <Slot />
-            </CurrentEndpointProvider>
+            <CurrentEndpointProvider>{withHeader ? <Stack /> : <Slot />}</CurrentEndpointProvider>
           </AuthProvider>
         </SettingsProvider>
       </QueryClientProvider>

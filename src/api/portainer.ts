@@ -276,6 +276,24 @@ export function runContainerAction(
 }
 
 /**
+ * Deletes a container. `force` stops it first when it runs; `removeVolumes`
+ * also deletes its anonymous volumes, never the named ones.
+ */
+export function removeContainer(
+  session: Session,
+  endpointId: number,
+  containerId: string,
+  options: { force: boolean; removeVolumes: boolean },
+): Promise<void> {
+  return request<void>(session, {
+    method: 'DELETE',
+    path: docker(endpointId, `/containers/${containerId}`),
+    query: { force: options.force || undefined, v: options.removeVolumes || undefined },
+    timeoutMs: 60_000,
+  });
+}
+
+/**
  * Stacks Portainer manages on an environment.
  *
  * Filtered here rather than through the route's `filters` parameter: that
