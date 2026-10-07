@@ -3,10 +3,15 @@ import {
   countDeletedImages,
   imageLabel,
   imagesWithUsage,
+  isAnonymousVolume,
   isDangling,
   pruneCandidates,
   reclaimableBytes,
   shortImageId,
+  supportsAnonymousPrune,
+  volumeConfirmPhrase,
+  volumePruneCandidates,
+  volumeSizes,
   volumesWithUsage,
 } from './usage';
 
@@ -146,5 +151,51 @@ describe('countDeletedImages', () => {
 
   it('counts nothing when Docker deleted nothing', () => {
     expect(countDeletedImages([makeImage()], [])).toBe(0);
+  });
+});
+
+describe('volume cleanup helpers', () => {
+  const anonymous = makeVolume({
+    Name: 'f'.repeat(64),
+    Labels: { 'com.docker.volume.anonymous': '' },
+  });
+  const named = makeVolume({ Name: 'pgdata' });
+  const usages = [
+    { item: anonymous, usedBy: [] },
+    { item: named, usedBy: [] },
+    { item: makeVolume({ Name: 'used' }), usedBy: ['web'] },
+  ];
+
+  it('recognises anonymous volumes by their label', () => {
+    expect(isAnonymousVolume(anonymous)).toBe(true);
+    expect(isAnonymousVolume(named)).toBe(false);
+  });
+
+  it('previews each scope, never including used volumes', () => {
+    expect(volumePruneCandidates(usages, 'anonymous')).toEqual([anonymous]);
+    expect(volumePruneCandidates(usages, 'all')).toEqual([anonymous, named]);
+  });
+
+  it('offers the anonymous scope only from Engine 23', () => {
+    expect(supportsAnonymousPrune('27.3.1')).toBe(true);
+    expect(supportsAnonymousPrune('23.0.0')).toBe(true);
+    expect(supportsAnonymousPrune('20.10.24')).toBe(false);
+    expect(supportsAnonymousPrune(undefined)).toBe(false);
+  });
+
+  it('reads sizes from system df, skipping uncomputed ones', () => {
+    const sizes = volumeSizes({
+      Volumes: [
+        { Name: 'a', UsageData: { Size: 100, RefCount: 0 } },
+        { Name: 'b', UsageData: { Size: -1, RefCount: -1 } },
+      ],
+    });
+    expect([...sizes]).toEqual([['a', 100]]);
+    expect(volumeSizes(undefined).size).toBe(0);
+  });
+
+  it('asks for the name, or a word when the name is unreadable', () => {
+    expect(volumeConfirmPhrase(named)).toBe('pgdata');
+    expect(volumeConfirmPhrase(anonymous)).toBe('supprimer');
   });
 });

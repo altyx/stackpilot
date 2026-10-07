@@ -11,7 +11,7 @@ import { PRIVACY_POLICY_URL, PUBLISHER } from './publisher';
  */
 export const PRIVACY: LegalDocument = {
   title: 'Politique de confidentialité',
-  updatedAt: '18 septembre 2026',
+  updatedAt: '7 octobre 2026',
   intro:
     "Cette politique explique quelles données l'application mobile StackPilot (l'« Application ») utilise, où elles sont conservées et quels tiers peuvent y avoir accès. En résumé : l'éditeur ne collecte aucune donnée par l'intermédiaire de l'Application, qui communique directement avec votre instance Portainer.",
   sections: [
@@ -77,6 +77,7 @@ export const PRIVACY: LegalDocument = {
       title: 'Partage et transferts',
       body: [
         "L'éditeur ne vend ni ne partage aucune donnée. L'Application ne contient ni outil de mesure d'audience, ni publicité.",
+        "Les journaux d'un conteneur ne quittent l'Application que si vous les copiez ou les partagez vous-même : le partage passe par la feuille de partage du système, vers l'application que vous choisissez. Ces journaux peuvent contenir des informations sensibles de vos services ; vérifiez-les avant de les transmettre.",
         "Les prestataires mentionnés sont établis notamment aux États-Unis : les données qui transitent par eux peuvent être traitées hors de l'Union européenne, dans les conditions prévues par leurs politiques :",
         [
           'Expo : https://expo.dev/privacy',

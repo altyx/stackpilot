@@ -1,17 +1,30 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useContainer, useContainerAction, useRecreateContainer } from '../../../../src/api/hooks';
+import {
+  useContainer,
+  useContainerAction,
+  useRecreateContainer,
+  useRemoveContainer,
+} from '../../../../src/api/hooks';
 import type { ContainerAction } from '../../../../src/api/types';
 import { Button } from '../../../../src/components/Button';
 import { Card } from '../../../../src/components/Card';
 import { ConfirmSheet } from '../../../../src/components/ConfirmSheet';
+import { ContainerActionsSheet } from '../../../../src/components/ContainerActionsSheet';
 import { ContainerImageStatus } from '../../../../src/components/ContainerImageStatus';
 import { ContainerLogsSection } from '../../../../src/components/ContainerLogsSection';
 import { ErrorView } from '../../../../src/components/ErrorView';
+import { HeaderMenuButton } from '../../../../src/components/HeaderMenuButton';
 import { Loader } from '../../../../src/components/Loader';
 import { Row } from '../../../../src/components/Row';
 import { StatusDot } from '../../../../src/components/StatusDot';
+import { ToggleRow } from '../../../../src/components/ToggleRow';
+import {
+  hasVolumeMounts,
+  secondaryActions,
+  type SecondaryAction,
+} from '../../../../src/lib/containerActions';
 import { formatDate, inspectName, shortId, stateLabel } from '../../../../src/lib/format';
 import { imageUpdateBlocker } from '../../../../src/lib/recreate';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
@@ -39,14 +52,20 @@ export default function ContainerDetailScreen() {
   const [pendingAction, setPendingAction] = useState<ContainerAction | null>(null);
   const [confirming, setConfirming] = useState<ContainerAction | null>(null);
   const [confirmingUpdate, setConfirmingUpdate] = useState(false);
+  const remove = useRemoveContainer(id, containerId);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
+  const [removeVolumes, setRemoveVolumes] = useState(false);
 
   if (isPending) return <Loader label="Chargement du conteneur…" />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   const running = data.State.Running;
+  const paused = data.State.Paused;
+  const extraActions = secondaryActions(data);
   const name = inspectName(data);
   const updateBlocker = imageUpdateBlocker(data);
-  const busy = action.isPending || recreate.isPending;
+  const busy = action.isPending || recreate.isPending || remove.isPending;
 
   function execute(next: ContainerAction) {
     setPendingAction(next);
@@ -62,8 +81,38 @@ export default function ContainerDetailScreen() {
 
   /** Destructive actions go through an explicit confirmation. */
   function run(next: ContainerAction) {
-    if (next === 'start') execute(next);
+    if (next === 'start' || next === 'unpause') execute(next);
     else setConfirming(next);
+  }
+
+  function choose(next: SecondaryAction) {
+    if (next === 'remove') {
+      setRemoveVolumes(false);
+      setConfirmingRemove(true);
+    } else {
+      run(next);
+    }
+  }
+
+  /**
+   * The screen shows a container that no longer exists once removed: it
+   * goes back to the list, or to it directly when opened from an alert.
+   */
+  function removeContainer() {
+    remove.mutate(
+      { force: running, removeVolumes },
+      {
+        onSuccess: () => {
+          if (router.canGoBack()) router.back();
+          else router.replace(`/endpoints/${id}`);
+        },
+        onError: (e) =>
+          Alert.alert(
+            'Suppression échouée',
+            e instanceof Error ? e.message : "Le conteneur n'a pas pu être supprimé.",
+          ),
+      },
+    );
   }
 
   /**
@@ -98,7 +147,19 @@ export default function ContainerDetailScreen() {
           tintColor={theme.colors.accent}
         />
       }>
-      <Stack.Screen options={{ title: '' }} />
+      <Stack.Screen
+        options={{
+          title: '',
+          headerRight: () =>
+            extraActions.length > 0 ? (
+              <HeaderMenuButton
+                accessibilityLabel="Plus d'actions"
+                disabled={busy}
+                onPress={() => setMenuOpen(true)}
+              />
+            ) : null,
+        }}
+      />
 
       <Card style={styles.card}>
         <View style={styles.headerRow}>
@@ -116,14 +177,25 @@ export default function ContainerDetailScreen() {
         <View style={styles.actions}>
           {running ? (
             <>
-              <Button
-                label={ACTION_LABELS.restart}
-                variant="secondary"
-                onPress={() => run('restart')}
-                loading={pendingAction === 'restart'}
-                disabled={busy}
-                style={styles.action}
-              />
+              {/* A paused container waits to be resumed, not restarted. */}
+              {paused ? (
+                <Button
+                  label={ACTION_LABELS.unpause}
+                  onPress={() => run('unpause')}
+                  loading={pendingAction === 'unpause'}
+                  disabled={busy}
+                  style={styles.action}
+                />
+              ) : (
+                <Button
+                  label={ACTION_LABELS.restart}
+                  variant="secondary"
+                  onPress={() => run('restart')}
+                  loading={pendingAction === 'restart'}
+                  disabled={busy}
+                  style={styles.action}
+                />
+              )}
               <Button
                 label={ACTION_LABELS.stop}
                 variant="danger"
@@ -188,7 +260,7 @@ export default function ContainerDetailScreen() {
         </Card>
       ) : null}
 
-      <ContainerLogsSection endpointId={id} containerId={containerId} />
+      <ContainerLogsSection endpointId={id} containerId={containerId} containerName={name} />
       <ConfirmSheet
         visible={confirming !== null}
         title={confirming ? `${ACTION_LABELS[confirming]} le conteneur ?` : ''}
@@ -202,6 +274,33 @@ export default function ContainerDetailScreen() {
         }}
         onCancel={() => setConfirming(null)}
       />
+      <ContainerActionsSheet
+        visible={menuOpen}
+        name={name}
+        actions={extraActions}
+        onChoose={choose}
+        onClose={() => setMenuOpen(false)}
+      />
+      <ConfirmSheet
+        visible={confirmingRemove}
+        title="Supprimer le conteneur ?"
+        message={describeRemoval(name, running)}
+        confirmLabel="Supprimer"
+        destructive
+        onConfirm={() => {
+          setConfirmingRemove(false);
+          removeContainer();
+        }}
+        onCancel={() => setConfirmingRemove(false)}>
+        {hasVolumeMounts(data) ? (
+          <ToggleRow
+            label="Supprimer aussi ses volumes anonymes"
+            hint="Les volumes nommés sont toujours conservés."
+            value={removeVolumes}
+            onChange={setRemoveVolumes}
+          />
+        ) : null}
+      </ConfirmSheet>
       <ConfirmSheet
         visible={confirmingUpdate}
         title="Mettre à jour l'image ?"
@@ -229,7 +328,21 @@ function describeUpdate(name: string, image: string): string {
 function describeImpact(action: ContainerAction | null, name: string): string {
   if (action === 'restart') return `${name} va redémarrer et sera brièvement indisponible.`;
   if (action === 'stop') return `${name} restera arrêté jusqu'à son prochain démarrage.`;
+  if (action === 'pause') return `${name} ne répondra plus jusqu'à sa reprise.`;
+  if (action === 'kill') {
+    return (
+      `${name} sera arrêté immédiatement, sans pouvoir se fermer proprement : ` +
+      'les écritures en cours peuvent être perdues.'
+    );
+  }
   return '';
+}
+
+function describeRemoval(name: string, running: boolean): string {
+  return (
+    (running ? `${name} sera arrêté puis supprimé. ` : `${name} sera supprimé. `) +
+    "Tout ce qui n'est pas dans un volume est perdu ; il faudra le recréer pour le relancer."
+  );
 }
 
 const styles = StyleSheet.create({
