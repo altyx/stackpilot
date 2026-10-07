@@ -2,7 +2,7 @@
 
 # Conditions générales d'utilisation
 
-_Dernière mise à jour : 29 septembre 2026_
+_Dernière mise à jour : 7 octobre 2026_
 
 Les présentes conditions générales d'utilisation (les « CGU ») encadrent l'utilisation de l'application mobile StackPilot (l'« Application »). En utilisant l'Application, vous acceptez les CGU dans leur intégralité ; si vous ne les acceptez pas, n'utilisez pas l'Application.
 
@@ -18,7 +18,7 @@ L'Application est distribuée par l'App Store d'Apple et par Google Play. Elle n
 
 ## 2. Objet de l'Application
 
-StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, en recréant un conteneur pour mettre à jour son image, ou en supprimant les images qu'aucun conteneur n'utilise.
+StackPilot est un client mobile pour Portainer, l'outil d'administration de conteneurs. Elle permet de consulter les environnements Docker d'une instance Portainer à laquelle vous avez accès (conteneurs, stacks, images, volumes, journaux, consommation des ressources et espace disque) et d'y agir, notamment en démarrant, arrêtant ou redémarrant des conteneurs et des stacks, en recréant un conteneur pour mettre à jour son image, ou en supprimant les images qu'aucun conteneur n'utilise.
 
 L'Application est un projet indépendant : elle n'est ni éditée, ni affiliée, ni approuvée par Portainer.io ou Docker, Inc. « Portainer » et « Docker » sont des marques de leurs titulaires respectifs.
 

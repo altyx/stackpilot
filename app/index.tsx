@@ -6,7 +6,7 @@ import { pickHomeEndpoint } from '../src/lib/endpoints';
 import { useCurrentEndpoint } from '../src/navigation/CurrentEndpoint';
 
 /**
- * Startup routing: the last environment's containers, failing that the first
+ * Startup routing: the last environment's overview, failing that the first
  * reachable environment's, failing that the environment list — which also
  * explains a loading error.
  */
@@ -22,5 +22,5 @@ export default function Index() {
   const home = endpoints.data
     ? pickHomeEndpoint(endpoints.data, currentEndpoint.endpointId)
     : undefined;
-  return <Redirect href={home ? `/endpoints/${home.Id}` : '/endpoints'} />;
+  return <Redirect href={home ? `/endpoints/${home.Id}/overview` : '/endpoints'} />;
 }

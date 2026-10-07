@@ -90,6 +90,42 @@ export interface ContainerSummary {
   Mounts?: ContainerMount[];
 }
 
+/** Subset of `GET /info` the overview reads. */
+export interface DockerInfo {
+  NCPU: number;
+  /** Host memory, in bytes. */
+  MemTotal: number;
+  ServerVersion?: string;
+  OperatingSystem?: string;
+}
+
+/** Subset of `GET /containers/{id}/stats?stream=false`. */
+export interface ContainerStatsResponse {
+  cpu_stats?: CpuStats;
+  precpu_stats?: CpuStats;
+  memory_stats?: {
+    usage?: number;
+    limit?: number;
+    /** Page cache counters: `inactive_file` on cgroup v2, `total_inactive_file` on v1. */
+    stats?: Record<string, number>;
+  };
+}
+
+interface CpuStats {
+  cpu_usage?: { total_usage?: number; percpu_usage?: number[] };
+  system_cpu_usage?: number;
+  online_cpus?: number;
+}
+
+/** Subset of `GET /system/df`. Sizes are -1 when Docker didn't compute them. */
+export interface DiskUsageResponse {
+  LayersSize?: number;
+  Images?: { Size: number; SharedSize: number; Containers: number }[] | null;
+  Containers?: { SizeRw?: number; State: string }[] | null;
+  Volumes?: { UsageData?: { Size: number; RefCount: number } | null }[] | null;
+  BuildCache?: { Size: number; InUse: boolean }[] | null;
+}
+
 /** Item from `GET /images/json`. */
 export interface ImageSummary {
   Id: string;

@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
   useContainers,
+  useImageUpdates,
   useImages,
   usePruneImages,
   useRemoveImage,
@@ -27,7 +29,7 @@ import {
 } from '../../../../src/lib/usage';
 import { theme } from '../../../../src/theme';
 
-type Filter = 'all' | 'used' | 'unused';
+type Filter = 'all' | 'used' | 'unused' | 'outdated';
 
 export default function ImagesScreen() {
   const id = useEndpointParam();
@@ -36,10 +38,25 @@ export default function ImagesScreen() {
   const containers = useContainers(id);
   const remove = useRemoveImage(id);
   const prune = usePruneImages(id);
-  const [filter, setFilter] = useState<Filter>('all');
+  // The overview links here with `?filter=outdated`. The drawer keeps this
+  // screen mounted, so a later visit with the parameter adjusts the filter.
+  const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
+  const [filter, setFilter] = useState<Filter>(filterParam === 'outdated' ? 'outdated' : 'all');
+  const [lastFilterParam, setLastFilterParam] = useState(filterParam);
+  if (filterParam !== lastFilterParam) {
+    setLastFilterParam(filterParam);
+    if (filterParam === 'outdated') setFilter('outdated');
+  }
   const [pruning, setPruning] = useState(false);
   const [deleting, setDeleting] = useState<ImageSummary | null>(null);
   const shownDeleting = useLatched(deleting);
+
+  const running = useMemo(
+    () => (containers.data ?? []).filter((container) => container.State === 'running'),
+    [containers.data],
+  );
+  const updates = useImageUpdates(id, running);
+  const outdatedIds = useMemo(() => new Set(updates.outdatedImageIds), [updates.outdatedImageIds]);
 
   const usages = useMemo(
     () => imagesWithUsage(images.data ?? [], containers.data ?? []),
@@ -48,14 +65,13 @@ export default function ImagesScreen() {
 
   const visible = useMemo(
     () =>
-      usages.filter((usage) =>
-        filter === 'all'
-          ? true
-          : filter === 'used'
-            ? usage.usedBy.length > 0
-            : usage.usedBy.length === 0,
-      ),
-    [usages, filter],
+      usages.filter((usage) => {
+        if (filter === 'used') return usage.usedBy.length > 0;
+        if (filter === 'unused') return usage.usedBy.length === 0;
+        if (filter === 'outdated') return outdatedIds.has(usage.item.Id);
+        return true;
+      }),
+    [usages, filter, outdatedIds],
   );
 
   if (images.isPending || containers.isPending) return <Loader label="Chargement des images…" />;
@@ -146,16 +162,23 @@ export default function ImagesScreen() {
                 { value: 'all', label: 'Toutes' },
                 { value: 'used', label: 'Utilisées' },
                 { value: 'unused', label: 'Inutilisées' },
+                // Only Portainer Business, indicator on, knows which images are outdated.
+                ...(updates.enabled ? [{ value: 'outdated' as const, label: 'Obsolètes' }] : []),
               ]}
             />
           </View>
         }
         ListEmptyComponent={
-          <EmptyState title="Aucune image" subtitle="Aucun résultat pour ce filtre." />
+          filter === 'outdated' ? (
+            <EmptyState title="Toutes les images sont à jour" />
+          ) : (
+            <EmptyState title="Aucune image" subtitle="Aucun résultat pour ce filtre." />
+          )
         }
         renderItem={({ item }) => (
           <ImageCard
             usage={item}
+            updateAvailable={outdatedIds.has(item.item.Id)}
             onDelete={item.usedBy.length === 0 && !busy ? () => setDeleting(item.item) : undefined}
           />
         )}

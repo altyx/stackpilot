@@ -9,9 +9,12 @@ import { UsageBadge } from './UsageBadge';
 
 export function ImageCard({
   usage,
+  updateAvailable = false,
   onDelete,
 }: {
   usage: Usage<ImageSummary>;
+  /** Its registry has a newer version, per Portainer's indicator. */
+  updateAvailable?: boolean;
   /** Offered on unused images only: Docker refuses to delete the others. */
   onDelete?: () => void;
 }) {
@@ -29,6 +32,8 @@ export function ImageCard({
         <Text style={styles.meta}>
           {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
         </Text>
+
+        {updateAvailable ? <Text style={styles.update}>Nouvelle version disponible</Text> : null}
 
         {isDangling(image) ? <Text style={styles.dangling}>Image sans tag (dangling)</Text> : null}
 
@@ -62,5 +67,6 @@ const styles = StyleSheet.create({
   name: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flex: 1 },
   meta: { color: theme.colors.textMuted, fontSize: 12 },
   dangling: { color: theme.colors.warning, fontSize: 12 },
+  update: { color: theme.colors.accent, fontSize: 12, fontWeight: '500' },
   usedBy: { color: theme.colors.text, fontSize: 12 },
 });

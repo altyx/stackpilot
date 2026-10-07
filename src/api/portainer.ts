@@ -2,7 +2,10 @@ import { normalizeBaseUrl, request, requestAnonymous, requestText, PortainerErro
 import type {
   ContainerAction,
   ContainerInspect,
+  ContainerStatsResponse,
   ContainerSummary,
+  DiskUsageResponse,
+  DockerInfo,
   Endpoint,
   ImageDeleteItem,
   ImagePruneResponse,
@@ -94,6 +97,38 @@ export function listContainers(session: Session, endpointId: number): Promise<Co
 export function listImages(session: Session, endpointId: number): Promise<ImageSummary[]> {
   return request<ImageSummary[]>(session, {
     path: docker(endpointId, '/images/json'),
+  });
+}
+
+/** Host the environment runs on: CPU count and memory, to scale container usage. */
+export function fetchDockerInfo(session: Session, endpointId: number): Promise<DockerInfo> {
+  return request<DockerInfo>(session, { path: docker(endpointId, '/info') });
+}
+
+/**
+ * Disk space Docker uses, by category. Docker walks every layer and volume
+ * to answer, which takes seconds on a busy host: callers cache it.
+ */
+export function fetchDiskUsage(session: Session, endpointId: number): Promise<DiskUsageResponse> {
+  return request<DiskUsageResponse>(session, {
+    path: docker(endpointId, '/system/df'),
+    timeoutMs: 60_000,
+  });
+}
+
+/**
+ * One reading of a container's resource usage. Without `one-shot`, Docker
+ * waits for a second sample (about a second) so the CPU delta can be computed.
+ */
+export function fetchContainerStats(
+  session: Session,
+  endpointId: number,
+  containerId: string,
+): Promise<ContainerStatsResponse> {
+  return request<ContainerStatsResponse>(session, {
+    path: docker(endpointId, `/containers/${containerId}/stats`),
+    query: { stream: false },
+    timeoutMs: 20_000,
   });
 }
 

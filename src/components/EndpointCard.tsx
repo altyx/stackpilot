@@ -40,7 +40,7 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
   if (kubernetes || !online) return <View style={styles.disabled}>{card}</View>;
 
   return (
-    <Link href={`/endpoints/${endpoint.Id}`} asChild>
+    <Link href={`/endpoints/${endpoint.Id}/overview`} asChild>
       <Pressable style={({ pressed }) => pressed && styles.pressed}>{card}</Pressable>
     </Link>
   );

@@ -5,7 +5,7 @@ import { BuildInfo } from '../../src/components/BuildInfo';
 import { Card } from '../../src/components/Card';
 import { SettingsChoiceRow } from '../../src/components/SettingsChoiceRow';
 import { SettingsNavRow } from '../../src/components/SettingsNavRow';
-import { SettingsSection } from '../../src/components/SettingsSection';
+import { Section } from '../../src/components/Section';
 import { SOURCE_CODE_URL } from '../../src/legal/publisher';
 import { newIssueUrl } from '../../src/lib/support';
 import { useSettings } from '../../src/settings/SettingsContext';
@@ -19,7 +19,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <SettingsSection title="Rafraîchissement">
+      <Section title="Rafraîchissement">
         <Text style={styles.hint}>
           La liste des conteneurs se met à jour seule. Un intervalle plus long ménage la batterie et
           le forfait de données ; en mode manuel, tirez la liste vers le bas pour la rafraîchir.
@@ -35,9 +35,9 @@ export default function SettingsScreen() {
             />
           ))}
         </Card>
-      </SettingsSection>
+      </Section>
 
-      <SettingsSection title="Notifications">
+      <Section title="Notifications">
         <Card style={styles.card}>
           <SettingsNavRow
             icon="notifications-outline"
@@ -46,9 +46,9 @@ export default function SettingsScreen() {
             onPress={() => router.push('/notifications')}
           />
         </Card>
-      </SettingsSection>
+      </Section>
 
-      <SettingsSection title="Aide">
+      <Section title="Aide">
         <Card style={styles.card}>
           <SettingsNavRow
             icon="bug-outline"
@@ -71,9 +71,9 @@ export default function SettingsScreen() {
             onPress={() => openLink(SOURCE_CODE_URL)}
           />
         </Card>
-      </SettingsSection>
+      </Section>
 
-      <SettingsSection title="À propos">
+      <Section title="À propos">
         <Card style={styles.card}>
           <SettingsNavRow
             icon="sparkles-outline"
@@ -94,7 +94,7 @@ export default function SettingsScreen() {
           />
         </Card>
         <BuildInfo />
-      </SettingsSection>
+      </Section>
     </ScrollView>
   );
 }
