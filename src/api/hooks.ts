@@ -16,6 +16,7 @@ import {
   listVolumes,
   pruneImages,
   recreateContainer,
+  redeployStack,
   removeImage,
   runContainerAction,
 } from './portainer';
@@ -28,6 +29,8 @@ import type {
   ContainerStatsResponse,
   ContainerSummary,
   Endpoint,
+  PortainerStack,
+  StackEnv,
   ImagePruneScope,
   Session,
   StackAction,
@@ -309,6 +312,28 @@ export function useContainerAction(endpointId: number, containerId: string) {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.container(endpointId, containerId),
       });
+    },
+  });
+}
+
+export function useRedeployStack(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      stack,
+      pullImages,
+      env,
+    }: {
+      stack: PortainerStack;
+      pullImages: boolean;
+      env?: StackEnv[];
+    }) => redeployStack(requireSession(session), stack, { pullImages, env }),
+    onSettled: (_data, _error, { stack }) => {
+      // Recreated containers get new ids; a Git redeploy may change the file.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stacks(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stackFile(stack.Id) });
     },
   });
 }

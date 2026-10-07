@@ -15,6 +15,7 @@ import type {
   ImageStatusResponse,
   ImageSummary,
   PortainerStack,
+  StackEnv,
   PortainerStatus,
   Session,
   StackFile,
@@ -241,6 +242,58 @@ export async function listStacks(session: Session, endpointId: number): Promise<
 export async function fetchStackFile(session: Session, stackId: number): Promise<string> {
   const file = await request<StackFile>(session, { path: `/stacks/${stackId}/file` });
   return file.StackFileContent;
+}
+
+/**
+ * Redeploys a stack Portainer manages, optionally pulling its images again
+ * and replacing its variables.
+ *
+ * A Git stack goes through its own route: the generic update would detach it
+ * from its repository. Without credentials in the payload, Portainer keeps the
+ * stored ones. The generic update needs the compose file back, unchanged.
+ * Both `PullImage` (older Portainer) and `RepullImageAndRedeploy` are sent.
+ */
+export async function redeployStack(
+  session: Session,
+  stack: PortainerStack,
+  options: { pullImages: boolean; env?: StackEnv[] },
+): Promise<void> {
+  const common = {
+    Env: options.env ?? stack.Env ?? [],
+    Prune: false,
+    PullImage: options.pullImages,
+    RepullImageAndRedeploy: options.pullImages,
+  };
+  // Pulling and recreating every service of a stack takes minutes on a slow link.
+  const timeoutMs = 300_000;
+  const query = { endpointId: stack.EndpointId };
+
+  if (stack.GitConfig) {
+    await request<void>(session, {
+      method: 'PUT',
+      path: `/stacks/${stack.Id}/git/redeploy`,
+      query,
+      body: {
+        ...common,
+        RepositoryReferenceName: stack.GitConfig.ReferenceName,
+        RepositoryAuthentication: false,
+      },
+      timeoutMs,
+    });
+    return;
+  }
+
+  const content = await fetchStackFile(session, stack.Id);
+  if (!content) {
+    throw new PortainerError('Fichier de la stack vide : Portainer refuserait le redéploiement.');
+  }
+  await request<void>(session, {
+    method: 'PUT',
+    path: `/stacks/${stack.Id}`,
+    query,
+    body: { ...common, StackFileContent: content },
+    timeoutMs,
+  });
 }
 
 /**
