@@ -54,6 +54,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
         <Text style={styles.caption} numberOfLines={1}>
           {endpointBase === null ? 'Aucun environnement ouvert' : (endpointName ?? 'Environnement')}
         </Text>
+        {item("Vue d'ensemble", 'speedometer-outline', endpointBase && `${endpointBase}/overview`)}
         {item('Conteneurs', 'cube-outline', endpointBase)}
         {item('Stacks', 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
         {item('Images', 'layers-outline', endpointBase && `${endpointBase}/images`)}

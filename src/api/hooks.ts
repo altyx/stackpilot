@@ -1,8 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
 import { useSettings } from '../settings/SettingsContext';
 import {
   fetchContainerLogs,
+  fetchContainerStats,
+  fetchDiskUsage,
+  fetchDockerInfo,
   fetchImageStatus,
   fetchStackFile,
   inspectContainer,
@@ -17,10 +20,12 @@ import {
   runContainerAction,
 } from './portainer';
 import { PortainerError } from './client';
+import { mapSettled } from '../lib/concurrency';
 import { containerName } from '../lib/format';
 import type {
   ContainerAction,
   ContainerInspect,
+  ContainerStatsResponse,
   ContainerSummary,
   Endpoint,
   ImagePruneScope,
@@ -51,6 +56,10 @@ export const queryKeys = {
   volumes: (endpointId: number) => ['volumes', endpointId] as const,
   stacks: (endpointId: number) => ['stacks', endpointId] as const,
   stackFile: (stackId: number) => ['stackFile', stackId] as const,
+  dockerInfo: (endpointId: number) => ['dockerInfo', endpointId] as const,
+  diskUsage: (endpointId: number) => ['diskUsage', endpointId] as const,
+  containerStats: (endpointId: number, containerIds: string) =>
+    ['containerStats', endpointId, containerIds] as const,
 };
 
 export function useEndpoints() {
@@ -174,6 +183,86 @@ export function usePruneImages(endpointId: number) {
     mutationFn: (scope: ImagePruneScope) => pruneImages(requireSession(session), endpointId, scope),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.images(endpointId) });
+    },
+  });
+}
+
+export function useDockerInfo(endpointId: number) {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.dockerInfo(endpointId),
+    queryFn: () => fetchDockerInfo(requireSession(session), endpointId),
+    enabled: !!session,
+    // CPU count and memory only change when the host does.
+    staleTime: 60 * 60_000,
+  });
+}
+
+export function useDiskUsage(endpointId: number) {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.diskUsage(endpointId),
+    queryFn: () => fetchDiskUsage(requireSession(session), endpointId),
+    enabled: !!session,
+    // Costly for Docker to compute, and slow to change: refreshed on demand.
+    staleTime: 5 * 60_000,
+  });
+}
+
+/** Above this, Docker spends its time sampling and the host feels it. */
+const STATS_CONCURRENCY = 4;
+
+/**
+ * One stats reading per running container. Keyed by the set of containers,
+ * so a container starting or stopping triggers a new reading.
+ */
+export function useContainerStats(endpointId: number, containers: ContainerSummary[]) {
+  const { session } = useAuth();
+  const ids = containers
+    .map((container) => container.Id)
+    .sort()
+    .join(',');
+  return useQuery({
+    queryKey: queryKeys.containerStats(endpointId, ids),
+    queryFn: async () => {
+      const readings = await mapSettled(containers, STATS_CONCURRENCY, (container) =>
+        fetchContainerStats(requireSession(session), endpointId, container.Id),
+      );
+      return containers.flatMap((container, index) => {
+        const stats: ContainerStatsResponse | null = readings[index];
+        return stats ? [{ container, stats }] : [];
+      });
+    },
+    enabled: !!session && containers.length > 0,
+    staleTime: 30_000,
+  });
+}
+
+/**
+ * Image status of each given container, sharing its cache with the
+ * indicator in the container list. Empty when the environment doesn't
+ * compare images with their registry (Community Edition, or disabled).
+ */
+export function useImageUpdates(endpointId: number, containers: ContainerSummary[]) {
+  const { session } = useAuth();
+  const enabled = useImageIndicatorEnabled(endpointId);
+  return useQueries({
+    queries: containers.map((container) => ({
+      queryKey: queryKeys.imageStatus(endpointId, container.Id),
+      queryFn: () => fetchImageStatus(requireSession(session), endpointId, container.Id),
+      enabled: !!session && enabled,
+      staleTime: 10 * 60_000,
+      retry: false,
+    })),
+    combine: (results) => {
+      const outdated = containers.filter((_container, index) => results[index].data === 'outdated');
+      return {
+        enabled,
+        isPending: enabled && results.some((result) => result.isPending),
+        outdated,
+        // Several containers often run the same image: it's updated once.
+        outdatedImageIds: [...new Set(outdated.map((container) => container.ImageID))],
+      };
     },
   });
 }

@@ -35,6 +35,9 @@ d'écrire du code touchant aux modules Expo.
   sous `[endpointId]` : chacun lit son segment via `useEndpointParam`.
 - Navigation : les écrans principaux vivent sous le menu latéral
   `app/(drawer)`, dont le contenu est `src/navigation/AppDrawerContent.tsx`.
+  L'app s'ouvre sur la vue d'ensemble de l'environnement
+  (`endpoints/[endpointId]/overview`) ; la liste des conteneurs garde l'URL
+  `endpoints/[endpointId]`, cible des liens existants.
   Les écrans de détail restent dans la pile racine, par-dessus le menu, avec
   un bouton retour. L'environnement visé par le menu est celui du dernier écran
   focalisé (`src/navigation/CurrentEndpoint.tsx`), persisté par instance.
@@ -60,6 +63,11 @@ d'écrire du code touchant aux modules Expo.
 - Les réglages de l'application vivent dans `src/settings` et sont persistés
   dans le trousseau, faute d'autre stockage embarqué. Toute nouvelle préférence
   conservée sur l'appareil doit apparaître dans `src/legal/privacy.ts`.
+- `Link asChild` d'expo-router fusionne le style de son enfant par
+  décomposition d'objet : un style `Pressable` en fonction (`({ pressed }) =>`)
+  y est perdu, mise en page comprise. Sous `Link`, ne garder dans la fonction
+  que l'effet d'appui et porter la mise en page par un enfant ; sinon naviguer
+  avec `useRouter` et `accessibilityRole="link"`.
 - Un composant React par fichier, nommé comme le composant, sous
   `src/components/` (ou `src/navigation/` pour le menu et la pile racine).
   Les commentaires de code sont en anglais et expliquent un pourquoi, pas un quoi.

@@ -28,6 +28,12 @@ export const theme = {
     /** Tint behind a destructive icon: flags the danger without shouting in a list. */
     dangerSubtle: 'rgba(248, 81, 73, 0.12)',
     dangerSubtleBorder: 'rgba(248, 81, 73, 0.35)',
+    /**
+     * Series of a breakdown chart (disk use). Distinct hues rather than the
+     * status colors, which would read as good or bad; always paired with a
+     * text legend.
+     */
+    series: ['#0ba5ec', '#a371f7', '#2dd4bf', '#f778ba'],
     /** Backdrop laid behind modal sheets. */
     backdrop: 'rgba(1, 4, 9, 0.6)',
   },

@@ -4,6 +4,7 @@ import { Alert } from 'react-native';
 import ImagesScreen from '../app/(drawer)/endpoints/[endpointId]/images';
 import { PortainerError } from '../src/api/client';
 import {
+  fetchImageStatus,
   listContainers,
   listEndpoints,
   listImages,
@@ -27,6 +28,7 @@ jest.mock('../src/api/portainer', () => ({
   listImages: jest.fn(),
   removeImage: jest.fn(),
   pruneImages: jest.fn(),
+  fetchImageStatus: jest.fn(),
 }));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -36,10 +38,10 @@ const used = makeImage({ Id: 'sha256:used', RepoTags: ['nginx:1.27'], Size: 100 
 const tagged = makeImage({ Id: 'sha256:old', RepoTags: ['app:1', 'app:latest'], Size: 2_000 });
 const dangling = makeImage({ Id: 'sha256:dangling', RepoTags: [], Size: 3_000 });
 
-async function renderImages() {
+async function renderImages(initialUrl = '/endpoints/1/images') {
   renderRouter(
     { _layout: Layout, '(drawer)/endpoints/[endpointId]/images': ImagesScreen },
-    { initialUrl: '/endpoints/1/images' },
+    { initialUrl },
   );
   await screen.findByText('nginx:1.27');
 }
@@ -129,5 +131,27 @@ describe('images screen', () => {
         "Aucune image n'a été supprimée.",
       ),
     );
+  });
+
+  it('opens on the outdated images when the overview asks for them', async () => {
+    jest
+      .mocked(listEndpoints)
+      .mockResolvedValue([makeEndpoint({ Id: 1, EnableImageNotification: true })]);
+    jest.mocked(fetchImageStatus).mockResolvedValue('outdated');
+    await renderImages('/endpoints/1/images?filter=outdated');
+
+    expect(await screen.findByText(/Nouvelle version disponible/)).toBeOnTheScreen();
+    expect(screen.getByText('nginx:1.27')).toBeOnTheScreen();
+    expect(screen.queryByText('app:1')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Obsolètes' })).toHaveProp(
+      'accessibilityState',
+      expect.objectContaining({ selected: true }),
+    );
+  });
+
+  it('offers the outdated filter only when Portainer compares images', async () => {
+    await renderImages();
+    expect(screen.queryByRole('button', { name: 'Obsolètes' })).toBeNull();
+    expect(fetchImageStatus).not.toHaveBeenCalled();
   });
 });
