@@ -42,6 +42,15 @@ describe('ContainerImageStatus', () => {
     expect(screen.getByLabelText("Mise à jour de l'image disponible")).toBeOnTheScreen();
   });
 
+  it('keeps an up-to-date image off the card but says so on the detail screen', () => {
+    query({ data: 'updated' });
+    render(<ContainerImageStatus endpointId={1} containerId="abc" />);
+    expect(screen.toJSON()).toBeNull();
+
+    screen.rerender(<ContainerImageStatus endpointId={1} containerId="abc" withLabel />);
+    expect(screen.getByText('Image à jour')).toBeOnTheScreen();
+  });
+
   it('keeps an undecided status off the card but names it on the detail screen', () => {
     query({ isError: true });
     render(<ContainerImageStatus endpointId={1} containerId="abc" />);
