@@ -25,12 +25,15 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 export function ImageStatusIcon({
   status,
   withLabel = false,
+  labels = IMAGE_STATUS_LABELS,
 }: {
   status: ImageStatus;
   /** Spells the status out next to the icon, for the detail screen. */
   withLabel?: boolean;
+  /** Wording for something other than a single container's image. */
+  labels?: Record<ImageStatus, string>;
 }) {
-  const label = IMAGE_STATUS_LABELS[status];
+  const label = labels[status];
   const icon =
     status === 'processing' ? (
       <ActivityIndicator color={theme.colors.textMuted} size="small" />

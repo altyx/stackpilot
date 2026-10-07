@@ -386,6 +386,23 @@ export async function fetchImageStatus(
   return normalizeImageStatus(response?.Status);
 }
 
+/**
+ * Whether a stack's images are behind their registry, all services combined:
+ * Portainer reports "outdated" as soon as one is. Same conditions as the
+ * container route: Business Edition, indicator enabled on the environment.
+ */
+export async function fetchStackImageStatus(
+  session: Session,
+  stackId: number,
+): Promise<ImageStatus> {
+  const response = await request<ImageStatusResponse>(session, {
+    path: `/stacks/${stackId}/images_status`,
+    // One registry lookup per service on a cache miss: slower than a container.
+    timeoutMs: 60_000,
+  });
+  return normalizeImageStatus(response?.Status);
+}
+
 /** Portainer's web UI has used both spellings for the in-progress state. */
 export function normalizeImageStatus(status: string | undefined): ImageStatus {
   switch (status) {

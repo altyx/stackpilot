@@ -5,7 +5,9 @@ import StacksScreen from '../app/(drawer)/endpoints/[endpointId]/stacks';
 import StackDetailScreen from '../app/endpoints/[endpointId]/stacks/[stackName]';
 import { PortainerError } from '../src/api/client';
 import {
+  fetchImageStatus,
   fetchStackFile,
+  fetchStackImageStatus,
   listContainers,
   listEndpoints,
   listStacks,
@@ -29,6 +31,7 @@ jest.mock('../src/api/portainer', () => ({
   listStacks: jest.fn(),
   fetchStackFile: jest.fn(),
   fetchImageStatus: jest.fn(),
+  fetchStackImageStatus: jest.fn(),
   runContainerAction: jest.fn(),
   redeployStack: jest.fn(),
 }));
@@ -255,6 +258,29 @@ describe('stack detail screen', () => {
       expect(screen.getByText('TZ est déjà défini plus haut.')).toBeOnTheScreen();
       expect(screen.queryByText('Enregistrer et redéployer ?')).toBeNull();
       expect(redeployStack).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('image status', () => {
+    it("shows whether the stack's images are up to date when Portainer checks them", async () => {
+      jest
+        .mocked(listEndpoints)
+        .mockResolvedValue([makeEndpoint({ Id: 1, EnableImageNotification: true })]);
+      jest.mocked(fetchStackImageStatus).mockResolvedValue('outdated');
+      // The member rows check their own image too, once the indicator is on.
+      jest.mocked(fetchImageStatus).mockResolvedValue('updated');
+      renderAt('/endpoints/1/stacks/blog');
+      expect(await screen.findByText("Mise à jour d'image disponible")).toBeOnTheScreen();
+      expect(fetchStackImageStatus).toHaveBeenCalledWith(expect.anything(), 7);
+    });
+
+    it('asks nothing when the environment has no indicator', async () => {
+      jest.mocked(fetchStackImageStatus).mockClear();
+      renderAt('/endpoints/1/stacks/blog');
+      await screen.findByText('1/2 en cours');
+      await waitFor(() => expect(listEndpoints).toHaveBeenCalled());
+      expect(fetchStackImageStatus).not.toHaveBeenCalled();
+      expect(screen.queryByText('Images à jour')).toBeNull();
     });
   });
 });
