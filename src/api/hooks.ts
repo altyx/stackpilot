@@ -15,9 +15,11 @@ import {
   listStacks,
   listVolumes,
   pruneImages,
+  pruneVolumes,
   recreateContainer,
   removeContainer,
   removeImage,
+  removeVolume,
   runContainerAction,
 } from './portainer';
 import { PortainerError } from './client';
@@ -30,6 +32,7 @@ import type {
   ContainerSummary,
   Endpoint,
   ImagePruneScope,
+  VolumePruneScope,
   Session,
   StackAction,
 } from './types';
@@ -184,6 +187,31 @@ export function usePruneImages(endpointId: number) {
     mutationFn: (scope: ImagePruneScope) => pruneImages(requireSession(session), endpointId, scope),
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.images(endpointId) });
+    },
+  });
+}
+
+export function useRemoveVolume(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => removeVolume(requireSession(session), endpointId, name),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.volumes(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diskUsage(endpointId) });
+    },
+  });
+}
+
+export function usePruneVolumes(endpointId: number) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (scope: VolumePruneScope) =>
+      pruneVolumes(requireSession(session), endpointId, scope),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.volumes(endpointId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.diskUsage(endpointId) });
     },
   });
 }

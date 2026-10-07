@@ -13,8 +13,8 @@ describe('summarizeDiskUsage', () => {
         { SizeRw: 20, State: 'exited' },
       ],
       Volumes: [
-        { UsageData: { Size: 300, RefCount: 1 } },
-        { UsageData: { Size: 100, RefCount: 0 } },
+        { Name: 'v', UsageData: { Size: 300, RefCount: 1 } },
+        { Name: 'v', UsageData: { Size: 100, RefCount: 0 } },
       ],
       BuildCache: [
         { Size: 50, InUse: false },
@@ -35,7 +35,10 @@ describe('summarizeDiskUsage', () => {
     const summary = summarizeDiskUsage({
       Images: null,
       Containers: [{ State: 'exited' }],
-      Volumes: [{ UsageData: { Size: -1, RefCount: -1 } }, { UsageData: null }],
+      Volumes: [
+        { Name: 'v', UsageData: { Size: -1, RefCount: -1 } },
+        { Name: 'v', UsageData: null },
+      ],
     });
     expect(summary.total).toBe(0);
     expect(summary.reclaimable).toBe(0);

@@ -3,6 +3,7 @@ import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { SheetActions } from './SheetActions';
 import { SheetHeader } from './SheetHeader';
+import { matchesPhrase, TypedConfirmation } from './TypedConfirmation';
 
 export interface ConfirmSheetProps {
   visible: boolean;
@@ -10,6 +11,8 @@ export interface ConfirmSheetProps {
   message?: string;
   confirmLabel: string;
   destructive?: boolean;
+  /** For irreversible data loss: the confirm button waits for this to be typed. */
+  confirmPhrase?: string;
   /** Called once the sheet has fully closed. */
   onConfirm: () => void;
   onCancel: () => void;
@@ -22,6 +25,7 @@ export function ConfirmSheet({
   message,
   confirmLabel,
   destructive = false,
+  confirmPhrase,
   onConfirm,
   onCancel,
   children,
@@ -29,6 +33,16 @@ export function ConfirmSheet({
   // Remembers why the sheet is closing: the callback only fires once the animation ends.
   const [outcome, setOutcome] = useState<'confirm' | 'cancel' | null>(null);
   const close = (next: 'confirm' | 'cancel') => setOutcome((current) => current ?? next);
+
+  // Every opening starts with an empty field: a phrase typed for a previous
+  // target must not pre-confirm the next one.
+  const [typed, setTyped] = useState('');
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible) setTyped('');
+  }
+  const confirmed = confirmPhrase === undefined || matchesPhrase(typed, confirmPhrase);
 
   return (
     <BottomSheet
@@ -41,10 +55,14 @@ export function ConfirmSheet({
       }}>
       <SheetHeader title={title} message={message} />
       {children}
+      {confirmPhrase !== undefined ? (
+        <TypedConfirmation phrase={confirmPhrase} value={typed} onChange={setTyped} />
+      ) : null}
       <SheetActions>
         <Button
           label={confirmLabel}
           variant={destructive ? 'danger' : 'primary'}
+          disabled={!confirmed}
           onPress={() => close('confirm')}
         />
         <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />

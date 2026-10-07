@@ -2,7 +2,9 @@ import type {
   ContainerSummary,
   ImageDeleteItem,
   ImagePruneScope,
+  DiskUsageResponse,
   ImageSummary,
+  VolumePruneScope,
   VolumeSummary,
 } from '../api/types';
 import { containerName } from './format';
@@ -109,6 +111,55 @@ export function pruneCandidates(
 export function countDeletedImages(images: ImageSummary[], deleted: ImageDeleteItem[]): number {
   const ids = new Set(deleted.map((item) => item.Deleted).filter(Boolean));
   return images.filter((image) => ids.has(image.Id)).length;
+}
+
+/** Label Docker (Engine 23+) puts on volumes created without a name. */
+const ANONYMOUS_LABEL = 'com.docker.volume.anonymous';
+
+export function isAnonymousVolume(volume: VolumeSummary): boolean {
+  return volume.Labels?.[ANONYMOUS_LABEL] !== undefined;
+}
+
+/**
+ * Whether the engine honours the anonymous-only default of `volume prune`.
+ * Before Engine 23 the same call deletes every unused volume, named ones
+ * included: the narrow scope must not be offered there. Unknown counts as old.
+ */
+export function supportsAnonymousPrune(serverVersion: string | undefined): boolean {
+  const major = Number(/^(\d+)\./.exec(serverVersion ?? '')?.[1]);
+  return Number.isInteger(major) && major >= 23;
+}
+
+/** Volumes a cleanup of this scope should delete, to preview it before confirming. */
+export function volumePruneCandidates(
+  usages: Usage<VolumeSummary>[],
+  scope: VolumePruneScope,
+): VolumeSummary[] {
+  return usages
+    .filter((usage) => usage.usedBy.length === 0)
+    .filter((usage) => scope === 'all' || isAnonymousVolume(usage.item))
+    .map((usage) => usage.item);
+}
+
+/**
+ * Size of each volume, from `docker system df`: the volume list doesn't
+ * carry it. Sizes Docker skipped computing (-1) are left out.
+ */
+export function volumeSizes(df: DiskUsageResponse | undefined): Map<string, number> {
+  const sizes = new Map<string, number>();
+  for (const volume of df?.Volumes ?? []) {
+    const size = volume.UsageData?.Size;
+    if (size !== undefined && size >= 0) sizes.set(volume.Name, size);
+  }
+  return sizes;
+}
+
+/**
+ * What a user types to confirm deleting a volume: its name when it has a
+ * readable one, a fixed word for anonymous volumes and their 64-character ids.
+ */
+export function volumeConfirmPhrase(volume: VolumeSummary): string {
+  return isAnonymousVolume(volume) || volume.Name.length > 40 ? 'supprimer' : volume.Name;
 }
 
 function push(map: Map<string, string[]>, key: string, value: string): void {
