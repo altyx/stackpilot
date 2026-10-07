@@ -16,6 +16,7 @@ import {
   listVolumes,
   pruneImages,
   recreateContainer,
+  removeContainer,
   removeImage,
   runContainerAction,
 } from './portainer';
@@ -309,6 +310,22 @@ export function useContainerAction(endpointId: number, containerId: string) {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.container(endpointId, containerId),
       });
+    },
+  });
+}
+
+export function useRemoveContainer(endpointId: number, containerId: string) {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (options: { force: boolean; removeVolumes: boolean }) =>
+      removeContainer(requireSession(session), endpointId, containerId, options),
+    onSuccess: () => {
+      // The screen leaves right after: nothing should refetch a container
+      // that no longer exists.
+      queryClient.removeQueries({ queryKey: queryKeys.container(endpointId, containerId) });
+      queryClient.removeQueries({ queryKey: queryKeys.logs(endpointId, containerId) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
     },
   });
 }
