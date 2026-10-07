@@ -121,7 +121,7 @@ beforeEach(() => {
     LayersSize: 3_000_000_000,
     Images: [{ Size: 1_000_000_000, SharedSize: 0, Containers: 0 }],
     Containers: [],
-    Volumes: [{ UsageData: { Size: 2_000_000_000, RefCount: 1 } }],
+    Volumes: [{ Name: 'pgdata', UsageData: { Size: 2_000_000_000, RefCount: 1 } }],
     BuildCache: [],
   });
 });

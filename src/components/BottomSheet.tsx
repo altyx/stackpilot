@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   Animated,
   Easing,
+  KeyboardAvoidingView,
   Modal,
   PanResponder,
+  Platform,
   Pressable,
   StyleSheet,
   View,
@@ -135,7 +137,11 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={() => callbacks.current.onRequestClose()}>
-      <View style={styles.root}>
+      {/* A sheet asking for typed input would otherwise sit under the keyboard.
+          Android resizes the window on its own. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.root}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, { opacity: progress }]}>
           <Pressable
             accessibilityRole="button"
@@ -154,7 +160,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
           <View style={styles.handle} />
           {children}
         </Animated.View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
