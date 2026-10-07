@@ -18,12 +18,18 @@ export function IconButton({
   accessibilityLabel,
   onPress,
   variant = 'neutral',
+  active,
   disabled,
 }: {
   icon: IconName;
   accessibilityLabel: string;
   onPress: () => void;
   variant?: 'neutral' | 'danger';
+  /**
+   * For a toggle: set means switched on, tinted and announced as checked.
+   * Left undefined for a plain action.
+   */
+  active?: boolean;
   disabled?: boolean;
 }) {
   const danger = variant === 'danger';
@@ -31,20 +37,20 @@ export function IconButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ disabled: !!disabled }}
+      accessibilityState={{ disabled: !!disabled, checked: active }}
       disabled={disabled}
       onPress={onPress}
       hitSlop={HIT_SLOP}
       style={({ pressed }) => [
         styles.button,
-        danger ? styles.danger : styles.neutral,
+        danger ? styles.danger : active ? styles.active : styles.neutral,
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}>
       <Ionicons
         name={icon}
         size={18}
-        color={danger ? theme.colors.danger : theme.colors.textMuted}
+        color={danger ? theme.colors.danger : active ? theme.colors.accent : theme.colors.textMuted}
       />
     </Pressable>
   );
@@ -64,6 +70,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.dangerSubtle,
     borderColor: theme.colors.dangerSubtleBorder,
   },
+  active: { backgroundColor: theme.colors.accentSubtle, borderColor: theme.colors.accentDim },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.45 },
 });

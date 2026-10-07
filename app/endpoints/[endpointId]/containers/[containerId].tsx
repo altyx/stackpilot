@@ -260,7 +260,7 @@ export default function ContainerDetailScreen() {
         </Card>
       ) : null}
 
-      <ContainerLogsSection endpointId={id} containerId={containerId} />
+      <ContainerLogsSection endpointId={id} containerId={containerId} containerName={name} />
       <ConfirmSheet
         visible={confirming !== null}
         title={confirming ? `${ACTION_LABELS[confirming]} le conteneur ?` : ''}
