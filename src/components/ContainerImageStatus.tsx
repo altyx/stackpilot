@@ -8,6 +8,10 @@ import { ImageStatusIcon } from './ImageStatusIcon';
  * Edition, or indicator disabled on the environment): the query stays idle
  * and no icon claims a status nobody checked. A failed check is treated the
  * same way in the list, and named in the detail screen.
+ *
+ * In the list, only an available update shows: a green tick next to the
+ * green state dot would read as "the container is fine". The detail screen
+ * still spells out "up to date".
  */
 export function ContainerImageStatus({
   endpointId,
@@ -26,6 +30,6 @@ export function ContainerImageStatus({
   if (isPending) return withLabel ? <ImageStatusIcon status="processing" withLabel /> : null;
 
   const status = isError ? 'unknown' : data;
-  if (status === 'unknown' && !withLabel) return null;
+  if (!withLabel && status !== 'outdated') return null;
   return <ImageStatusIcon status={status} withLabel={withLabel} />;
 }

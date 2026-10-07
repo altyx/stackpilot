@@ -26,6 +26,7 @@ import { StackActionSheet } from '../../../../src/components/StackActionSheet';
 import { StackEnvEditor } from '../../../../src/components/StackEnvEditor';
 import { StackEnvRow } from '../../../../src/components/StackEnvRow';
 import { StackFileSection } from '../../../../src/components/StackFileSection';
+import { StackImageStatus } from '../../../../src/components/StackImageStatus';
 import { StackKindBadge } from '../../../../src/components/StackKindBadge';
 import { StackRedeploySheet } from '../../../../src/components/StackRedeploySheet';
 import { useLatched } from '../../../../src/components/useLatched';
@@ -142,6 +143,7 @@ export default function StackDetailScreen() {
           </Text>
           <StackKindBadge kind={overview.kind} />
         </View>
+        {stack ? <StackImageStatus endpointId={id} stackId={stack.Id} withLabel /> : null}
         {stack ? null : (
           <Text style={styles.note}>
             Stack déployée hors de Portainer : seuls ses conteneurs sont connus.

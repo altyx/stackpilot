@@ -2,9 +2,18 @@ import { render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { groupByStack, mergeStacks } from '../lib/stacks';
 import { makeContainer, makeStack } from '../testing/fixtures';
+import { useStackImageStatus } from '../api/hooks';
 import { StackCard } from './StackCard';
 
 jest.mock('expo-router', () => ({ Link: ({ children }: { children: ReactNode }) => children }));
+// The status needs a session and a query client: an idle query unless a test says otherwise.
+jest.mock('../api/hooks', () => ({ useStackImageStatus: jest.fn() }));
+
+const idle = { data: undefined, isError: false, isPending: true, fetchStatus: 'idle' };
+
+beforeEach(() => {
+  jest.mocked(useStackImageStatus).mockReturnValue(idle as never);
+});
 
 const compose = { 'com.docker.compose.project': 'blog' };
 const sections = groupByStack([
@@ -51,5 +60,36 @@ describe('StackCard', () => {
     render(<StackCard endpointId={1} overview={overview} />);
     expect(screen.getByText('Aucun conteneur')).toBeOnTheScreen();
     expect(screen.getByText('Gérée par Portainer')).toBeOnTheScreen();
+  });
+
+  it("shows the stack's image status once Portainer reports it", () => {
+    jest.mocked(useStackImageStatus).mockReturnValue({
+      data: 'outdated',
+      isError: false,
+      isPending: false,
+      fetchStatus: 'idle',
+    } as never);
+    const [overview] = mergeStacks(sections, [makeStack({ Id: 7, Name: 'blog' })]);
+    render(<StackCard endpointId={1} overview={overview} />);
+    expect(screen.getByLabelText("Mise à jour d'image disponible")).toBeOnTheScreen();
+    expect(useStackImageStatus).toHaveBeenCalledWith(1, 7);
+  });
+
+  it('shows nothing when the images are up to date, not to read as "stack OK"', () => {
+    jest.mocked(useStackImageStatus).mockReturnValue({
+      data: 'updated',
+      isError: false,
+      isPending: false,
+      fetchStatus: 'idle',
+    } as never);
+    const [overview] = mergeStacks(sections, [makeStack({ Id: 7, Name: 'blog' })]);
+    render(<StackCard endpointId={1} overview={overview} />);
+    expect(screen.queryByLabelText('Images à jour')).toBeNull();
+  });
+
+  it('asks nothing for a stack Portainer does not manage', () => {
+    const [overview] = mergeStacks(sections, []);
+    render(<StackCard endpointId={1} overview={overview} />);
+    expect(useStackImageStatus).not.toHaveBeenCalled();
   });
 });

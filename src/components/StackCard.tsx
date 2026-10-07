@@ -4,6 +4,7 @@ import { formatDate } from '../lib/format';
 import type { StackOverview } from '../lib/stacks';
 import { theme } from '../theme';
 import { Card } from './Card';
+import { StackImageStatus } from './StackImageStatus';
 import { StackKindBadge } from './StackKindBadge';
 
 export function StackCard({
@@ -22,6 +23,8 @@ export function StackCard({
             <Text style={styles.name} numberOfLines={1}>
               {name}
             </Text>
+            {/* Only a stack Portainer manages has an image status to ask for. */}
+            {stack ? <StackImageStatus endpointId={endpointId} stackId={stack.Id} /> : null}
             <StackKindBadge kind={kind} />
           </View>
 

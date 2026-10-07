@@ -9,6 +9,7 @@ import {
   fetchDockerInfo,
   fetchImageStatus,
   fetchStackFile,
+  fetchStackImageStatus,
   inspectContainer,
   listContainers,
   listEndpoints,
@@ -68,6 +69,7 @@ export const queryKeys = {
   volumes: (endpointId: number) => ['volumes', endpointId] as const,
   stacks: (endpointId: number) => ['stacks', endpointId] as const,
   stackFile: (stackId: number) => ['stackFile', stackId] as const,
+  stackImageStatus: (stackId: number) => ['stackImageStatus', stackId] as const,
   dockerInfo: (endpointId: number) => ['dockerInfo', endpointId] as const,
   diskUsage: (endpointId: number) => ['diskUsage', endpointId] as const,
   containerStats: (endpointId: number, containerIds: string) =>
@@ -305,6 +307,22 @@ export function useImageUpdates(endpointId: number, containers: ContainerSummary
 }
 
 /**
+ * Image status of a stack Portainer manages, cached like the containers' and
+ * idle where Portainer doesn't compare images (see `useImageIndicatorEnabled`).
+ */
+export function useStackImageStatus(endpointId: number, stackId: number | null) {
+  const { session } = useAuth();
+  const enabled = useImageIndicatorEnabled(endpointId);
+  return useQuery({
+    queryKey: queryKeys.stackImageStatus(stackId ?? 0),
+    queryFn: () => fetchStackImageStatus(requireSession(session), stackId ?? 0),
+    enabled: !!session && enabled && stackId !== null,
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+}
+
+/**
  * Recreates a container, pulling its image first: Portainer's way of
  * updating it. The mutation resolves with the new container, whose id
  * differs from the old one: the caller navigates to it.
@@ -425,6 +443,8 @@ export function useRedeployStack(endpointId: number) {
       void queryClient.invalidateQueries({ queryKey: queryKeys.stacks(endpointId) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.containers(endpointId) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.stackFile(stack.Id) });
+      // Pulling during the redeploy is precisely what brings the images up to date.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stackImageStatus(stack.Id) });
     },
   });
 }

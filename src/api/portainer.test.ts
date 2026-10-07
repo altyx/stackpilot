@@ -7,6 +7,7 @@ import {
   fetchDockerInfo,
   fetchImageStatus,
   fetchStackFile,
+  fetchStackImageStatus,
   fetchStatus,
   listContainers,
   listStacks,
@@ -445,5 +446,16 @@ describe('redeployStack', () => {
       /Fichier de la stack vide/,
     );
     expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('fetchStackImageStatus', () => {
+  it("normalises the stack's image status", async () => {
+    requestMock.mockResolvedValue({ Status: 'inprocess', Message: '' });
+    await expect(fetchStackImageStatus(session, 7)).resolves.toBe('processing');
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      path: '/stacks/7/images_status',
+      timeoutMs: 60_000,
+    });
   });
 });
