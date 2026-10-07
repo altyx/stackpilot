@@ -75,6 +75,18 @@ describe('StackCard', () => {
     expect(useStackImageStatus).toHaveBeenCalledWith(1, 7);
   });
 
+  it('shows nothing when the images are up to date, not to read as "stack OK"', () => {
+    jest.mocked(useStackImageStatus).mockReturnValue({
+      data: 'updated',
+      isError: false,
+      isPending: false,
+      fetchStatus: 'idle',
+    } as never);
+    const [overview] = mergeStacks(sections, [makeStack({ Id: 7, Name: 'blog' })]);
+    render(<StackCard endpointId={1} overview={overview} />);
+    expect(screen.queryByLabelText('Images à jour')).toBeNull();
+  });
+
   it('asks nothing for a stack Portainer does not manage', () => {
     const [overview] = mergeStacks(sections, []);
     render(<StackCard endpointId={1} overview={overview} />);

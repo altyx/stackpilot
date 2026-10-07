@@ -274,6 +274,22 @@ describe('stack detail screen', () => {
       expect(fetchStackImageStatus).toHaveBeenCalledWith(expect.anything(), 7);
     });
 
+    it('spells out up-to-date images on the detail screen, but not on the card', async () => {
+      jest
+        .mocked(listEndpoints)
+        .mockResolvedValue([makeEndpoint({ Id: 1, EnableImageNotification: true })]);
+      jest.mocked(fetchStackImageStatus).mockResolvedValue('updated');
+      jest.mocked(fetchImageStatus).mockResolvedValue('updated');
+
+      renderAt('/endpoints/1/stacks');
+      await screen.findByText('blog');
+      await waitFor(() => expect(fetchStackImageStatus).toHaveBeenCalled());
+      expect(screen.queryByLabelText('Images à jour')).toBeNull();
+
+      fireEvent.press(screen.getByText('blog'));
+      expect(await screen.findByText('Images à jour')).toBeOnTheScreen();
+    });
+
     it('asks nothing when the environment has no indicator', async () => {
       jest.mocked(fetchStackImageStatus).mockClear();
       renderAt('/endpoints/1/stacks/blog');
