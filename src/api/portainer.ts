@@ -1,4 +1,5 @@
 import { normalizeBaseUrl, request, requestAnonymous, requestText, PortainerError } from './client';
+import { parseLogLines, type LogLine } from '../lib/logs';
 import type {
   ContainerAction,
   ContainerInspect,
@@ -298,18 +299,23 @@ export function recreateContainer(
   });
 }
 
+/**
+ * Log lines of a container: the last `tail` lines, or every line since a
+ * Unix time. Timestamps are always requested: following the logs resumes
+ * from the last one, and the screen chooses whether to show them.
+ */
 export async function fetchContainerLogs(
   session: Session,
   endpointId: number,
   containerId: string,
-  tail = 200,
-): Promise<string> {
+  window: { tail?: number; since?: string },
+): Promise<LogLine[]> {
   const raw = await requestText(session, {
     path: docker(endpointId, `/containers/${containerId}/logs`),
-    query: { stdout: 1, stderr: 1, timestamps: 0, tail },
+    query: { stdout: 1, stderr: 1, timestamps: 1, tail: window.tail, since: window.since },
     timeoutMs: 30_000,
   });
-  return demultiplexDockerLogs(raw);
+  return parseLogLines(demultiplexDockerLogs(raw));
 }
 
 /**

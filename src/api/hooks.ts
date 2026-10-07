@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
 import { useSettings } from '../settings/SettingsContext';
@@ -22,6 +23,7 @@ import {
 import { PortainerError } from './client';
 import { mapSettled } from '../lib/concurrency';
 import { containerName } from '../lib/format';
+import { mergeLogLines, sinceParam, type LogLine, type LogRange } from '../lib/logs';
 import type {
   ContainerAction,
   ContainerInspect,
@@ -49,7 +51,10 @@ export const queryKeys = {
   containers: (endpointId: number) => ['containers', endpointId] as const,
   container: (endpointId: number, containerId: string) =>
     ['container', endpointId, containerId] as const,
-  logs: (endpointId: number, containerId: string) => ['logs', endpointId, containerId] as const,
+  logs: (endpointId: number, containerId: string, rangeKey?: string) =>
+    rangeKey === undefined
+      ? (['logs', endpointId, containerId] as const)
+      : (['logs', endpointId, containerId, rangeKey] as const),
   imageStatus: (endpointId: number, containerId: string) =>
     ['imageStatus', endpointId, containerId] as const,
   images: (endpointId: number) => ['images', endpointId] as const,
@@ -288,13 +293,70 @@ export function useRecreateContainer(endpointId: number, containerId: string) {
   });
 }
 
-export function useContainerLogs(endpointId: number, containerId: string, tail = 200) {
+/** Pace of the live follow: frequent enough to read along, light on the host. */
+export const LOG_FOLLOW_INTERVAL_MS = 2000;
+
+/**
+ * Logs of a container over a range, optionally followed live. Following
+ * polls for the lines after the last one shown and appends them to the
+ * cached list, rather than holding a streaming connection: React Native's
+ * fetch has no streaming body, and a poll survives Portainer's proxy and a
+ * flaky mobile network alike.
+ */
+export function useContainerLogs(
+  endpointId: number,
+  containerId: string,
+  range: LogRange,
+  { enabled, follow }: { enabled: boolean; follow: boolean },
+) {
   const { session } = useAuth();
-  return useQuery({
-    queryKey: queryKeys.logs(endpointId, containerId),
-    queryFn: () => fetchContainerLogs(requireSession(session), endpointId, containerId, tail),
-    enabled: !!session,
+  const queryClient = useQueryClient();
+  const queryKey = queryKeys.logs(endpointId, containerId, range.key);
+
+  const query = useQuery({
+    queryKey,
+    queryFn: () =>
+      fetchContainerLogs(requireSession(session), endpointId, containerId, {
+        tail: range.tail,
+        since: range.sinceSeconds
+          ? String(Math.floor(Date.now() / 1000) - range.sinceSeconds)
+          : undefined,
+      }),
+    enabled: !!session && enabled,
+    // While following, the poll keeps the list current: a background refetch
+    // would only throw the appended lines away.
+    staleTime: follow ? Infinity : 0,
   });
+
+  const ready = query.isSuccess;
+  useEffect(() => {
+    if (!follow || !session || !ready) return;
+    const key = queryKeys.logs(endpointId, containerId, range.key);
+    let polling = false;
+    const timer = setInterval(() => {
+      if (polling) return;
+      polling = true;
+      const last = queryClient.getQueryData<LogLine[]>(key)?.at(-1)?.timestamp;
+      fetchContainerLogs(session, endpointId, containerId, {
+        since: last ? sinceParam(last) : undefined,
+        tail: last ? undefined : range.tail,
+      })
+        .then((incoming) =>
+          queryClient.setQueryData<LogLine[]>(key, (current) =>
+            mergeLogLines(current ?? [], incoming),
+          ),
+        )
+        // A missed poll is caught up by the next one, which asks from the
+        // same last line: no need to interrupt the reading for it.
+        .catch(() => undefined)
+        .finally(() => {
+          polling = false;
+        });
+    }, LOG_FOLLOW_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [follow, session, ready, queryClient, endpointId, containerId, range.key, range.tail]);
+
+  return query;
 }
 
 export function useContainerAction(endpointId: number, containerId: string) {

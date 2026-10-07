@@ -20,6 +20,8 @@ export const theme = {
     /** Background of filled accent controls, dark enough for white text. */
     accentFill: '#0a6fa8',
     accentDim: '#0b5f85',
+    /** Tint behind a control that is switched on. */
+    accentSubtle: 'rgba(11, 165, 236, 0.15)',
     success: '#3fb950',
     warning: '#d29922',
     danger: '#f85149',

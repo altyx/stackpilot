@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
-import { Alert, Text } from 'react-native';
+import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import * as Clipboard from 'expo-clipboard';
+import { Alert, Share, Text } from 'react-native';
 import ContainerDetailScreen from '../app/endpoints/[endpointId]/containers/[containerId]';
 import {
   fetchContainerLogs,
@@ -20,6 +21,7 @@ jest.mock(
       '../src/testing/secureStoreMock',
     ).secureStoreMock,
 );
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(() => Promise.resolve(true)) }));
 jest.mock('../src/api/portainer', () => ({
   listEndpoints: jest.fn(),
   inspectContainer: jest.fn(),
@@ -57,7 +59,7 @@ beforeEach(() => {
       Promise.resolve(makeContainerInspect({ Id: id })),
     );
   jest.mocked(listEndpoints).mockResolvedValue([makeEndpoint({ Id: 1 })]);
-  jest.mocked(fetchContainerLogs).mockResolvedValue('');
+  jest.mocked(fetchContainerLogs).mockResolvedValue([]);
 });
 
 describe('container detail screen', () => {
@@ -100,5 +102,105 @@ describe('container detail screen', () => {
     await renderContainer();
     expect(screen.queryByRole('button', { name: "Mettre à jour l'image" })).toBeNull();
     expect(screen.getByText(/son propre conteneur/)).toBeOnTheScreen();
+  });
+
+  describe('logs', () => {
+    const lines = [
+      { timestamp: '2026-10-07T12:00:00.100Z', text: 'booting' },
+      { timestamp: '2026-10-07T12:00:01.200Z', text: 'ready' },
+    ];
+
+    async function openLogs() {
+      await renderContainer();
+      fireEvent.press(screen.getByRole('button', { name: 'Afficher les logs' }));
+      await screen.findByText('ready');
+    }
+
+    beforeEach(() => {
+      jest.mocked(fetchContainerLogs).mockResolvedValue(lines);
+    });
+
+    it('loads only when asked, the last 500 lines by default', async () => {
+      await renderContainer();
+      expect(fetchContainerLogs).not.toHaveBeenCalled();
+      fireEvent.press(screen.getByRole('button', { name: 'Afficher les logs' }));
+      expect(await screen.findByText('booting')).toBeOnTheScreen();
+      expect(fetchContainerLogs).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
+        tail: 500,
+        since: undefined,
+      });
+      expect(screen.getByText('2 lignes')).toBeOnTheScreen();
+    });
+
+    it('switches to a period, asking Docker for the lines since then', async () => {
+      await openLogs();
+      fireEvent.press(screen.getByRole('button', { name: '1 h' }));
+      await waitFor(() =>
+        expect(fetchContainerLogs).toHaveBeenLastCalledWith(expect.anything(), 1, 'old', {
+          tail: undefined,
+          since: expect.stringMatching(/^\d+$/) as unknown,
+        }),
+      );
+    });
+
+    it('shows the time of each line on demand', async () => {
+      await openLogs();
+      // The time is a Text nested in the line's: matched by substring.
+      expect(screen.queryAllByText(/\d{2}:\d{2}:01\.200/)).toHaveLength(0);
+      fireEvent.press(screen.getByRole('button', { name: "Afficher l'heure" }));
+      expect(screen.queryAllByText(/\d{2}:\d{2}:01\.200/).length).toBeGreaterThan(0);
+    });
+
+    it('copies and shares the lines, with timestamps when shown', async () => {
+      const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
+      await openLogs();
+      fireEvent.press(screen.getByRole('button', { name: 'Copier les logs' }));
+      expect(Clipboard.setStringAsync).toHaveBeenCalledWith('booting\nready');
+      expect(await screen.findByRole('button', { name: 'Logs copiés' })).toBeOnTheScreen();
+
+      fireEvent.press(screen.getByRole('button', { name: "Afficher l'heure" }));
+      fireEvent.press(screen.getByRole('button', { name: 'Partager les logs' }));
+      expect(shareSpy).toHaveBeenCalledWith({
+        title: 'Logs de web',
+        message: '2026-10-07T12:00:00.100Z booting\n2026-10-07T12:00:01.200Z ready',
+      });
+    });
+
+    it('opens and closes the full screen view with the same toggle', async () => {
+      await openLogs();
+      fireEvent.press(screen.getByRole('button', { name: 'Plein écran' }));
+      expect(await screen.findByText('Logs · web')).toBeOnTheScreen();
+      // The controls exist both in the card and over it: the modal's come last.
+      fireEvent.press(screen.getAllByRole('button', { name: 'Quitter le plein écran' }).at(-1)!);
+      await waitFor(() => expect(screen.queryByText('Logs · web')).toBeNull());
+    });
+
+    it('follows live, asking only for the lines after the last one', async () => {
+      await openLogs();
+      jest.useFakeTimers();
+      try {
+        jest.mocked(fetchContainerLogs).mockResolvedValue([
+          { timestamp: '2026-10-07T12:00:01.200Z', text: 'ready' },
+          { timestamp: '2026-10-07T12:00:02.300Z', text: 'request served' },
+        ]);
+        fireEvent.press(screen.getByRole('button', { name: 'Suivre en direct' }));
+        // Past the poll, plus React Query's batched notification (a timer too).
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(2100);
+        });
+        expect(fetchContainerLogs).toHaveBeenLastCalledWith(expect.anything(), 1, 'old', {
+          since: '1791374401.200',
+          tail: undefined,
+        });
+        expect(screen.getByText('request served')).toBeOnTheScreen();
+        // The repeated last line isn't doubled.
+        expect(screen.getAllByText('ready')).toHaveLength(1);
+        expect(screen.getByText('3 lignes · en direct')).toBeOnTheScreen();
+        // Unmounted under fake timers, so the poll is cleared by the same clock.
+        screen.unmount();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 });
