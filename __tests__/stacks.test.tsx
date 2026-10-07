@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
-import { Text } from 'react-native';
+import { Alert, Text } from 'react-native';
 import StacksScreen from '../app/(drawer)/endpoints/[endpointId]/stacks';
 import StackDetailScreen from '../app/endpoints/[endpointId]/stacks/[stackName]';
 import { PortainerError } from '../src/api/client';
@@ -9,6 +9,7 @@ import {
   listContainers,
   listEndpoints,
   listStacks,
+  redeployStack,
   runContainerAction,
 } from '../src/api/portainer';
 import { makeContainer, makeEndpoint, makeStack } from '../src/testing/fixtures';
@@ -29,6 +30,7 @@ jest.mock('../src/api/portainer', () => ({
   fetchStackFile: jest.fn(),
   fetchImageStatus: jest.fn(),
   runContainerAction: jest.fn(),
+  redeployStack: jest.fn(),
 }));
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -140,7 +142,7 @@ describe('stack detail screen', () => {
   it('stops the whole stack after confirmation', async () => {
     jest.mocked(runContainerAction).mockResolvedValue(undefined);
     renderAt('/endpoints/1/stacks/blog');
-    fireEvent.press(await screen.findByRole('button', { name: 'Démarrer ou arrêter la stack' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Marche / arrêt' }));
     fireEvent.press(screen.getByRole('button', { name: 'Arrêter la stack' }));
     fireEvent.press(screen.getByRole('button', { name: 'Arrêter' }));
     await waitFor(() => expect(runContainerAction).toHaveBeenCalledTimes(2));
@@ -157,5 +159,102 @@ describe('stack detail screen', () => {
   it('explains a stack that no longer exists', async () => {
     renderAt('/endpoints/1/stacks/ghost');
     expect(await screen.findByText('Stack introuvable')).toBeOnTheScreen();
+  });
+
+  describe('redeploy', () => {
+    beforeEach(() => {
+      jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+      jest.mocked(redeployStack).mockResolvedValue(undefined);
+    });
+
+    it('pulls the images and redeploys after confirmation', async () => {
+      renderAt('/endpoints/1/stacks/blog');
+      fireEvent.press(await screen.findByRole('button', { name: 'Redéployer' }));
+      fireEvent.press(
+        await screen.findByRole('button', { name: 'Retélécharger les images et redéployer' }),
+      );
+      expect(screen.getByText(/plusieurs minutes/)).toBeOnTheScreen();
+      fireEvent.press(screen.getAllByRole('button', { name: 'Redéployer' }).at(-1)!);
+
+      await waitFor(() =>
+        expect(redeployStack).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ Id: 7 }),
+          { pullImages: true, env: undefined },
+        ),
+      );
+      await waitFor(() =>
+        expect(Alert.alert).toHaveBeenCalledWith('Stack redéployée', 'blog a été redéployée.'),
+      );
+    });
+
+    it('offers a Git update for a stack linked to a repository', async () => {
+      jest.mocked(listStacks).mockResolvedValue([
+        makeStack({
+          Id: 7,
+          Name: 'blog',
+          GitConfig: {
+            URL: 'https://git.lan/blog.git',
+            ReferenceName: 'refs/heads/main',
+            ConfigFilePath: 'compose.yml',
+          },
+        }),
+      ]);
+      renderAt('/endpoints/1/stacks/blog');
+      fireEvent.press(await screen.findByRole('button', { name: 'Redéployer' }));
+      expect(await screen.findByText(/dernière version de main/)).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Mettre à jour depuis Git' })).toBeOnTheScreen();
+    });
+
+    it('does not offer it for an external stack', async () => {
+      renderAt('/endpoints/1/stacks/legacy');
+      await screen.findByText('1/1 en cours');
+      expect(screen.queryByRole('button', { name: 'Redéployer' })).toBeNull();
+    });
+
+    it('edits the variables, shows what changes, then redeploys with them', async () => {
+      renderAt('/endpoints/1/stacks/blog');
+      fireEvent.press(await screen.findByRole('button', { name: 'Modifier' }));
+
+      fireEvent.changeText(screen.getByDisplayValue('Europe/Paris'), 'UTC');
+      fireEvent.press(screen.getByRole('button', { name: 'Retirer DB_PASSWORD' }));
+      fireEvent.press(screen.getByRole('button', { name: '+ Ajouter une variable' }));
+      const names = screen.getAllByLabelText('Nom de la variable');
+      fireEvent.changeText(names.at(-1)!, 'LOG_LEVEL');
+      fireEvent.changeText(screen.getAllByLabelText(/^Valeur de/).at(-1)!, ' debug ');
+      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer' }));
+
+      expect(
+        await screen.findByText(/Ajoutées : LOG_LEVEL\. Modifiées : TZ\. Retirées : DB_PASSWORD\./),
+      ).toBeOnTheScreen();
+      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer et redéployer' }));
+
+      await waitFor(() =>
+        expect(redeployStack).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ Id: 7 }),
+          {
+            pullImages: false,
+            // The value keeps its spaces: it goes exactly as typed.
+            env: [
+              { name: 'TZ', value: 'UTC' },
+              { name: 'LOG_LEVEL', value: ' debug ' },
+            ],
+          },
+        ),
+      );
+    });
+
+    it('refuses to save duplicate names', async () => {
+      renderAt('/endpoints/1/stacks/blog');
+      fireEvent.press(await screen.findByRole('button', { name: 'Modifier' }));
+      fireEvent.press(screen.getByRole('button', { name: '+ Ajouter une variable' }));
+      fireEvent.changeText(screen.getAllByLabelText('Nom de la variable').at(-1)!, 'TZ');
+      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer' }));
+
+      expect(screen.getByText('TZ est déjà défini plus haut.')).toBeOnTheScreen();
+      expect(screen.queryByText('Enregistrer et redéployer ?')).toBeNull();
+      expect(redeployStack).not.toHaveBeenCalled();
+    });
   });
 });

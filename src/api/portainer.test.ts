@@ -17,12 +17,14 @@ import {
   pruneImages,
   pruneVolumes,
   recreateContainer,
+  redeployStack,
   removeContainer,
   removeImage,
   removeVolume,
   runContainerAction,
 } from './portainer';
-import type { Session } from './types';
+import type { PortainerStack, Session } from './types';
+import { makeStack } from '../testing/fixtures';
 
 jest.mock('./client', () => ({
   ...jest.requireActual<typeof import('./client')>('./client'),
@@ -383,5 +385,65 @@ describe('pruneVolumes', () => {
       deleted: [],
       spaceReclaimed: 0,
     });
+  });
+});
+
+describe('redeployStack', () => {
+  const env = [{ name: 'TZ', value: 'UTC' }];
+
+  it('sends the stored file back with the variables, pulling when asked', async () => {
+    requestMock
+      .mockResolvedValueOnce({ StackFileContent: 'services: {}' })
+      .mockResolvedValueOnce(undefined);
+    await redeployStack(session, makeStack({ Id: 7, EndpointId: 3, Env: env }), {
+      pullImages: true,
+    });
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      method: 'PUT',
+      path: '/stacks/7',
+      query: { endpointId: 3 },
+      body: {
+        StackFileContent: 'services: {}',
+        Env: env,
+        Prune: false,
+        PullImage: true,
+        RepullImageAndRedeploy: true,
+      },
+      timeoutMs: 300_000,
+    });
+  });
+
+  it('uses the Git route for a repository stack, keeping stored credentials', async () => {
+    requestMock.mockResolvedValue(undefined);
+    const stack: PortainerStack = makeStack({
+      Id: 7,
+      EndpointId: 3,
+      GitConfig: { URL: 'u', ReferenceName: 'refs/heads/main', ConfigFilePath: 'c' },
+    });
+    await redeployStack(session, stack, { pullImages: false, env });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+    expect(requestMock).toHaveBeenLastCalledWith(session, {
+      method: 'PUT',
+      path: '/stacks/7/git/redeploy',
+      query: { endpointId: 3 },
+      body: {
+        Env: env,
+        Prune: false,
+        PullImage: false,
+        RepullImageAndRedeploy: false,
+        RepositoryReferenceName: 'refs/heads/main',
+        RepositoryAuthentication: false,
+      },
+      timeoutMs: 300_000,
+    });
+  });
+
+  it('refuses to redeploy from an empty file', async () => {
+    requestMock.mockClear();
+    requestMock.mockResolvedValueOnce({ StackFileContent: '' });
+    await expect(redeployStack(session, makeStack(), { pullImages: false })).rejects.toThrow(
+      /Fichier de la stack vide/,
+    );
+    expect(requestMock).toHaveBeenCalledTimes(1);
   });
 });

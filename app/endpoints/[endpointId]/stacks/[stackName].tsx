@@ -1,10 +1,21 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useContainers, useStackAction, useStacks } from '../../../../src/api/hooks';
-import { StackStatus, type StackAction } from '../../../../src/api/types';
+import {
+  useContainers,
+  useRedeployStack,
+  useStackAction,
+  useStacks,
+} from '../../../../src/api/hooks';
+import {
+  StackStatus,
+  type PortainerStack,
+  type StackAction,
+  type StackEnv,
+} from '../../../../src/api/types';
 import { Button } from '../../../../src/components/Button';
 import { Card } from '../../../../src/components/Card';
+import { ConfirmSheet } from '../../../../src/components/ConfirmSheet';
 import { ContainerRow } from '../../../../src/components/ContainerRow';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
 import { EmptyState } from '../../../../src/components/EmptyState';
@@ -12,10 +23,14 @@ import { ErrorView } from '../../../../src/components/ErrorView';
 import { Loader } from '../../../../src/components/Loader';
 import { Row } from '../../../../src/components/Row';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
+import { StackEnvEditor } from '../../../../src/components/StackEnvEditor';
 import { StackEnvRow } from '../../../../src/components/StackEnvRow';
 import { StackFileSection } from '../../../../src/components/StackFileSection';
 import { StackKindBadge } from '../../../../src/components/StackKindBadge';
+import { StackRedeploySheet } from '../../../../src/components/StackRedeploySheet';
+import { useLatched } from '../../../../src/components/useLatched';
 import { formatDate } from '../../../../src/lib/format';
+import { diffEnv, type EnvDiff } from '../../../../src/lib/stackEnv';
 import {
   STACK_KIND_LABELS,
   describeStackResult,
@@ -33,6 +48,11 @@ export default function StackDetailScreen() {
   const stacks = useStacks(id);
   const stackAction = useStackAction(id);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const redeploy = useRedeployStack(id);
+  const [redeploying, setRedeploying] = useState(false);
+  const [editingEnv, setEditingEnv] = useState(false);
+  const [pendingEnv, setPendingEnv] = useState<StackEnv[] | null>(null);
+  const shownPendingEnv = useLatched(pendingEnv);
 
   const overview = useMemo(
     () =>
@@ -77,6 +97,24 @@ export default function StackDetailScreen() {
     );
   }
 
+  function runRedeploy(target: PortainerStack, pullImages: boolean, env?: StackEnv[]) {
+    redeploy.mutate(
+      { stack: target, pullImages, env },
+      {
+        onSuccess: () => {
+          setEditingEnv(false);
+          Alert.alert('Stack redéployée', `${target.Name} a été redéployée.`);
+        },
+        // Edits stay in the form on failure: nothing typed is lost.
+        onError: (e) =>
+          Alert.alert(
+            'Redéploiement échoué',
+            e instanceof Error ? e.message : "La stack n'a pas pu être redéployée.",
+          ),
+      },
+    );
+  }
+
   function refetch() {
     void containers.refetch();
     void stacks.refetch();
@@ -85,6 +123,9 @@ export default function StackDetailScreen() {
   return (
     <ScrollView
       contentContainerStyle={styles.content}
+      // The variable fields sit low on the page: iOS lifts them over the keyboard.
+      automaticallyAdjustKeyboardInsets
+      keyboardShouldPersistTaps="handled"
       refreshControl={
         <RefreshControl
           refreshing={containers.isRefetching || stacks.isRefetching}
@@ -106,13 +147,32 @@ export default function StackDetailScreen() {
             Stack déployée hors de Portainer : seuls ses conteneurs sont connus.
           </Text>
         )}
-        {section ? (
-          <Button
-            label="Démarrer ou arrêter la stack"
-            variant="secondary"
-            onPress={() => setSheetOpen(true)}
-            loading={stackAction.isPending}
-          />
+        <View style={styles.actions}>
+          {section ? (
+            <Button
+              label="Marche / arrêt"
+              variant="secondary"
+              onPress={() => setSheetOpen(true)}
+              loading={stackAction.isPending}
+              disabled={redeploy.isPending}
+              style={styles.action}
+            />
+          ) : null}
+          {/* Only Portainer can redeploy: an external stack has no file it knows. */}
+          {stack ? (
+            <Button
+              label="Redéployer"
+              onPress={() => setRedeploying(true)}
+              loading={redeploy.isPending}
+              disabled={stackAction.isPending}
+              style={styles.action}
+            />
+          ) : null}
+        </View>
+        {redeploy.isPending ? (
+          <Text style={styles.note}>
+            Redéploiement en cours… Télécharger les images peut prendre plusieurs minutes.
+          </Text>
         ) : null}
       </Card>
 
@@ -146,12 +206,31 @@ export default function StackDetailScreen() {
         </Card>
       ) : null}
 
-      {stack?.Env && stack.Env.length > 0 ? (
-        <Card>
-          <Text style={styles.sectionTitle}>Variables d&apos;environnement</Text>
-          {stack.Env.map((variable) => (
-            <StackEnvRow key={variable.name} variable={variable} />
-          ))}
+      {stack ? (
+        <Card style={styles.card}>
+          <View style={styles.envHeader}>
+            <Text style={styles.sectionTitle}>Variables d&apos;environnement</Text>
+            {!editingEnv ? (
+              <Text
+                accessibilityRole="button"
+                onPress={() => setEditingEnv(true)}
+                style={styles.link}>
+                Modifier
+              </Text>
+            ) : null}
+          </View>
+          {editingEnv ? (
+            <StackEnvEditor
+              initial={stack.Env}
+              busy={redeploy.isPending}
+              onCancel={() => setEditingEnv(false)}
+              onSave={setPendingEnv}
+            />
+          ) : stack.Env && stack.Env.length > 0 ? (
+            stack.Env.map((variable) => <StackEnvRow key={variable.name} variable={variable} />)
+          ) : (
+            <Text style={styles.note}>Aucune variable définie dans Portainer.</Text>
+          )}
         </Card>
       ) : null}
 
@@ -169,6 +248,27 @@ export default function StackDetailScreen() {
 
       {stack ? <StackFileSection stackId={stack.Id} /> : null}
 
+      <StackRedeploySheet
+        stack={redeploying ? stack : null}
+        onConfirm={(target, pullImages) => runRedeploy(target, pullImages)}
+        onClose={() => setRedeploying(false)}
+      />
+      <ConfirmSheet
+        visible={pendingEnv !== null}
+        title="Enregistrer et redéployer ?"
+        message={
+          stack && shownPendingEnv
+            ? describeEnvChange(diffEnv(stack.Env, shownPendingEnv))
+            : undefined
+        }
+        confirmLabel="Enregistrer et redéployer"
+        onConfirm={() => {
+          const env = pendingEnv;
+          setPendingEnv(null);
+          if (stack && env) runRedeploy(stack, false, env);
+        }}
+        onCancel={() => setPendingEnv(null)}
+      />
       <StackActionSheet
         section={sheetOpen ? section : null}
         onConfirm={runStackAction}
@@ -176,6 +276,17 @@ export default function StackDetailScreen() {
       />
     </ScrollView>
   );
+}
+
+/** Names, not values: a changed password shouldn't be echoed back on screen. */
+function describeEnvChange(diff: EnvDiff): string {
+  const parts = [
+    diff.added.length ? `Ajoutées : ${diff.added.join(', ')}.` : '',
+    diff.changed.length ? `Modifiées : ${diff.changed.join(', ')}.` : '',
+    diff.removed.length ? `Retirées : ${diff.removed.join(', ')}.` : '',
+  ].filter(Boolean);
+  const summary = parts.length ? parts.join(' ') : 'Aucune variable modifiée.';
+  return `${summary} La stack sera redéployée pour les appliquer : ses conteneurs concernés seront recréés.`;
 }
 
 function describeAutoUpdate(interval?: string, webhook?: string): string {
@@ -192,4 +303,8 @@ const styles = StyleSheet.create({
   note: { color: theme.colors.textMuted, fontSize: 12 },
   sectionTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
   members: { gap: theme.spacing(2) },
+  actions: { flexDirection: 'row', gap: theme.spacing(2) },
+  action: { flex: 1 },
+  envHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  link: { color: theme.colors.accent, fontSize: 13, fontWeight: '600' },
 });
