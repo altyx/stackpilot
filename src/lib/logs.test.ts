@@ -5,6 +5,7 @@ import {
   mergeLogLines,
   parseLogLines,
   sinceParam,
+  stripFrameHeaders,
   type LogLine,
 } from './logs';
 
@@ -20,11 +21,80 @@ describe('parseLogLines', () => {
     ]);
   });
 
+  it('drops terminal colour codes', () => {
+    expect(parseLogLines('2026-10-08T01:00:00Z \u001b[31m [ERROR] Failed\u001b[0m\n')).toEqual([
+      line('2026-10-08T01:00:00Z', ' [ERROR] Failed'),
+    ]);
+  });
+
   it('keeps a line without timestamp as is, and empty messages', () => {
     expect(parseLogLines('no stamp\n2026-10-07T12:00:00Z')).toEqual([
       line('', 'no stamp'),
       line('2026-10-07T12:00:00Z', ''),
     ]);
+  });
+});
+
+describe('stripFrameHeaders', () => {
+  /**
+   * A Docker block as it reaches the app: real bytes (stream, padding, size
+   * in bytes, body), then read as UTF-8 text like `response.text()` does.
+   */
+  function frames(...blocks: [stream: number, text: string][]): string {
+    const bytes = Buffer.concat(
+      blocks.map(([stream, text]) => {
+        const body = Buffer.from(text, 'utf8');
+        const header = Buffer.alloc(8);
+        header[0] = stream;
+        header.writeUInt32BE(body.length, 4);
+        return Buffer.concat([header, body]);
+      }),
+    );
+    return new TextDecoder().decode(bytes);
+  }
+
+  const stamp = (n: number) => `2026-10-08T09:00:0${n}.000000001Z`;
+
+  it('keeps every line when a block is longer than 127 bytes', () => {
+    // The size byte (0xA9) is no valid UTF-8 on its own: it decodes to U+FFFD.
+    const long = 'x'.repeat(140);
+    const raw = frames(
+      [1, `${stamp(0)} short\n`],
+      [1, `${stamp(1)} ${long}\n`],
+      [2, `${stamp(2)} end\n`],
+    );
+    expect(parseLogLines(stripFrameHeaders(raw)).map((line) => line.text)).toEqual([
+      'short',
+      long,
+      'end',
+    ]);
+  });
+
+  it('keeps accents and emoji, whose bytes outnumber their characters', () => {
+    const raw = frames([1, `${stamp(0)} démarré ✅ 🚀\n`], [1, `${stamp(1)} prêt\n`]);
+    expect(parseLogLines(stripFrameHeaders(raw)).map((line) => line.text)).toEqual([
+      'démarré ✅ 🚀',
+      'prêt',
+    ]);
+  });
+
+  it('handles a size whose last byte reads as a digit', () => {
+    // 50 bytes: the size ends with 0x32, the character "2", like the year.
+    const text = `${stamp(0)} ${'y'.repeat(50 - stamp(0).length - 2)}\n`;
+    expect(Buffer.byteLength(text)).toBe(50);
+    expect(parseLogLines(stripFrameHeaders(frames([1, text])))[0].text).toBe(
+      'y'.repeat(50 - stamp(0).length - 2),
+    );
+  });
+
+  it('keeps several lines sent in one block', () => {
+    const raw = frames([1, `${stamp(0)} a\n${stamp(1)} b\n`]);
+    expect(parseLogLines(stripFrameHeaders(raw)).map((line) => line.text)).toEqual(['a', 'b']);
+  });
+
+  it('leaves TTY output, which has no headers, untouched', () => {
+    const raw = `${stamp(0)} plain\r\n${stamp(1)} text\r\n`;
+    expect(stripFrameHeaders(raw)).toBe(raw);
   });
 });
 

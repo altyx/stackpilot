@@ -1,6 +1,5 @@
 import { PortainerError, request, requestAnonymous, requestText } from './client';
 import {
-  demultiplexDockerLogs,
   fetchContainerLogs,
   fetchContainerStats,
   fetchDiskUsage,
@@ -196,19 +195,6 @@ describe('normalizeImageStatus', () => {
     expect(normalizeImageStatus('inprocess')).toBe('processing');
     expect(normalizeImageStatus('error')).toBe('unknown');
     expect(normalizeImageStatus(undefined)).toBe('unknown');
-  });
-});
-
-describe('demultiplexDockerLogs', () => {
-  const frame = (stream: number, text: string) =>
-    String.fromCharCode(stream, 0, 0, 0, 0, 0, 0, text.length) + text;
-
-  it('strips the 8-byte stream headers', () => {
-    expect(demultiplexDockerLogs(frame(1, 'out\n') + frame(2, 'err\n'))).toBe('out\nerr\n');
-  });
-
-  it('leaves TTY output untouched', () => {
-    expect(demultiplexDockerLogs('plain text')).toBe('plain text');
   });
 });
 

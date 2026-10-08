@@ -1,5 +1,5 @@
 import { normalizeBaseUrl, request, requestAnonymous, requestText, PortainerError } from './client';
-import { parseLogLines, type LogLine } from '../lib/logs';
+import { parseLogLines, stripFrameHeaders, type LogLine } from '../lib/logs';
 import type {
   ContainerAction,
   ContainerInspect,
@@ -455,29 +455,5 @@ export async function fetchContainerLogs(
     query: { stdout: 1, stderr: 1, timestamps: 1, tail: window.tail, since: window.since },
     timeoutMs: 30_000,
   });
-  return parseLogLines(demultiplexDockerLogs(raw));
-}
-
-/**
- * Without a TTY, Docker prefixes each log block with an 8-byte header
- * (1 stream byte, 3 padding, 4 big-endian size). Stripped here to keep only
- * the text.
- */
-export function demultiplexDockerLogs(raw: string): string {
-  const looksMultiplexed = raw.length > 8 && raw.charCodeAt(0) <= 2 && raw.charCodeAt(1) === 0;
-  if (!looksMultiplexed) return raw;
-
-  const chunks: string[] = [];
-  let cursor = 0;
-  while (cursor + 8 <= raw.length) {
-    const size =
-      (raw.charCodeAt(cursor + 4) << 24) |
-      (raw.charCodeAt(cursor + 5) << 16) |
-      (raw.charCodeAt(cursor + 6) << 8) |
-      raw.charCodeAt(cursor + 7);
-    if (size < 0 || size > raw.length - cursor - 8) break;
-    chunks.push(raw.slice(cursor + 8, cursor + 8 + size));
-    cursor += 8 + size;
-  }
-  return chunks.length ? chunks.join('') : raw;
+  return parseLogLines(stripFrameHeaders(raw));
 }
