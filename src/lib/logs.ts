@@ -29,13 +29,37 @@ export const DEFAULT_LOG_RANGE = LOG_RANGES[1];
  */
 export const MAX_LOG_LINES = 5000;
 
+/**
+ * Header Docker puts before each block when the container has no TTY: one
+ * stream byte, three zero bytes, then the block's size on four bytes.
+ *
+ * The size can't be trusted here: the body is read as UTF-8 text, so a size
+ * byte of 128 or more turns into a replacement character, and multi-byte
+ * characters make sizes (bytes) and offsets (characters) disagree. A header
+ * is found instead by what follows it: the logs are always fetched with
+ * timestamps, so every block starts with an ISO date. The size decodes to
+ * two to four characters (its first byte is always zero).
+ */
+const FRAME_HEADER = /[\u0000-\u0002]\u0000\u0000\u0000[^]{2,4}?(?=\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/g;
+
+/** Docker's log output with its block headers removed; TTY output has none. */
+export function stripFrameHeaders(raw: string): string {
+  return raw.replace(FRAME_HEADER, '');
+}
+
 /** "2026-10-07T12:00:00.123456789Z message" → timestamp and message. */
 const TIMESTAMPED = /^(\d{4}-\d{2}-\d{2}T\S+)\s?(.*)$/;
 
-/** Splits Docker's text output (already demultiplexed) into lines. */
+/**
+ * Terminal colour and style codes ("\x1b[31m"). Many services colour their
+ * output for a console; drawn as text, the codes only clutter the line.
+ */
+const ANSI_ESCAPE = /\u001b\[[0-9;?]*[A-Za-z]/g;
+
+/** Splits Docker's text output (headers already stripped) into lines. */
 export function parseLogLines(raw: string): LogLine[] {
   const lines: LogLine[] = [];
-  for (const line of raw.split('\n')) {
+  for (const line of raw.replace(ANSI_ESCAPE, '').split('\n')) {
     if (line === '') continue;
     const match = TIMESTAMPED.exec(line.replace(/\r$/, ''));
     lines.push(match ? { timestamp: match[1], text: match[2] } : { timestamp: '', text: line });
