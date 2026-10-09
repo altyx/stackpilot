@@ -11,12 +11,12 @@ import { UsageBadge } from './UsageBadge';
 describe('UsageBadge', () => {
   it('counts the containers using the resource', () => {
     render(<UsageBadge usedBy={['web', 'worker']} />);
-    expect(screen.getByText('utilisé · 2')).toBeOnTheScreen();
+    expect(screen.getByText('used · 2')).toBeOnTheScreen();
   });
 
   it('flags unused resources', () => {
     render(<UsageBadge usedBy={[]} />);
-    expect(screen.getByText('inutilisé')).toBeOnTheScreen();
+    expect(screen.getByText('unused')).toBeOnTheScreen();
   });
 });
 
@@ -31,16 +31,16 @@ describe('StatusDot', () => {
 
 describe('EmptyState', () => {
   it('shows its title and subtitle', () => {
-    render(<EmptyState title="Aucun conteneur" subtitle="Aucun résultat pour ce filtre." />);
-    expect(screen.getByText('Aucun conteneur')).toBeOnTheScreen();
-    expect(screen.getByText('Aucun résultat pour ce filtre.')).toBeOnTheScreen();
+    render(<EmptyState title="No containers" subtitle="Nothing matches this filter." />);
+    expect(screen.getByText('No containers')).toBeOnTheScreen();
+    expect(screen.getByText('Nothing matches this filter.')).toBeOnTheScreen();
   });
 });
 
 describe('Loader', () => {
   it('shows its label', () => {
-    render(<Loader label="Chargement…" />);
-    expect(screen.getByText('Chargement…')).toBeOnTheScreen();
+    render(<Loader label="Loading…" />);
+    expect(screen.getByText('Loading…')).toBeOnTheScreen();
   });
 });
 
@@ -53,34 +53,34 @@ describe('Row', () => {
 });
 
 describe('ReleaseCard', () => {
-  const release = { version: '1.2.0', date: '1 janvier 2026', changes: ['Ajout A', 'Correctif B'] };
+  const release = { version: '1.2.0', date: 'January 1, 2026', changes: ['Added A', 'Fixed B'] };
 
   it('lists the notes of a release', () => {
     render(<ReleaseCard release={release} installed={false} />);
     expect(screen.getByText('Version 1.2.0')).toBeOnTheScreen();
-    expect(screen.getByText('1 janvier 2026')).toBeOnTheScreen();
-    expect(screen.getByText('Ajout A')).toBeOnTheScreen();
-    expect(screen.getByText('Correctif B')).toBeOnTheScreen();
-    expect(screen.queryByText('Installée')).toBeNull();
+    expect(screen.getByText('January 1, 2026')).toBeOnTheScreen();
+    expect(screen.getByText('Added A')).toBeOnTheScreen();
+    expect(screen.getByText('Fixed B')).toBeOnTheScreen();
+    expect(screen.queryByText('Installed')).toBeNull();
   });
 
   it('marks the installed version', () => {
     render(<ReleaseCard release={release} installed />);
-    expect(screen.getByText('Installée')).toBeOnTheScreen();
+    expect(screen.getByText('Installed')).toBeOnTheScreen();
   });
 });
 
 describe('NumberedStep', () => {
   it('numbers its instruction', () => {
-    render(<NumberedStep n={2} text="Collez le jeton." />);
+    render(<NumberedStep n={2} text="Paste the token." />);
     expect(screen.getByText('2')).toBeOnTheScreen();
-    expect(screen.getByText('Collez le jeton.')).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Copier' })).toBeNull();
+    expect(screen.getByText('Paste the token.')).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Copy' })).toBeNull();
   });
 
   it('shows the command to type, copyable', () => {
-    render(<NumberedStep n={1} text="Récupérez l'autorité :" code="mkcert -CAROOT" />);
+    render(<NumberedStep n={1} text="Get the authority:" code="mkcert -CAROOT" />);
     expect(screen.getByText('mkcert -CAROOT')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Copier' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeOnTheScreen();
   });
 });

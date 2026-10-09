@@ -44,7 +44,7 @@ export async function loginWithPassword(
     path: '/auth',
     body: { username, password },
   });
-  if (!jwt) throw new PortainerError('Portainer a répondu sans jeton de session.');
+  if (!jwt) throw new PortainerError('Portainer replied without a session token.');
   return { baseUrl, mode: 'jwt', token: jwt, username };
 }
 
@@ -73,7 +73,7 @@ export function getEndpoint(session: Session, endpointId: number): Promise<Endpo
  */
 function assertEndpointId(endpointId: number): void {
   if (!Number.isInteger(endpointId)) {
-    throw new PortainerError(`Identifiant d'environnement invalide (${String(endpointId)}).`);
+    throw new PortainerError(`Invalid environment id (${String(endpointId)}).`);
   }
 }
 
@@ -160,7 +160,7 @@ export async function removeImage(
     // an image, a conflict means a container still depends on it.
     if (error instanceof PortainerError && error.status === 409) {
       throw new PortainerError(
-        "Image utilisée : un conteneur, peut-être arrêté, en dépend encore. Supprimez-le d'abord.",
+        'Image in use: a container, maybe a stopped one, still depends on it. Delete it first.',
         409,
         error.detail,
       );
@@ -219,7 +219,7 @@ export async function removeVolume(
   } catch (error) {
     if (error instanceof PortainerError && error.status === 409) {
       throw new PortainerError(
-        "Volume utilisé : un conteneur, peut-être arrêté, s'en sert encore. Supprimez-le d'abord.",
+        'Volume in use: a container, maybe a stopped one, still uses it. Delete it first.',
         409,
         error.detail,
       );
@@ -356,7 +356,7 @@ export async function redeployStack(
 
   const content = await fetchStackFile(session, stack.Id);
   if (!content) {
-    throw new PortainerError('Fichier de la stack vide : Portainer refuserait le redéploiement.');
+    throw new PortainerError('The stack file is empty: Portainer would refuse the redeploy.');
   }
   await request<void>(session, {
     method: 'PUT',

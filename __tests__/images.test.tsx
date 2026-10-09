@@ -62,17 +62,17 @@ beforeEach(() => {
 describe('images screen', () => {
   it('offers deletion on unused images only', async () => {
     await renderImages();
-    expect(screen.getByRole('button', { name: 'Supprimer app:1' })).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Supprimer nginx:1.27' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Delete app:1' })).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Delete nginx:1.27' })).toBeNull();
   });
 
   it('deletes an image after confirmation, forcing when it carries several tags', async () => {
     jest.mocked(removeImage).mockResolvedValue([{ Deleted: 'sha256:old' }]);
     await renderImages();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
-    expect(screen.getByText(/avec ses 2 tags/)).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: "Supprimer l'image" }));
+    fireEvent.press(screen.getByRole('button', { name: 'Delete app:1' }));
+    expect(screen.getByText(/along with its 2 tags/)).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Delete image' }));
 
     await waitFor(() =>
       expect(removeImage).toHaveBeenCalledWith(expect.anything(), 1, 'sha256:old', true),
@@ -81,15 +81,13 @@ describe('images screen', () => {
   });
 
   it('reports a failed deletion', async () => {
-    jest.mocked(removeImage).mockRejectedValue(new PortainerError('Image utilisée', 409));
+    jest.mocked(removeImage).mockRejectedValue(new PortainerError('Image in use', 409));
     await renderImages();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
-    fireEvent.press(screen.getByRole('button', { name: "Supprimer l'image" }));
+    fireEvent.press(screen.getByRole('button', { name: 'Delete app:1' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Delete image' }));
 
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith('Suppression échouée', 'Image utilisée'),
-    );
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Delete failed', 'Image in use'));
   });
 
   it('prunes untagged images only, then reports what was freed', async () => {
@@ -99,16 +97,16 @@ describe('images screen', () => {
     });
     await renderImages();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Nettoyer les images' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Images sans tag · 1 · 3,0 ko' }));
-    expect(screen.getByText("Supprimer l'image ?")).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Nettoyer' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Clean up images' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Untagged images · 1 · 3.0 kB' }));
+    expect(screen.getByText('Delete image?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Clean up' }));
 
     await waitFor(() => expect(pruneImages).toHaveBeenCalledWith(expect.anything(), 1, 'dangling'));
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Nettoyage terminé',
-        '1 image supprimée · 3,0 ko libérés.',
+        'Cleanup complete',
+        '1 image deleted · 3.0 kB freed.',
       ),
     );
   });
@@ -117,19 +115,14 @@ describe('images screen', () => {
     jest.mocked(pruneImages).mockResolvedValue({ deleted: [], spaceReclaimed: 0 });
     await renderImages();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Nettoyer les images' }));
-    fireEvent.press(
-      screen.getByRole('button', { name: 'Toutes les images inutilisées · 2 · 5,0 ko' }),
-    );
-    expect(screen.getByText('Supprimer 2 images ?')).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Nettoyer' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Clean up images' }));
+    fireEvent.press(screen.getByRole('button', { name: 'All unused images · 2 · 5.0 kB' }));
+    expect(screen.getByText('Delete 2 images?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Clean up' }));
 
     await waitFor(() => expect(pruneImages).toHaveBeenCalledWith(expect.anything(), 1, 'unused'));
     await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith(
-        'Nettoyage terminé',
-        "Aucune image n'a été supprimée.",
-      ),
+      expect(Alert.alert).toHaveBeenCalledWith('Cleanup complete', 'No image was deleted.'),
     );
   });
 
@@ -140,10 +133,10 @@ describe('images screen', () => {
     jest.mocked(fetchImageStatus).mockResolvedValue('outdated');
     await renderImages('/endpoints/1/images?filter=outdated');
 
-    expect(await screen.findByText(/Nouvelle version disponible/)).toBeOnTheScreen();
+    expect(await screen.findByText(/New version available/)).toBeOnTheScreen();
     expect(screen.getByText('nginx:1.27')).toBeOnTheScreen();
     expect(screen.queryByText('app:1')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Obsolètes' })).toHaveProp(
+    expect(screen.getByRole('button', { name: 'Outdated' })).toHaveProp(
       'accessibilityState',
       expect.objectContaining({ selected: true }),
     );
@@ -151,7 +144,7 @@ describe('images screen', () => {
 
   it('offers the outdated filter only when Portainer compares images', async () => {
     await renderImages();
-    expect(screen.queryByRole('button', { name: 'Obsolètes' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Outdated' })).toBeNull();
     expect(fetchImageStatus).not.toHaveBeenCalled();
   });
 });

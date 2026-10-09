@@ -13,7 +13,7 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
     return (
       <Card>
         <InlineStatus
-          loading="Calcul de l'espace disque…"
+          loading="Measuring disk usage…"
           error={error}
           onRetry={() => void refetch()}
         />
@@ -26,7 +26,7 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
     <Card style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.total}>{formatBytes(summary.total)}</Text>
-        <Text style={styles.muted}>utilisés par Docker</Text>
+        <Text style={styles.muted}>used by Docker</Text>
       </View>
 
       {summary.total > 0 ? (
@@ -54,8 +54,7 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
 
       {summary.reclaimable > 0 ? (
         <Text style={styles.reclaimable}>
-          {formatBytes(summary.reclaimable)} récupérables en supprimant ce qui n&apos;est plus
-          utilisé.
+          {formatBytes(summary.reclaimable)} reclaimable by removing what is no longer used.
         </Text>
       ) : null}
     </Card>

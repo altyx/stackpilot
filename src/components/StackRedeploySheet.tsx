@@ -54,40 +54,36 @@ export function StackRedeploySheet({
       {step === 'choose' ? (
         <>
           <SheetHeader
-            title={`Redéployer ${shown.Name}`}
+            title={`Redeploy ${shown.Name}`}
             message={
               git
-                ? `Récupère la dernière version de ${branchName(git.ReferenceName)} puis recrée les services qui ont changé.`
-                : 'Recrée les services à partir du fichier compose enregistré dans Portainer.'
+                ? `Fetches the latest version of ${branchName(git.ReferenceName)}, then recreates the services that changed.`
+                : 'Recreates the services from the compose file stored in Portainer.'
             }
           />
           <SheetActions>
             <Button
-              label={git ? 'Mettre à jour depuis Git' : 'Redéployer'}
+              label={git ? 'Update from Git' : 'Redeploy'}
               variant="secondary"
               onPress={() => setStep('redeploy')}
             />
             <Button
-              label={
-                git
-                  ? 'Depuis Git, avec les dernières images'
-                  : 'Retélécharger les images et redéployer'
-              }
+              label={git ? 'From Git, with the latest images' : 'Pull images and redeploy'}
               variant="secondary"
               onPress={() => setStep('pull')}
             />
-            <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
           </SheetActions>
         </>
       ) : (
         <>
           <SheetHeader
-            title={`Redéployer ${shown.Name} ?`}
+            title={`Redeploy ${shown.Name}?`}
             message={describeImpact(step === 'pull')}
           />
           <SheetActions>
-            <Button label="Redéployer" onPress={() => close(step)} />
-            <Button label="Retour" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label="Redeploy" onPress={() => close(step)} />
+            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
           </SheetActions>
         </>
       )}
@@ -96,13 +92,13 @@ export function StackRedeploySheet({
 }
 
 function branchName(reference: string): string {
-  return reference.replace(/^refs\/(heads|tags)\//, '') || 'la branche suivie';
+  return reference.replace(/^refs\/(heads|tags)\//, '') || 'the tracked branch';
 }
 
 function describeImpact(pullImages: boolean): string {
   return (
-    'Les conteneurs concernés seront recréés : le service est brièvement interrompu, et ce ' +
-    "qui n'est pas dans un volume est perdu." +
-    (pullImages ? ' Télécharger les images peut prendre plusieurs minutes.' : '')
+    'The affected containers will be recreated: the service is briefly interrupted, and ' +
+    'anything not in a volume is lost.' +
+    (pullImages ? ' Pulling images can take several minutes.' : '')
   );
 }

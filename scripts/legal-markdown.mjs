@@ -42,7 +42,7 @@ function toMarkdown(document) {
     '',
     `# ${escape(document.title)}`,
     '',
-    `_Dernière mise à jour : ${escape(document.updatedAt)}_`,
+    `_Last updated: ${escape(document.updatedAt)}_`,
     '',
     escape(document.intro),
   ];

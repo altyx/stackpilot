@@ -45,10 +45,10 @@ const PROBLEM_ORDER: Record<ProblemKind, number> = {
 };
 
 export const PROBLEM_LABELS: Record<ProblemKind, string> = {
-  unhealthy: 'Healthcheck en échec',
-  restarting: 'Redémarre en boucle',
-  crashed: 'Arrêt anormal',
-  dead: 'Mort',
+  unhealthy: 'Failing healthcheck',
+  restarting: 'Restart loop',
+  crashed: 'Exited abnormally',
+  dead: 'Dead',
 };
 
 /** Containers worth a look, most urgent first. */

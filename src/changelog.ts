@@ -20,8 +20,8 @@ export interface Release {
 export const CHANGELOG: readonly Release[] = [
   {
     version: '1.0.0',
-    date: '16 septembre 2026',
-    changes: ["Ajout d'une page settings applicatif"],
+    date: 'September 16, 2026',
+    changes: ['Added an in-app settings page'],
   },
 ];
 

@@ -19,7 +19,7 @@ import { ImagePruneSheet } from '../../../../src/components/ImagePruneSheet';
 import { Loader } from '../../../../src/components/Loader';
 import { Segmented } from '../../../../src/components/Segmented';
 import { useLatched } from '../../../../src/components/useLatched';
-import { formatBytes } from '../../../../src/lib/format';
+import { formatBytes, plural } from '../../../../src/lib/format';
 import {
   countDeletedImages,
   imageLabel,
@@ -74,7 +74,7 @@ export default function ImagesScreen() {
     [usages, filter, outdatedIds],
   );
 
-  if (images.isPending || containers.isPending) return <Loader label="Chargement des images…" />;
+  if (images.isPending || containers.isPending) return <Loader label="Loading images…" />;
   const error = images.error ?? containers.error;
   if (error) {
     return (
@@ -106,8 +106,8 @@ export default function ImagesScreen() {
       {
         onError: (e) =>
           Alert.alert(
-            'Suppression échouée',
-            e instanceof Error ? e.message : "L'image n'a pas pu être supprimée.",
+            'Delete failed',
+            e instanceof Error ? e.message : 'The image could not be deleted.',
           ),
       },
     );
@@ -117,11 +117,11 @@ export default function ImagesScreen() {
     const candidates = pruneCandidates(usages, scope);
     prune.mutate(scope, {
       onSuccess: ({ deleted, spaceReclaimed }) =>
-        Alert.alert('Nettoyage terminé', describePrune(candidates, deleted, spaceReclaimed)),
+        Alert.alert('Cleanup complete', describePrune(candidates, deleted, spaceReclaimed)),
       onError: (e) =>
         Alert.alert(
-          'Nettoyage échoué',
-          e instanceof Error ? e.message : "Les images n'ont pas pu être supprimées.",
+          'Cleanup failed',
+          e instanceof Error ? e.message : 'The images could not be deleted.',
         ),
     });
   }
@@ -142,13 +142,12 @@ export default function ImagesScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.summary}>
-              {usages.length} image{usages.length > 1 ? 's' : ''} · {unusedCount} inutilisée
-              {unusedCount > 1 ? 's' : ''}
-              {reclaimable > 0 ? ` · ${formatBytes(reclaimable)} récupérables` : ''}
+              {plural(usages.length, 'image')} · {unusedCount} unused
+              {reclaimable > 0 ? ` · ${formatBytes(reclaimable)} reclaimable` : ''}
             </Text>
             {unusedCount > 0 ? (
               <Button
-                label="Nettoyer les images"
+                label="Clean up images"
                 variant="secondary"
                 onPress={() => setPruning(true)}
                 loading={prune.isPending}
@@ -159,20 +158,20 @@ export default function ImagesScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: 'Toutes' },
-                { value: 'used', label: 'Utilisées' },
-                { value: 'unused', label: 'Inutilisées' },
+                { value: 'all', label: 'All' },
+                { value: 'used', label: 'Used' },
+                { value: 'unused', label: 'Unused' },
                 // Only Portainer Business, indicator on, knows which images are outdated.
-                ...(updates.enabled ? [{ value: 'outdated' as const, label: 'Obsolètes' }] : []),
+                ...(updates.enabled ? [{ value: 'outdated' as const, label: 'Outdated' }] : []),
               ]}
             />
           </View>
         }
         ListEmptyComponent={
           filter === 'outdated' ? (
-            <EmptyState title="Toutes les images sont à jour" />
+            <EmptyState title="All images are up to date" />
           ) : (
-            <EmptyState title="Aucune image" subtitle="Aucun résultat pour ce filtre." />
+            <EmptyState title="No images" subtitle="Nothing matches this filter." />
           )
         }
         renderItem={({ item }) => (
@@ -191,9 +190,9 @@ export default function ImagesScreen() {
       />
       <ConfirmSheet
         visible={deleting !== null}
-        title="Supprimer l'image ?"
+        title="Delete image?"
         message={shownDeleting ? describeRemoval(shownDeleting) : undefined}
-        confirmLabel="Supprimer l'image"
+        confirmLabel="Delete image"
         destructive
         onConfirm={() => {
           const image = deleting;
@@ -209,9 +208,9 @@ export default function ImagesScreen() {
 function describeRemoval(image: ImageSummary): string {
   const tags = (image.RepoTags ?? []).length;
   return (
-    `${imageLabel(image)} (${formatBytes(image.Size)}) sera supprimée de l'environnement` +
-    (tags > 1 ? `, avec ses ${tags} tags. ` : '. ') +
-    'Il faudra la retélécharger pour la réutiliser.'
+    `${imageLabel(image)} (${formatBytes(image.Size)}) will be removed from the environment` +
+    (tags > 1 ? `, along with its ${tags} tags. ` : '. ') +
+    'It will have to be pulled again to be reused.'
   );
 }
 
@@ -221,9 +220,8 @@ function describePrune(
   reclaimed: number,
 ): string {
   const count = countDeletedImages(candidates, deleted);
-  if (count === 0 && reclaimed === 0) return "Aucune image n'a été supprimée.";
-  const images = `${count} image${count > 1 ? 's' : ''} supprimée${count > 1 ? 's' : ''}`;
-  return `${images} · ${formatBytes(reclaimed)} libérés.`;
+  if (count === 0 && reclaimed === 0) return 'No image was deleted.';
+  return `${plural(count, 'image')} deleted · ${formatBytes(reclaimed)} freed.`;
 }
 
 const styles = StyleSheet.create({

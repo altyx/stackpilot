@@ -2,6 +2,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useContainerLogs } from '../api/hooks';
+import { plural } from '../lib/format';
 import { DEFAULT_LOG_RANGE, formatLogText, type LogRange } from '../lib/logs';
 import { theme } from '../theme';
 import { Button } from './Button';
@@ -45,9 +46,7 @@ export function ContainerLogsSection({
   }, [copied]);
 
   if (!visible) {
-    return (
-      <Button label="Afficher les logs" variant="secondary" onPress={() => setVisible(true)} />
-    );
+    return <Button label="Show logs" variant="secondary" onPress={() => setVisible(true)} />;
   }
 
   const lines = logs.data ?? [];
@@ -60,9 +59,9 @@ export function ContainerLogsSection({
 
   function share() {
     Share.share({
-      title: `Logs de ${containerName}`,
+      title: `Logs for ${containerName}`,
       message: formatLogText(lines, timestamps),
-    }).catch(() => Alert.alert('Partage impossible', "Les logs n'ont pas pu être partagés."));
+    }).catch(() => Alert.alert('Sharing failed', 'The logs could not be shared.'));
   }
 
   function changeRange(next: LogRange) {
@@ -88,9 +87,7 @@ export function ContainerLogsSection({
   const rangePicker = <LogRangePicker value={range} onChange={changeRange} />;
   const status = (
     <Text style={styles.status}>
-      {logs.isPending
-        ? 'Chargement…'
-        : `${lines.length} ligne${lines.length > 1 ? 's' : ''}${follow ? ' · en direct' : ''}`}
+      {logs.isPending ? 'Loading…' : `${plural(lines.length, 'line')}${follow ? ' · live' : ''}`}
     </Text>
   );
 
@@ -107,7 +104,7 @@ export function ContainerLogsSection({
 
       {logs.error ? (
         <Text style={styles.error}>
-          {logs.error instanceof Error ? logs.error.message : 'Logs indisponibles.'}
+          {logs.error instanceof Error ? logs.error.message : 'Logs unavailable.'}
         </Text>
       ) : (
         <ScrollView
@@ -121,7 +118,7 @@ export function ContainerLogsSection({
             stick.follow(() => inline.current?.scrollToEnd({ animated: false }))
           }>
           {shown.length === 0 && !logs.isPending ? (
-            <Text style={styles.muted}>Aucune sortie sur cette période.</Text>
+            <Text style={styles.muted}>No output in this range.</Text>
           ) : (
             shown.map((line, index) => (
               <LogLineRow
@@ -135,7 +132,7 @@ export function ContainerLogsSection({
       )}
       {lines.length > shown.length ? (
         <Text style={styles.muted}>
-          {shown.length} dernières lignes affichées : passez en plein écran pour tout lire.
+          Showing the last {shown.length} lines: switch to full screen to read them all.
         </Text>
       ) : null}
 

@@ -88,7 +88,7 @@ describe('request', () => {
     await expect(request(session, { path: '/x' })).rejects.toMatchObject({
       name: 'PortainerError',
       status: 403,
-      message: "Accès refusé : ce compte n'a pas les droits sur cette ressource.",
+      message: 'Access denied: this account has no rights on this resource.',
       detail: 'Unauthorized',
     });
   });
@@ -97,7 +97,7 @@ describe('request', () => {
     fetchMock.mockResolvedValue(fakeResponse(500, 'boom'));
     await expect(request(session, { path: '/x' })).rejects.toMatchObject({
       status: 500,
-      message: 'Erreur Portainer (HTTP 500).',
+      message: 'Portainer error (HTTP 500).',
       detail: 'boom',
     });
   });
@@ -131,7 +131,7 @@ describe('request', () => {
     );
     const pending = request(session, { path: '/slow', timeoutMs: 50 });
     const expectation = expect(pending).rejects.toMatchObject({
-      message: "L'instance Portainer n'a pas répondu à temps.",
+      message: 'The Portainer instance did not respond in time.',
       detail: 'https://portainer.lan/api/slow',
     });
     jest.advanceTimersByTime(50);
@@ -141,14 +141,14 @@ describe('request', () => {
 
   it('points at the TLS certificate on https, at the network on http', async () => {
     fetchMock.mockRejectedValue(new TypeError('Network request failed'));
-    await expect(request(session, { path: '/x' })).rejects.toThrow(/certificat TLS/);
+    await expect(request(session, { path: '/x' })).rejects.toThrow(/TLS certificate/);
     await expect(request(session, { path: '/x' })).rejects.toMatchObject({
       detail: 'https://portainer.lan/api/x\nNetwork request failed',
       reason: 'certificate',
     });
     await expect(
       request({ ...session, baseUrl: 'http://portainer.lan' }, { path: '/x' }),
-    ).rejects.toThrow("Impossible de joindre l'instance Portainer. Vérifiez l'URL et le réseau.");
+    ).rejects.toThrow('Cannot reach the Portainer instance. Check the URL and the network.');
     await expect(
       request({ ...session, baseUrl: 'http://portainer.lan' }, { path: '/x' }),
     ).rejects.toMatchObject({ reason: undefined });

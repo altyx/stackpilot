@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { StackAction } from '../api/types';
+import { plural } from '../lib/format';
 import type { StackSection } from '../lib/stacks';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
@@ -57,28 +58,28 @@ export function StackActionSheet({
         <>
           <SheetHeader
             title={shown.title}
-            message={`${shown.running}/${total} en cours · ${total} conteneur${total > 1 ? 's' : ''}`}
+            message={`${shown.running}/${total} running · ${plural(total, 'container')}`}
           />
           <SheetActions>
-            <Button label="Démarrer la stack" onPress={() => setStep('start')} />
-            <Button label="Arrêter la stack" variant="danger" onPress={() => setStep('stop')} />
-            <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+            <Button label="Start stack" onPress={() => setStep('start')} />
+            <Button label="Stop stack" variant="danger" onPress={() => setStep('stop')} />
+            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
           </SheetActions>
         </>
       ) : (
         <>
           <SheetHeader
-            title={step === 'start' ? 'Démarrer la stack ?' : 'Arrêter la stack ?'}
+            title={step === 'start' ? 'Start stack?' : 'Stop stack?'}
             message={describeImpact(shown, step)}
           />
           <StackMemberList section={shown} />
           <SheetActions>
             <Button
-              label={step === 'start' ? 'Démarrer' : 'Arrêter'}
+              label={step === 'start' ? 'Start' : 'Stop'}
               variant={step === 'stop' ? 'danger' : 'primary'}
               onPress={() => close(step)}
             />
-            <Button label="Retour" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
           </SheetActions>
         </>
       )}
@@ -88,8 +89,8 @@ export function StackActionSheet({
 
 function describeImpact(section: StackSection, action: StackAction): string {
   const total = section.members.length;
-  const verb = action === 'start' ? 'démarré' : 'arrêté';
+  const verb = action === 'start' ? 'started' : 'stopped';
   return total > 1
-    ? `Les ${total} conteneurs de la stack ${section.title} seront ${verb}s, y compris ceux masqués par un filtre.`
-    : `Le conteneur de la stack ${section.title} sera ${verb}.`;
+    ? `All ${total} containers of the ${section.title} stack will be ${verb}, including those hidden by a filter.`
+    : `The container of the ${section.title} stack will be ${verb}.`;
 }

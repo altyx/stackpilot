@@ -46,7 +46,7 @@ jest.mock('../src/api/portainer', () => ({
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const Layout = createTestLayout(queryClient);
 const Containers = () => <Text>Liste des conteneurs</Text>;
-const ContainerDetail = () => <Text>Détail conteneur</Text>;
+const ContainerDetail = () => <Text>Container detail</Text>;
 const Images = () => <Text>Liste des images</Text>;
 
 const compose = (project: string) => ({ 'com.docker.compose.project': project });
@@ -129,9 +129,9 @@ beforeEach(() => {
 describe('overview screen', () => {
   it('lists the containers needing a look, most urgent first', async () => {
     renderOverview();
-    expect(await screen.findByText('2 conteneurs à surveiller')).toBeOnTheScreen();
-    expect(screen.getByText('Healthcheck en échec')).toBeOnTheScreen();
-    expect(screen.getByText('Arrêt anormal')).toBeOnTheScreen();
+    expect(await screen.findByText('2 containers to check')).toBeOnTheScreen();
+    expect(screen.getByText('Failing healthcheck')).toBeOnTheScreen();
+    expect(screen.getByText('Exited abnormally')).toBeOnTheScreen();
 
     fireEvent.press(screen.getByText('db'));
     await waitFor(() => expect(screen).toHavePathname('/endpoints/1/containers/db'));
@@ -140,28 +140,28 @@ describe('overview screen', () => {
   it('says so when everything runs fine', async () => {
     jest.mocked(listContainers).mockResolvedValue([web]);
     renderOverview();
-    expect(await screen.findByText('Tout fonctionne')).toBeOnTheScreen();
+    expect(await screen.findByText('All good')).toBeOnTheScreen();
   });
 
   it('counts containers, stacks, images and volumes, then their health', async () => {
     renderOverview();
     expect(await screen.findByText('2/3')).toBeOnTheScreen();
     expect(await screen.findByText('1/2')).toBeOnTheScreen();
-    expect(screen.getByText('1 arrêtée')).toBeOnTheScreen();
-    expect(await screen.findByText('1 inutilisée')).toBeOnTheScreen();
-    expect(await screen.findByText('1 inutilisé')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Sains : 1')).toBeOnTheScreen();
-    expect(screen.getByLabelText('En mauvaise santé : 1')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Sans healthcheck : 1')).toBeOnTheScreen();
+    expect(screen.getByText('1 stopped')).toBeOnTheScreen();
+    // One unused image and one unused volume: the two tiles share the caption.
+    await waitFor(() => expect(screen.getAllByText('1 unused')).toHaveLength(2));
+    expect(screen.getByLabelText('Healthy: 1')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Unhealthy: 1')).toBeOnTheScreen();
+    expect(screen.getByLabelText('No healthcheck: 1')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('link', { name: 'Conteneurs, 2/3 en cours' }));
+    fireEvent.press(screen.getByRole('link', { name: 'Containers, 2/3 running' }));
     await waitFor(() => expect(screen).toHavePathname('/endpoints/1'));
   });
 
   it('measures running containers only, against the host capacity', async () => {
     renderOverview();
-    expect(await screen.findByText('60 % de 2 cœurs')).toBeOnTheScreen();
-    expect(screen.getByText('2,0 Go / 4,0 Go')).toBeOnTheScreen();
+    expect(await screen.findByText('60% of 2 cores')).toBeOnTheScreen();
+    expect(screen.getByText('2.0 GB / 4.0 GB')).toBeOnTheScreen();
     expect(fetchContainerStats).toHaveBeenCalledTimes(2);
     expect(fetchContainerStats).not.toHaveBeenCalledWith(expect.anything(), 1, 'worker');
     // Heaviest first.
@@ -171,14 +171,16 @@ describe('overview screen', () => {
 
   it('breaks down disk usage and what a cleanup would free', async () => {
     renderOverview();
-    expect(await screen.findByText('5,0 Go')).toBeOnTheScreen();
-    expect(screen.getByText('Cache de build')).toBeOnTheScreen();
-    expect(screen.getByText(/1,0 Go récupérables/)).toBeOnTheScreen();
+    expect(await screen.findByText('5.0 GB')).toBeOnTheScreen();
+    expect(screen.getByText('Build cache')).toBeOnTheScreen();
+    expect(screen.getByText(/1.0 GB reclaimable/)).toBeOnTheScreen();
   });
 
   it('explains why updates are unknown without the registry check', async () => {
     renderOverview();
-    expect(await screen.findByText(/Portainer ne compare pas les images/)).toBeOnTheScreen();
+    expect(
+      await screen.findByText(/Portainer does not compare this environment/),
+    ).toBeOnTheScreen();
     expect(fetchImageStatus).not.toHaveBeenCalled();
   });
 
@@ -195,7 +197,7 @@ describe('overview screen', () => {
       );
     renderOverview();
 
-    fireEvent.press(await screen.findByRole('link', { name: '1 image à mettre à jour' }));
+    fireEvent.press(await screen.findByRole('link', { name: '1 image to update' }));
     await waitFor(() => expect(screen).toHavePathname('/endpoints/1/images'));
     expect(screen).toHaveSearchParams({ endpointId: '1', filter: 'outdated' });
   });
@@ -206,6 +208,6 @@ describe('overview screen', () => {
       .mockResolvedValue([makeEndpoint({ Id: 1, EnableImageNotification: true })]);
     jest.mocked(fetchImageStatus).mockResolvedValue('updated');
     renderOverview();
-    expect(await screen.findByText('Toutes les images sont à jour')).toBeOnTheScreen();
+    expect(await screen.findByText('All images are up to date')).toBeOnTheScreen();
   });
 });

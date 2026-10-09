@@ -65,7 +65,7 @@ export function ConfirmSheet({
           disabled={!confirmed}
           onPress={() => close('confirm')}
         />
-        <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+        <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
       </SheetActions>
     </BottomSheet>
   );

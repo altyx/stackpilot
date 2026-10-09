@@ -4,10 +4,8 @@ import { IconButton } from './IconButton';
 describe('IconButton', () => {
   it('is announced by its label and calls onPress', () => {
     const onPress = jest.fn();
-    render(
-      <IconButton icon="trash-outline" accessibilityLabel="Supprimer app:1" onPress={onPress} />,
-    );
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
+    render(<IconButton icon="trash-outline" accessibilityLabel="Delete app:1" onPress={onPress} />);
+    fireEvent.press(screen.getByRole('button', { name: 'Delete app:1' }));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
@@ -16,12 +14,12 @@ describe('IconButton', () => {
     render(
       <IconButton
         icon="trash-outline"
-        accessibilityLabel="Supprimer app:1"
+        accessibilityLabel="Delete app:1"
         onPress={onPress}
         disabled
       />,
     );
-    const button = screen.getByRole('button', { name: 'Supprimer app:1' });
+    const button = screen.getByRole('button', { name: 'Delete app:1' });
     expect(button).toBeDisabled();
     fireEvent.press(button);
     expect(onPress).not.toHaveBeenCalled();

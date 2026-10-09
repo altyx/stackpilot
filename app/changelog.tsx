@@ -24,11 +24,11 @@ export default function ChangelogScreen() {
         accessibilityRole="link"
         onPress={() =>
           Linking.openURL(RELEASES_URL).catch(() =>
-            Alert.alert('Lien inaccessible', 'Aucune application ne peut ouvrir cette adresse.'),
+            Alert.alert('Cannot open link', 'No app can open this address.'),
           )
         }
         style={({ pressed }) => pressed && styles.pressed}>
-        <Text style={styles.link}>Toutes les versions sur GitHub</Text>
+        <Text style={styles.link}>All releases on GitHub</Text>
       </Pressable>
     </ScrollView>
   );

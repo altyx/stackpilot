@@ -46,7 +46,7 @@ export default function LoginScreen() {
       router.replace('/');
     } catch (e) {
       setError({
-        message: e instanceof Error ? e.message : 'Connexion impossible.',
+        message: e instanceof Error ? e.message : 'Unable to sign in.',
         detail: e instanceof PortainerError ? e.detail : undefined,
         certificate: e instanceof PortainerError && e.reason === 'certificate',
       });
@@ -60,22 +60,22 @@ export default function LoginScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Connexion à Portainer</Text>
+        <Text style={styles.title}>Sign in to Portainer</Text>
         <Text style={styles.subtitle}>
-          Les identifiants sont stockés dans le trousseau sécurisé de l&apos;appareil.
+          Credentials are stored in the device&apos;s secure keychain.
         </Text>
 
         {sessionExpired ? (
           <Text accessibilityRole="alert" style={styles.expired}>
             {lastLogin?.mode === 'jwt'
-              ? 'Votre session a expiré. Reconnectez-vous pour continuer.'
-              : "L'access token a été refusé par Portainer : il a probablement été révoqué."}
+              ? 'Your session has expired. Sign in again to continue.'
+              : 'Portainer rejected the access token: it has probably been revoked.'}
           </Text>
         ) : null}
 
         <Card style={styles.card}>
           <LoginField
-            label="URL de l'instance"
+            label="Instance URL"
             placeholder="https://portainer.local:9443"
             value={baseUrl}
             onChangeText={setBaseUrl}
@@ -92,7 +92,7 @@ export default function LoginScreen() {
               onPress={() => setMode('apiKey')}
             />
             <LoginModeTab
-              label="Identifiants"
+              label="Credentials"
               active={mode === 'jwt'}
               onPress={() => setMode('jwt')}
             />
@@ -109,7 +109,7 @@ export default function LoginScreen() {
           ) : (
             <>
               <LoginField
-                label="Utilisateur"
+                label="Username"
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -117,7 +117,7 @@ export default function LoginScreen() {
                 textContentType="username"
               />
               <LoginField
-                label="Mot de passe"
+                label="Password"
                 value={password}
                 onChangeText={setPassword}
                 secret
@@ -136,14 +136,14 @@ export default function LoginScreen() {
               ) : null}
               {error.certificate ? (
                 <Link href="/certificates" style={styles.errorLink}>
-                  Résoudre un problème de certificat
+                  Fix a certificate problem
                 </Link>
               ) : null}
             </View>
           ) : null}
 
           <Button
-            label="Se connecter"
+            label="Sign in"
             onPress={handleSubmit}
             disabled={!canSubmit}
             loading={busy}
@@ -152,21 +152,21 @@ export default function LoginScreen() {
         </Card>
 
         <Text style={styles.legal}>
-          En vous connectant, vous acceptez les{' '}
+          By signing in, you accept the{' '}
           <Link href="/terms" style={styles.legalLink}>
-            conditions générales d&apos;utilisation
+            terms of use
           </Link>
-          . Voir aussi la{' '}
+          . See also the{' '}
           <Link href="/privacy" style={styles.legalLink}>
-            politique de confidentialité
+            privacy policy
           </Link>
           .
         </Text>
 
         <Text style={styles.hint}>
           {mode === 'apiKey'
-            ? 'Créez un access token depuis Portainer › My account › Access tokens. Il ne expire pas et reste révocable côté serveur.'
-            : 'La connexion par identifiants ouvre une session JWT temporaire ; Portainer l’invalide au bout de quelques heures.'}
+            ? 'Create an access token in Portainer › My account › Access tokens. It never expires and can be revoked on the server.'
+            : 'Signing in with credentials opens a temporary JWT session; Portainer ends it after a few hours.'}
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -19,10 +19,10 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Section title="Rafraîchissement">
+      <Section title="Refresh">
         <Text style={styles.hint}>
-          La liste des conteneurs se met à jour seule. Un intervalle plus long ménage la batterie et
-          le forfait de données ; en mode manuel, tirez la liste vers le bas pour la rafraîchir.
+          The container list updates on its own. A longer interval saves battery and mobile data; in
+          manual mode, pull the list down to refresh it.
         </Text>
         <Card style={styles.card}>
           {REFRESH_INTERVALS.map((option, index) => (
@@ -41,55 +41,55 @@ export default function SettingsScreen() {
         <Card style={styles.card}>
           <SettingsNavRow
             icon="notifications-outline"
-            label="Alertes de vos conteneurs"
-            hint="Jeton à donner à votre service de surveillance"
+            label="Alerts for your containers"
+            hint="The token your monitoring service needs"
             onPress={() => router.push('/notifications')}
           />
         </Card>
       </Section>
 
-      <Section title="Aide">
+      <Section title="Help">
         <Card style={styles.card}>
           <SettingsNavRow
             icon="bug-outline"
-            label="Signaler un problème"
-            hint="Ouvre GitHub, message pré-rempli avec la version et l'appareil — rien de votre instance"
+            label="Report a problem"
+            hint="Opens GitHub with the version and device pre-filled — nothing about your instance"
             external
             first
             onPress={() => openLink(newIssueUrl())}
           />
           <SettingsNavRow
             icon="lock-closed-outline"
-            label="Certificat HTTPS"
-            hint="Faire accepter à ce téléphone un certificat auto-signé ou privé"
+            label="HTTPS certificate"
+            hint="Get this phone to trust a self-signed or private certificate"
             onPress={() => router.push('/certificates')}
           />
           <SettingsNavRow
             icon="logo-github"
-            label="Code source"
+            label="Source code"
             external
             onPress={() => openLink(SOURCE_CODE_URL)}
           />
         </Card>
       </Section>
 
-      <Section title="À propos">
+      <Section title="About">
         <Card style={styles.card}>
           <SettingsNavRow
             icon="sparkles-outline"
-            label="Nouveautés"
+            label="What's new"
             hint={`Version ${LATEST_RELEASE.version}`}
             first
             onPress={() => router.push('/changelog')}
           />
           <SettingsNavRow
             icon="document-text-outline"
-            label="Conditions d'utilisation"
+            label="Terms of use"
             onPress={() => router.push('/terms')}
           />
           <SettingsNavRow
             icon="shield-checkmark-outline"
-            label="Politique de confidentialité"
+            label="Privacy policy"
             onPress={() => router.push('/privacy')}
           />
         </Card>
@@ -101,7 +101,7 @@ export default function SettingsScreen() {
 
 function openLink(url: string): void {
   Linking.openURL(url).catch(() =>
-    Alert.alert('Lien inaccessible', 'Aucune application ne peut ouvrir cette adresse.'),
+    Alert.alert('Cannot open link', 'No app can open this address.'),
   );
 }
 

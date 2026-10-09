@@ -6,7 +6,7 @@ export function UsageBadge({ usedBy }: { usedBy: string[] }) {
   const used = usedBy.length > 0;
   return (
     <Text style={[styles.usageBadge, used ? styles.usageUsed : styles.usageUnused]}>
-      {used ? `utilisé · ${usedBy.length}` : 'inutilisé'}
+      {used ? `used · ${usedBy.length}` : 'unused'}
     </Text>
   );
 }

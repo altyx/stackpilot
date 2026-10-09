@@ -23,7 +23,7 @@ export function RootNavigator() {
     else if (session && onLoginScreen) router.replace('/');
   }, [session, isRestoring, segments, router]);
 
-  if (isRestoring) return <Loader label="Restauration de la session…" />;
+  if (isRestoring) return <Loader label="Restoring session…" />;
 
   return (
     <Stack
@@ -37,13 +37,13 @@ export function RootNavigator() {
       }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: '' }} />
-      {/* Les textes légaux servent l'écran de connexion comme les réglages. */}
+      {/* The legal texts serve the login screen as well as the settings. */}
       <Stack.Screen name="terms" options={{ title: '' }} />
       <Stack.Screen name="privacy" options={{ title: '' }} />
       <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
-      <Stack.Screen name="changelog" options={{ title: 'Nouveautés' }} />
-      <Stack.Screen name="certificates" options={{ title: 'Certificat HTTPS' }} />
-      {/* Le menu porte ses propres en-têtes, avec le bouton qui l'ouvre. */}
+      <Stack.Screen name="changelog" options={{ title: "What's new" }} />
+      <Stack.Screen name="certificates" options={{ title: 'HTTPS certificate' }} />
+      {/* The drawer screens carry their own headers, with the button that opens it. */}
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
         name="endpoints/[endpointId]/containers/[containerId]"

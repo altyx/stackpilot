@@ -64,7 +64,7 @@ export default function StackDetailScreen() {
   );
 
   if (containers.isPending || (stacks.isPending && !stacks.error)) {
-    return <Loader label="Chargement de la stack…" />;
+    return <Loader label="Loading stack…" />;
   }
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
   if (!overview) {
@@ -72,8 +72,8 @@ export default function StackDetailScreen() {
       <>
         <Stack.Screen options={{ title: stackName }} />
         <EmptyState
-          title="Stack introuvable"
-          subtitle="Elle a peut-être été supprimée, ou ses conteneurs ont disparu."
+          title="Stack not found"
+          subtitle="It may have been deleted, or its containers are gone."
         />
       </>
     );
@@ -91,8 +91,8 @@ export default function StackDetailScreen() {
         },
         onError: (e) =>
           Alert.alert(
-            'Action échouée',
-            e instanceof Error ? e.message : "L'action n'a pas pu être appliquée.",
+            'Action failed',
+            e instanceof Error ? e.message : 'The action could not be applied.',
           ),
       },
     );
@@ -104,13 +104,13 @@ export default function StackDetailScreen() {
       {
         onSuccess: () => {
           setEditingEnv(false);
-          Alert.alert('Stack redéployée', `${target.Name} a été redéployée.`);
+          Alert.alert('Stack redeployed', `${target.Name} was redeployed.`);
         },
         // Edits stay in the form on failure: nothing typed is lost.
         onError: (e) =>
           Alert.alert(
-            'Redéploiement échoué',
-            e instanceof Error ? e.message : "La stack n'a pas pu être redéployée.",
+            'Redeploy failed',
+            e instanceof Error ? e.message : 'The stack could not be redeployed.',
           ),
       },
     );
@@ -139,20 +139,20 @@ export default function StackDetailScreen() {
       <Card style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.count}>
-            {total === 0 ? 'Aucun conteneur' : `${running}/${total} en cours`}
+            {total === 0 ? 'No containers' : `${running}/${total} running`}
           </Text>
           <StackKindBadge kind={overview.kind} />
         </View>
         {stack ? <StackImageStatus endpointId={id} stackId={stack.Id} withLabel /> : null}
         {stack ? null : (
           <Text style={styles.note}>
-            Stack déployée hors de Portainer : seuls ses conteneurs sont connus.
+            Stack deployed outside Portainer: only its containers are known.
           </Text>
         )}
         <View style={styles.actions}>
           {section ? (
             <Button
-              label="Marche / arrêt"
+              label="Start / stop"
               variant="secondary"
               onPress={() => setSheetOpen(true)}
               loading={stackAction.isPending}
@@ -163,7 +163,7 @@ export default function StackDetailScreen() {
           {/* Only Portainer can redeploy: an external stack has no file it knows. */}
           {stack ? (
             <Button
-              label="Redéployer"
+              label="Redeploy"
               onPress={() => setRedeploying(true)}
               loading={redeploy.isPending}
               disabled={stackAction.isPending}
@@ -172,9 +172,7 @@ export default function StackDetailScreen() {
           ) : null}
         </View>
         {redeploy.isPending ? (
-          <Text style={styles.note}>
-            Redéploiement en cours… Télécharger les images peut prendre plusieurs minutes.
-          </Text>
+          <Text style={styles.note}>Redeploying… Pulling images can take several minutes.</Text>
         ) : null}
       </Card>
 
@@ -182,42 +180,42 @@ export default function StackDetailScreen() {
         <Card>
           <Row label="Type" value={STACK_KIND_LABELS[overview.kind]} />
           <Row
-            label="État Portainer"
+            label="Portainer status"
             value={stack.Status === StackStatus.Active ? 'Active' : 'Inactive'}
           />
-          <Row label="Créée le" value={stack.CreationDate ? formatDate(stack.CreationDate) : '—'} />
-          <Row label="Par" value={stack.CreatedBy || '—'} />
+          <Row label="Created" value={stack.CreationDate ? formatDate(stack.CreationDate) : '—'} />
+          <Row label="By" value={stack.CreatedBy || '—'} />
           {stack.UpdateDate ? (
             <>
-              <Row label="Mise à jour le" value={formatDate(stack.UpdateDate)} />
-              <Row label="Par" value={stack.UpdatedBy || '—'} />
+              <Row label="Updated" value={formatDate(stack.UpdateDate)} />
+              <Row label="By" value={stack.UpdatedBy || '—'} />
             </>
           ) : null}
-          <Row label="Fichier" value={stack.EntryPoint || '—'} />
+          <Row label="File" value={stack.EntryPoint || '—'} />
           {stack.GitConfig ? (
             <>
-              <Row label="Dépôt Git" value={stack.GitConfig.URL} />
-              <Row label="Référence" value={stack.GitConfig.ReferenceName} />
+              <Row label="Git repository" value={stack.GitConfig.URL} />
+              <Row label="Reference" value={stack.GitConfig.ReferenceName} />
               <Row
-                label="Mise à jour auto"
+                label="Auto update"
                 value={describeAutoUpdate(stack.AutoUpdate?.Interval, stack.AutoUpdate?.Webhook)}
               />
             </>
           ) : null}
-          {stack.Webhook ? <Row label="Webhook" value="Oui" /> : null}
+          {stack.Webhook ? <Row label="Webhook" value="Yes" /> : null}
         </Card>
       ) : null}
 
       {stack ? (
         <Card style={styles.card}>
           <View style={styles.envHeader}>
-            <Text style={styles.sectionTitle}>Variables d&apos;environnement</Text>
+            <Text style={styles.sectionTitle}>Environment variables</Text>
             {!editingEnv ? (
               <Text
                 accessibilityRole="button"
                 onPress={() => setEditingEnv(true)}
                 style={styles.link}>
-                Modifier
+                Edit
               </Text>
             ) : null}
           </View>
@@ -231,14 +229,14 @@ export default function StackDetailScreen() {
           ) : stack.Env && stack.Env.length > 0 ? (
             stack.Env.map((variable) => <StackEnvRow key={variable.name} variable={variable} />)
           ) : (
-            <Text style={styles.note}>Aucune variable définie dans Portainer.</Text>
+            <Text style={styles.note}>No variables defined in Portainer.</Text>
           )}
         </Card>
       ) : null}
 
       {section ? (
         <View style={styles.members}>
-          <Text style={styles.sectionTitle}>Conteneurs</Text>
+          <Text style={styles.sectionTitle}>Containers</Text>
           {section.members.map((container, index) => (
             <View key={container.Id}>
               {index > 0 ? <ContainerRowSeparator /> : null}
@@ -257,13 +255,13 @@ export default function StackDetailScreen() {
       />
       <ConfirmSheet
         visible={pendingEnv !== null}
-        title="Enregistrer et redéployer ?"
+        title="Save and redeploy?"
         message={
           stack && shownPendingEnv
             ? describeEnvChange(diffEnv(stack.Env, shownPendingEnv))
             : undefined
         }
-        confirmLabel="Enregistrer et redéployer"
+        confirmLabel="Save and redeploy"
         onConfirm={() => {
           const env = pendingEnv;
           setPendingEnv(null);
@@ -283,18 +281,18 @@ export default function StackDetailScreen() {
 /** Names, not values: a changed password shouldn't be echoed back on screen. */
 function describeEnvChange(diff: EnvDiff): string {
   const parts = [
-    diff.added.length ? `Ajoutées : ${diff.added.join(', ')}.` : '',
-    diff.changed.length ? `Modifiées : ${diff.changed.join(', ')}.` : '',
-    diff.removed.length ? `Retirées : ${diff.removed.join(', ')}.` : '',
+    diff.added.length ? `Added: ${diff.added.join(', ')}.` : '',
+    diff.changed.length ? `Changed: ${diff.changed.join(', ')}.` : '',
+    diff.removed.length ? `Removed: ${diff.removed.join(', ')}.` : '',
   ].filter(Boolean);
-  const summary = parts.length ? parts.join(' ') : 'Aucune variable modifiée.';
-  return `${summary} La stack sera redéployée pour les appliquer : ses conteneurs concernés seront recréés.`;
+  const summary = parts.length ? parts.join(' ') : 'No variable changed.';
+  return `${summary} The stack will be redeployed to apply them: the affected containers will be recreated.`;
 }
 
 function describeAutoUpdate(interval?: string, webhook?: string): string {
-  if (interval) return `Toutes les ${interval}`;
-  if (webhook) return 'Par webhook';
-  return 'Non';
+  if (interval) return `Every ${interval}`;
+  if (webhook) return 'By webhook';
+  return 'No';
 }
 
 const styles = StyleSheet.create({

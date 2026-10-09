@@ -37,14 +37,14 @@ export function StackCard({
               {describeOrigin(stack.CreationDate, stack.CreatedBy)}
             </Text>
           ) : (
-            <Text style={styles.meta}>Déployée hors de Portainer</Text>
+            <Text style={styles.meta}>Deployed outside Portainer</Text>
           )}
 
           {stack?.GitConfig ? (
             <Text style={styles.meta} numberOfLines={1}>
               Git · {stack.GitConfig.ReferenceName.replace(/^refs\/heads\//, '')}
               {stack.AutoUpdate?.Interval
-                ? ` · mise à jour auto toutes les ${stack.AutoUpdate.Interval}`
+                ? ` · auto update every ${stack.AutoUpdate.Interval}`
                 : ''}
             </Text>
           ) : null}
@@ -55,8 +55,8 @@ export function StackCard({
 }
 
 export function describeCount(running: number, total: number): string {
-  if (total === 0) return 'Aucun conteneur';
-  return `${running}/${total} en cours`;
+  if (total === 0) return 'No containers';
+  return `${running}/${total} running`;
 }
 
 function countStyle(running: number, total: number) {
@@ -67,9 +67,9 @@ function countStyle(running: number, total: number) {
 
 function describeOrigin(creationDate: number, createdBy: string): string {
   const parts = [];
-  if (creationDate > 0) parts.push(`Créée le ${formatDate(creationDate)}`);
-  if (createdBy) parts.push(`par ${createdBy}`);
-  return parts.join(' ') || 'Gérée par Portainer';
+  if (creationDate > 0) parts.push(`Created ${formatDate(creationDate)}`);
+  if (createdBy) parts.push(`by ${createdBy}`);
+  return parts.join(' ') || 'Managed by Portainer';
 }
 
 const styles = StyleSheet.create({

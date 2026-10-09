@@ -25,10 +25,10 @@ describe('VolumeCard', () => {
     });
     render(<VolumeCard usage={{ item: volume, usedBy: ['db', 'backup'] }} />);
     expect(screen.getByText('pgdata')).toBeOnTheScreen();
-    expect(screen.getByText(/^local · 16\/09\/2026/)).toBeOnTheScreen();
+    expect(screen.getByText(/^local · 16 Sep 2026/)).toBeOnTheScreen();
     expect(screen.getByText('db, backup')).toBeOnTheScreen();
     expect(screen.getByText('/var/lib/docker/volumes/pgdata/_data')).toBeOnTheScreen();
-    expect(screen.getByText('utilisé · 2')).toBeOnTheScreen();
+    expect(screen.getByText('used · 2')).toBeOnTheScreen();
   });
 });
 
@@ -42,29 +42,29 @@ describe('ImageCard', () => {
     });
     render(<ImageCard usage={{ item: image, usedBy: ['web'] }} />);
     expect(screen.getByText('app:1')).toBeOnTheScreen();
-    expect(screen.getByText(/^1,5 ko · abcdef012345 · 16\/09\/2026/)).toBeOnTheScreen();
+    expect(screen.getByText(/^1.5 kB · abcdef012345 · 16 Sep 2026/)).toBeOnTheScreen();
     expect(screen.getByText('3 tags')).toBeOnTheScreen();
     expect(screen.getByText('web')).toBeOnTheScreen();
-    expect(screen.queryByText('Image sans tag (dangling)')).toBeNull();
+    expect(screen.queryByText('Untagged image (dangling)')).toBeNull();
   });
 
   it('flags dangling images by their short id', () => {
     const image = makeImage({ Id: 'sha256:abcdef0123456789', RepoTags: null, Created: created });
     render(<ImageCard usage={{ item: image, usedBy: [] }} />);
     expect(screen.getByText('abcdef012345')).toBeOnTheScreen();
-    expect(screen.getByText('Image sans tag (dangling)')).toBeOnTheScreen();
-    expect(screen.getByText('inutilisé')).toBeOnTheScreen();
+    expect(screen.getByText('Untagged image (dangling)')).toBeOnTheScreen();
+    expect(screen.getByText('unused')).toBeOnTheScreen();
   });
 
   it('offers deletion only when given a handler', () => {
     const image = makeImage({ RepoTags: ['app:1'] });
     const onDelete = jest.fn();
     render(<ImageCard usage={{ item: image, usedBy: [] }} onDelete={onDelete} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer app:1' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Delete app:1' }));
     expect(onDelete).toHaveBeenCalledTimes(1);
 
     screen.rerender(<ImageCard usage={{ item: image, usedBy: [] }} />);
-    expect(screen.queryByRole('button', { name: 'Supprimer app:1' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Delete app:1' })).toBeNull();
   });
 });
 
@@ -77,19 +77,19 @@ describe('EndpointCard', () => {
     });
     render(<EndpointCard endpoint={endpoint} current={false} />);
     expect(screen.getByText('homelab')).toBeOnTheScreen();
-    expect(screen.getByText('En ligne')).toBeOnTheScreen();
+    expect(screen.getByText('Online')).toBeOnTheScreen();
     expect(screen.getByText('tcp://10.0.0.2:2375')).toBeOnTheScreen();
-    expect(screen.getByText('3 en cours · 1 arrêtés · 5 images')).toBeOnTheScreen();
+    expect(screen.getByText('3 running · 1 stopped · 5 images')).toBeOnTheScreen();
   });
 
   it('explains what it cannot show', () => {
     render(<EndpointCard endpoint={makeEndpoint({ URL: '', Status: 2 })} current={false} />);
-    expect(screen.getByText('Hors ligne')).toBeOnTheScreen();
-    expect(screen.getByText('socket local')).toBeOnTheScreen();
-    expect(screen.getByText('Aucun instantané disponible')).toBeOnTheScreen();
+    expect(screen.getByText('Offline')).toBeOnTheScreen();
+    expect(screen.getByText('local socket')).toBeOnTheScreen();
+    expect(screen.getByText('No snapshot available')).toBeOnTheScreen();
 
     screen.rerender(<EndpointCard endpoint={makeEndpoint({ Type: 5 })} current={false} />);
-    expect(screen.getByText(/Environnement Kubernetes/)).toBeOnTheScreen();
+    expect(screen.getByText(/Kubernetes environment/)).toBeOnTheScreen();
   });
 });
 

@@ -69,22 +69,20 @@ beforeEach(() => {
 describe('volumes screen', () => {
   it('shows sizes and offers deletion on unused volumes only', async () => {
     await renderVolumes();
-    expect(await screen.findByText(/3,0 Go récupérables/)).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Supprimer pgdata' })).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Supprimer cache' })).toBeNull();
+    expect(await screen.findByText(/3.0 GB reclaimable/)).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Delete pgdata' })).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Delete cache' })).toBeNull();
   });
 
   it('deletes a volume only once its name is typed', async () => {
     jest.mocked(removeVolume).mockResolvedValue(undefined);
     await renderVolumes();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer pgdata' }));
-    expect(
-      await screen.findByText(/toutes ses données seront supprimés définitivement/),
-    ).toBeOnTheScreen();
-    const confirm = screen.getByRole('button', { name: 'Supprimer définitivement' });
+    fireEvent.press(screen.getByRole('button', { name: 'Delete pgdata' }));
+    expect(await screen.findByText(/all its data will be permanently deleted/)).toBeOnTheScreen();
+    const confirm = screen.getByRole('button', { name: 'Delete permanently' });
     expect(confirm).toBeDisabled();
-    fireEvent.changeText(screen.getByLabelText('Saisissez pgdata pour confirmer'), 'pgdata');
+    fireEvent.changeText(screen.getByLabelText('Type pgdata to confirm'), 'pgdata');
     fireEvent.press(confirm);
 
     await waitFor(() => expect(removeVolume).toHaveBeenCalledWith(expect.anything(), 1, 'pgdata'));
@@ -92,14 +90,12 @@ describe('volumes screen', () => {
   });
 
   it('reports a refused deletion', async () => {
-    jest.mocked(removeVolume).mockRejectedValue(new PortainerError('Volume utilisé', 409));
+    jest.mocked(removeVolume).mockRejectedValue(new PortainerError('Volume in use', 409));
     await renderVolumes();
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer pgdata' }));
-    fireEvent.changeText(screen.getByLabelText('Saisissez pgdata pour confirmer'), 'pgdata');
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer définitivement' }));
-    await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith('Suppression échouée', 'Volume utilisé'),
-    );
+    fireEvent.press(screen.getByRole('button', { name: 'Delete pgdata' }));
+    fireEvent.changeText(screen.getByLabelText('Type pgdata to confirm'), 'pgdata');
+    fireEvent.press(screen.getByRole('button', { name: 'Delete permanently' }));
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Delete failed', 'Volume in use'));
   });
 
   it('prunes every unused volume after confirmation and reports it', async () => {
@@ -108,16 +104,16 @@ describe('volumes screen', () => {
       .mockResolvedValue({ deleted: ['pgdata'], spaceReclaimed: 3_000_000_000 });
     await renderVolumes();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Nettoyer les volumes' }));
-    fireEvent.press(await screen.findByRole('button', { name: /^Tous les volumes inutilisés/ }));
-    fireEvent.changeText(screen.getByLabelText('Saisissez supprimer pour confirmer'), 'supprimer');
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer définitivement' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Clean up volumes' }));
+    fireEvent.press(await screen.findByRole('button', { name: /^All unused volumes/ }));
+    fireEvent.changeText(screen.getByLabelText('Type delete to confirm'), 'delete');
+    fireEvent.press(screen.getByRole('button', { name: 'Delete permanently' }));
 
     await waitFor(() => expect(pruneVolumes).toHaveBeenCalledWith(expect.anything(), 1, 'all'));
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
-        'Nettoyage terminé',
-        '1 volume supprimé · 3,0 Go libérés.',
+        'Cleanup complete',
+        '1 volume deleted · 3.0 GB freed.',
       ),
     );
   });

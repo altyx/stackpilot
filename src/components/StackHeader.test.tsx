@@ -22,14 +22,14 @@ describe('StackHeader', () => {
       />,
     );
     expect(screen.getByText('blog')).toBeOnTheScreen();
-    expect(screen.getByText('1/2 en cours')).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Actions sur la stack blog' }));
+    expect(screen.getByText('1/2 running')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Actions for the blog stack' }));
     expect(onPressActions).toHaveBeenCalledWith(section);
   });
 
   it('disables the actions while another one runs', () => {
     render(<StackHeader section={section} busy={false} disabled onPressActions={jest.fn()} />);
-    expect(screen.getByRole('button', { name: 'Actions sur la stack blog' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Actions for the blog stack' })).toBeDisabled();
   });
 
   it('replaces the button with a spinner while its own action runs', () => {
@@ -42,7 +42,7 @@ describe('StackHeader', () => {
     render(
       <StackHeader section={alone} busy={false} disabled={false} onPressActions={jest.fn()} />,
     );
-    expect(screen.getByText('Sans stack')).toBeOnTheScreen();
+    expect(screen.getByText('No stack')).toBeOnTheScreen();
     expect(screen.queryByRole('button')).toBeNull();
   });
 });
@@ -66,9 +66,9 @@ describe('StackMemberList', () => {
     render(<StackMemberList section={members(8)} />);
     expect(screen.getByText('c5')).toBeOnTheScreen();
     expect(screen.queryByText('c6')).toBeNull();
-    expect(screen.getByText('et 2 autres')).toBeOnTheScreen();
+    expect(screen.getByText('and 2 more')).toBeOnTheScreen();
 
     screen.rerender(<StackMemberList section={members(7)} />);
-    expect(screen.getByText('et 1 autre')).toBeOnTheScreen();
+    expect(screen.getByText('and 1 more')).toBeOnTheScreen();
   });
 });

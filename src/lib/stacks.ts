@@ -5,14 +5,14 @@ import {
   type PortainerStack,
   type StackAction,
 } from '../api/types';
-import { containerName } from './format';
+import { containerName, plural } from './format';
 
 /** Label set by Docker Compose; it's the stack name on Portainer's side. */
 const COMPOSE_PROJECT = 'com.docker.compose.project';
 /** Equivalent for Swarm stacks. */
 const SWARM_NAMESPACE = 'com.docker.stack.namespace';
 
-const UNGROUPED_KEY = ' sans-stack';
+const UNGROUPED_KEY = ' no-stack';
 
 export interface StackSection {
   key: string;
@@ -64,7 +64,7 @@ export function groupByStack(
       const sorted = [...members].sort(byName);
       return {
         key,
-        title: key === UNGROUPED_KEY ? 'Sans stack' : key,
+        title: key === UNGROUPED_KEY ? 'No stack' : key,
         data: sorted.filter(isVisible),
         members: sorted,
         running: sorted.filter((container) => container.State === 'running').length,
@@ -90,7 +90,7 @@ export type StackKind = 'compose' | 'swarm' | 'external';
 export const STACK_KIND_LABELS: Record<StackKind, string> = {
   compose: 'Compose',
   swarm: 'Swarm',
-  external: 'Externe',
+  external: 'External',
 };
 
 /** A stack as the Stacks screens show it: Portainer's record and/or its containers. */
@@ -159,13 +159,13 @@ export function describeStackResult(
   action: StackAction,
   result: StackActionResult,
 ): { title: string; message: string } {
-  const verb = action === 'start' ? 'démarrés' : 'arrêtés';
+  const verb = action === 'start' ? 'started' : 'stopped';
   if (result.failures.length === 0) {
-    return { title: section.title, message: `${result.succeeded} conteneurs ${verb}.` };
+    return { title: section.title, message: `${plural(result.succeeded, 'container')} ${verb}.` };
   }
-  const detail = result.failures.map((f) => `• ${f.name} : ${f.message}`).join('\n');
+  const detail = result.failures.map((f) => `• ${f.name}: ${f.message}`).join('\n');
   return {
     title: section.title,
-    message: `${result.succeeded} conteneurs ${verb}, ${result.failures.length} en échec.\n\n${detail}`,
+    message: `${plural(result.succeeded, 'container')} ${verb}, ${result.failures.length} failed.\n\n${detail}`,
   };
 }

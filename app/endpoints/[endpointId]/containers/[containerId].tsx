@@ -31,12 +31,12 @@ import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { theme } from '../../../../src/theme';
 
 const ACTION_LABELS: Record<ContainerAction, string> = {
-  start: 'Démarrer',
-  stop: 'Arrêter',
-  restart: 'Redémarrer',
-  pause: 'Mettre en pause',
-  unpause: 'Reprendre',
-  kill: 'Tuer',
+  start: 'Start',
+  stop: 'Stop',
+  restart: 'Restart',
+  pause: 'Pause',
+  unpause: 'Resume',
+  kill: 'Kill',
 };
 
 export default function ContainerDetailScreen() {
@@ -57,7 +57,7 @@ export default function ContainerDetailScreen() {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [removeVolumes, setRemoveVolumes] = useState(false);
 
-  if (isPending) return <Loader label="Chargement du conteneur…" />;
+  if (isPending) return <Loader label="Loading container…" />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   const running = data.State.Running;
@@ -72,8 +72,8 @@ export default function ContainerDetailScreen() {
     action.mutate(next, {
       onError: (e) =>
         Alert.alert(
-          'Action échouée',
-          e instanceof Error ? e.message : "L'action n'a pas pu être appliquée.",
+          'Action failed',
+          e instanceof Error ? e.message : 'The action could not be applied.',
         ),
       onSettled: () => setPendingAction(null),
     });
@@ -108,8 +108,8 @@ export default function ContainerDetailScreen() {
         },
         onError: (e) =>
           Alert.alert(
-            'Suppression échouée',
-            e instanceof Error ? e.message : "Le conteneur n'a pas pu être supprimé.",
+            'Delete failed',
+            e instanceof Error ? e.message : 'The container could not be deleted.',
           ),
       },
     );
@@ -126,12 +126,12 @@ export default function ContainerDetailScreen() {
       {
         onSuccess: (created) => {
           router.replace(`/endpoints/${id}/containers/${created.Id}`);
-          Alert.alert('Image mise à jour', `${name} a été recréé avec la dernière image.`);
+          Alert.alert('Image updated', `${name} was recreated with the latest image.`);
         },
         onError: (e) =>
           Alert.alert(
-            'Mise à jour échouée',
-            e instanceof Error ? e.message : "Le conteneur n'a pas pu être recréé.",
+            'Update failed',
+            e instanceof Error ? e.message : 'The container could not be recreated.',
           ),
       },
     );
@@ -153,7 +153,7 @@ export default function ContainerDetailScreen() {
           headerRight: () =>
             extraActions.length > 0 ? (
               <HeaderMenuButton
-                accessibilityLabel="Plus d'actions"
+                accessibilityLabel="More actions"
                 disabled={busy}
                 onPress={() => setMenuOpen(true)}
               />
@@ -166,7 +166,7 @@ export default function ContainerDetailScreen() {
           <StatusDot state={data.State.Status} />
           <Text style={styles.state}>{stateLabel(data.State.Status)}</Text>
           {data.State.Health ? (
-            <Text style={styles.health}>santé : {data.State.Health.Status}</Text>
+            <Text style={styles.health}>health: {data.State.Health.Status}</Text>
           ) : null}
         </View>
         <Text style={styles.image} numberOfLines={2}>
@@ -221,7 +221,7 @@ export default function ContainerDetailScreen() {
         ) : (
           <>
             <Button
-              label="Mettre à jour l'image"
+              label="Update image"
               variant="secondary"
               onPress={() => setConfirmingUpdate(true)}
               loading={recreate.isPending}
@@ -229,8 +229,7 @@ export default function ContainerDetailScreen() {
             />
             {recreate.isPending ? (
               <Text style={styles.updateProgress}>
-                Téléchargement de l&apos;image et recréation du conteneur… Cela peut prendre
-                plusieurs minutes.
+                Pulling the image and recreating the container… This can take several minutes.
               </Text>
             ) : null}
           </>
@@ -239,12 +238,12 @@ export default function ContainerDetailScreen() {
 
       <Card>
         <Row label="ID" value={shortId(data.Id)} />
-        <Row label="Créé le" value={formatDate(data.Created)} />
-        <Row label="Démarré le" value={formatDate(data.State.StartedAt)} />
-        {!running ? <Row label="Code de sortie" value={String(data.State.ExitCode)} /> : null}
-        <Row label="Redémarrage" value={data.HostConfig.RestartPolicy?.Name || 'no'} />
-        <Row label="Réseau" value={Object.keys(data.NetworkSettings.Networks).join(', ') || '—'} />
-        <Row label="Variables d'env." value={`${data.Config.Env?.length ?? 0}`} />
+        <Row label="Created" value={formatDate(data.Created)} />
+        <Row label="Started" value={formatDate(data.State.StartedAt)} />
+        {!running ? <Row label="Exit code" value={String(data.State.ExitCode)} /> : null}
+        <Row label="Restart policy" value={data.HostConfig.RestartPolicy?.Name || 'no'} />
+        <Row label="Network" value={Object.keys(data.NetworkSettings.Networks).join(', ') || '—'} />
+        <Row label="Env. variables" value={`${data.Config.Env?.length ?? 0}`} />
       </Card>
 
       {data.Mounts.length > 0 ? (
@@ -263,7 +262,7 @@ export default function ContainerDetailScreen() {
       <ContainerLogsSection endpointId={id} containerId={containerId} containerName={name} />
       <ConfirmSheet
         visible={confirming !== null}
-        title={confirming ? `${ACTION_LABELS[confirming]} le conteneur ?` : ''}
+        title={confirming ? `${ACTION_LABELS[confirming]} container?` : ''}
         message={describeImpact(confirming, name)}
         confirmLabel={confirming ? ACTION_LABELS[confirming] : ''}
         destructive
@@ -283,9 +282,9 @@ export default function ContainerDetailScreen() {
       />
       <ConfirmSheet
         visible={confirmingRemove}
-        title="Supprimer le conteneur ?"
+        title="Delete container?"
         message={describeRemoval(name, running)}
-        confirmLabel="Supprimer"
+        confirmLabel="Delete"
         destructive
         onConfirm={() => {
           setConfirmingRemove(false);
@@ -294,8 +293,8 @@ export default function ContainerDetailScreen() {
         onCancel={() => setConfirmingRemove(false)}>
         {hasVolumeMounts(data) ? (
           <ToggleRow
-            label="Supprimer aussi ses volumes anonymes"
-            hint="Les volumes nommés sont toujours conservés."
+            label="Also delete its anonymous volumes"
+            hint="Named volumes are always kept."
             value={removeVolumes}
             onChange={setRemoveVolumes}
           />
@@ -303,9 +302,9 @@ export default function ContainerDetailScreen() {
       </ConfirmSheet>
       <ConfirmSheet
         visible={confirmingUpdate}
-        title="Mettre à jour l'image ?"
+        title="Update image?"
         message={describeUpdate(name, data.Config.Image)}
-        confirmLabel="Mettre à jour"
+        confirmLabel="Update"
         destructive
         onConfirm={() => {
           setConfirmingUpdate(false);
@@ -319,20 +318,20 @@ export default function ContainerDetailScreen() {
 
 function describeUpdate(name: string, image: string): string {
   return (
-    `Portainer va télécharger la dernière version de ${image}, puis supprimer ${name} ` +
-    'et le recréer avec la même configuration. Les données qui ne sont pas conservées ' +
-    'dans un volume seront perdues.'
+    `Portainer will pull the latest version of ${image}, then delete ${name} ` +
+    'and recreate it with the same configuration. Any data not kept in a volume ' +
+    'will be lost.'
   );
 }
 
 function describeImpact(action: ContainerAction | null, name: string): string {
-  if (action === 'restart') return `${name} va redémarrer et sera brièvement indisponible.`;
-  if (action === 'stop') return `${name} restera arrêté jusqu'à son prochain démarrage.`;
-  if (action === 'pause') return `${name} ne répondra plus jusqu'à sa reprise.`;
+  if (action === 'restart') return `${name} will restart and be briefly unavailable.`;
+  if (action === 'stop') return `${name} will stay stopped until it is started again.`;
+  if (action === 'pause') return `${name} will not respond until it is resumed.`;
   if (action === 'kill') {
     return (
-      `${name} sera arrêté immédiatement, sans pouvoir se fermer proprement : ` +
-      'les écritures en cours peuvent être perdues.'
+      `${name} will be stopped immediately, with no chance to shut down cleanly: ` +
+      'writes in progress may be lost.'
     );
   }
   return '';
@@ -340,8 +339,8 @@ function describeImpact(action: ContainerAction | null, name: string): string {
 
 function describeRemoval(name: string, running: boolean): string {
   return (
-    (running ? `${name} sera arrêté puis supprimé. ` : `${name} sera supprimé. `) +
-    "Tout ce qui n'est pas dans un volume est perdu ; il faudra le recréer pour le relancer."
+    (running ? `${name} will be stopped, then deleted. ` : `${name} will be deleted. `) +
+    'Anything not in a volume is lost; it will have to be recreated to run again.'
   );
 }
 

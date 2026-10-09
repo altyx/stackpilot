@@ -9,8 +9,8 @@ describe('CodeBlock', () => {
     render(<CodeBlock code="mkcert -CAROOT" />);
     expect(screen.getByText('mkcert -CAROOT')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Copier' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Copy' }));
     expect(Clipboard.setStringAsync).toHaveBeenCalledWith('mkcert -CAROOT');
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Copié' })).toBeOnTheScreen());
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Copied' })).toBeOnTheScreen());
   });
 });

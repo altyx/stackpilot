@@ -23,7 +23,7 @@ export function VolumeCard({
     volume.Driver,
     size !== undefined ? formatBytes(size) : null,
     volume.CreatedAt ? formatDate(volume.CreatedAt) : null,
-    isAnonymousVolume(volume) ? 'anonyme' : null,
+    isAnonymousVolume(volume) ? 'anonymous' : null,
   ].filter(Boolean);
   return (
     <Card style={styles.card}>
@@ -52,7 +52,7 @@ export function VolumeCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={`Supprimer ${volume.Name}`}
+          accessibilityLabel={`Delete ${volume.Name}`}
           onPress={onDelete}
         />
       ) : null}

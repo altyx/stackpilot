@@ -13,9 +13,9 @@ export interface LogRange {
 }
 
 export const LOG_RANGES: readonly LogRange[] = [
-  { key: 'tail-100', label: '100 lignes', tail: 100 },
-  { key: 'tail-500', label: '500 lignes', tail: 500 },
-  { key: 'tail-2000', label: '2 000 lignes', tail: 2000 },
+  { key: 'tail-100', label: '100 lines', tail: 100 },
+  { key: 'tail-500', label: '500 lines', tail: 500 },
+  { key: 'tail-2000', label: '2,000 lines', tail: 2000 },
   { key: 'since-15m', label: '15 min', sinceSeconds: 15 * 60 },
   { key: 'since-1h', label: '1 h', sinceSeconds: 60 * 60 },
   { key: 'since-24h', label: '24 h', sinceSeconds: 24 * 60 * 60 },

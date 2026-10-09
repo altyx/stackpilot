@@ -14,11 +14,11 @@ import { VolumePruneList } from './VolumePruneList';
 type Step = 'choose' | VolumePruneScope;
 type Outcome = VolumePruneScope | 'cancel';
 
-const CONFIRM_PHRASE = 'supprimer';
+const CONFIRM_PHRASE = 'delete';
 
 const SCOPE_LABELS: Record<VolumePruneScope, string> = {
-  anonymous: 'Volumes anonymes',
-  all: 'Tous les volumes inutilisés',
+  anonymous: 'Anonymous volumes',
+  all: 'All unused volumes',
 };
 
 /**
@@ -64,7 +64,7 @@ export function VolumePruneSheet({
     volumes.reduce((sum, volume) => sum + (sizes.get(volume.Name) ?? 0), 0);
 
   function describeOption(scope: VolumePruneScope, volumes: VolumeSummary[]): string {
-    if (volumes.length === 0) return `${SCOPE_LABELS[scope]} · aucun`;
+    if (volumes.length === 0) return `${SCOPE_LABELS[scope]} · none`;
     const size = total(volumes);
     return `${SCOPE_LABELS[scope]} · ${volumes.length}${size > 0 ? ` · ${formatBytes(size)}` : ''}`;
   }
@@ -84,8 +84,8 @@ export function VolumePruneSheet({
       {step === 'choose' ? (
         <>
           <SheetHeader
-            title="Nettoyer les volumes"
-            message="Seuls les volumes qu'aucun conteneur n'utilise, même arrêté, sont supprimés. Leurs données sont perdues définitivement."
+            title="Clean up volumes"
+            message="Only volumes that no container uses, even a stopped one, are deleted. Their data is lost for good."
           />
           <SheetActions>
             {anonymousScopeAvailable ? (
@@ -102,12 +102,12 @@ export function VolumePruneSheet({
               disabled={all.length === 0}
               onPress={() => setStep('all')}
             />
-            <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
           </SheetActions>
           {!anonymousScopeAvailable ? (
             <Text style={styles.note}>
-              Ce moteur Docker, antérieur à la version 23, ne sait pas limiter le nettoyage aux
-              volumes anonymes : seul le nettoyage complet est proposé.
+              This Docker engine, older than version 23, cannot limit the cleanup to anonymous
+              volumes: only the full cleanup is offered.
             </Text>
           ) : null}
         </>
@@ -115,26 +115,24 @@ export function VolumePruneSheet({
         <>
           <SheetHeader
             title={
-              candidates.length > 1
-                ? `Supprimer ${candidates.length} volumes ?`
-                : 'Supprimer le volume ?'
+              candidates.length > 1 ? `Delete ${candidates.length} volumes?` : 'Delete volume?'
             }
             message={
               step === 'anonymous'
-                ? 'Les volumes anonymes inutilisés et leurs données seront supprimés définitivement.'
-                : 'Tous les volumes inutilisés, y compris ceux portant un nom, seront supprimés avec leurs données. Aucune récupération possible.'
+                ? 'Unused anonymous volumes and their data will be permanently deleted.'
+                : 'All unused volumes, named ones included, will be deleted along with their data. There is no way to recover it.'
             }
           />
           <VolumePruneList volumes={candidates} sizes={sizes} />
           <TypedConfirmation phrase={CONFIRM_PHRASE} value={typed} onChange={setTyped} />
           <SheetActions>
             <Button
-              label="Supprimer définitivement"
+              label="Delete permanently"
               variant="danger"
               disabled={!matchesPhrase(typed, CONFIRM_PHRASE)}
               onPress={() => close(step)}
             />
-            <Button label="Retour" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
           </SheetActions>
         </>
       )}

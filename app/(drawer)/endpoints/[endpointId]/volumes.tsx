@@ -19,7 +19,7 @@ import { Segmented } from '../../../../src/components/Segmented';
 import { useLatched } from '../../../../src/components/useLatched';
 import { VolumeCard } from '../../../../src/components/VolumeCard';
 import { VolumePruneSheet } from '../../../../src/components/VolumePruneSheet';
-import { formatBytes } from '../../../../src/lib/format';
+import { formatBytes, plural } from '../../../../src/lib/format';
 import {
   supportsAnonymousPrune,
   volumeConfirmPhrase,
@@ -64,7 +64,7 @@ export default function VolumesScreen() {
     [usages, filter],
   );
 
-  if (volumes.isPending || containers.isPending) return <Loader label="Chargement des volumes…" />;
+  if (volumes.isPending || containers.isPending) return <Loader label="Loading volumes…" />;
   const error = volumes.error ?? containers.error;
   if (error) {
     return (
@@ -86,8 +86,8 @@ export default function VolumesScreen() {
     remove.mutate(volume.Name, {
       onError: (e) =>
         Alert.alert(
-          'Suppression échouée',
-          e instanceof Error ? e.message : "Le volume n'a pas pu être supprimé.",
+          'Delete failed',
+          e instanceof Error ? e.message : 'The volume could not be deleted.',
         ),
     });
   }
@@ -96,11 +96,11 @@ export default function VolumesScreen() {
     const expected = volumePruneCandidates(usages, scope).length;
     prune.mutate(scope, {
       onSuccess: ({ deleted, spaceReclaimed }) =>
-        Alert.alert('Nettoyage terminé', describePrune(deleted.length, expected, spaceReclaimed)),
+        Alert.alert('Cleanup complete', describePrune(deleted.length, expected, spaceReclaimed)),
       onError: (e) =>
         Alert.alert(
-          'Nettoyage échoué',
-          e instanceof Error ? e.message : "Les volumes n'ont pas pu être supprimés.",
+          'Cleanup failed',
+          e instanceof Error ? e.message : 'The volumes could not be deleted.',
         ),
     });
   }
@@ -125,13 +125,12 @@ export default function VolumesScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.summary}>
-              {usages.length} volume{usages.length > 1 ? 's' : ''} · {unused.length} inutilisé
-              {unused.length > 1 ? 's' : ''}
-              {reclaimable > 0 ? ` · ${formatBytes(reclaimable)} récupérables` : ''}
+              {plural(usages.length, 'volume')} · {unused.length} unused
+              {reclaimable > 0 ? ` · ${formatBytes(reclaimable)} reclaimable` : ''}
             </Text>
             {unused.length > 0 ? (
               <Button
-                label="Nettoyer les volumes"
+                label="Clean up volumes"
                 variant="secondary"
                 onPress={() => setPruning(true)}
                 loading={prune.isPending}
@@ -142,15 +141,15 @@ export default function VolumesScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'used', label: 'Utilisés' },
-                { value: 'unused', label: 'Inutilisés' },
+                { value: 'all', label: 'All' },
+                { value: 'used', label: 'Used' },
+                { value: 'unused', label: 'Unused' },
               ]}
             />
           </View>
         }
         ListEmptyComponent={
-          <EmptyState title="Aucun volume" subtitle="Aucun résultat pour ce filtre." />
+          <EmptyState title="No volumes" subtitle="Nothing matches this filter." />
         }
         renderItem={({ item }) => (
           <VolumeCard
@@ -170,9 +169,9 @@ export default function VolumesScreen() {
       />
       <ConfirmSheet
         visible={deleting !== null}
-        title="Supprimer le volume ?"
+        title="Delete volume?"
         message={shownDeleting ? describeRemoval(shownDeleting, sizes) : undefined}
-        confirmLabel="Supprimer définitivement"
+        confirmLabel="Delete permanently"
         confirmPhrase={shownDeleting ? volumeConfirmPhrase(shownDeleting) : undefined}
         destructive
         onConfirm={() => {
@@ -189,8 +188,8 @@ export default function VolumesScreen() {
 function describeRemoval(volume: VolumeSummary, sizes: Map<string, number>): string {
   const size = sizes.get(volume.Name);
   return (
-    `${volume.Name}${size !== undefined ? ` (${formatBytes(size)})` : ''} et toutes ses ` +
-    'données seront supprimés définitivement. Aucune récupération possible.'
+    `${volume.Name}${size !== undefined ? ` (${formatBytes(size)})` : ''} and all its ` +
+    'data will be permanently deleted. There is no way to recover it.'
   );
 }
 
@@ -199,10 +198,10 @@ function describeRemoval(volume: VolumeSummary, sizes: Map<string, number>): str
  * list was stale, worth saying rather than hiding.
  */
 function describePrune(deleted: number, expected: number, reclaimed: number): string {
-  if (deleted === 0) return "Aucun volume n'a été supprimé.";
-  const volumes = `${deleted} volume${deleted > 1 ? 's' : ''} supprimé${deleted > 1 ? 's' : ''}`;
-  const freed = reclaimed > 0 ? ` · ${formatBytes(reclaimed)} libérés` : '';
-  const gap = deleted !== expected ? ` (${expected} prévu${expected > 1 ? 's' : ''})` : '';
+  if (deleted === 0) return 'No volume was deleted.';
+  const volumes = `${plural(deleted, 'volume')} deleted`;
+  const freed = reclaimed > 0 ? ` · ${formatBytes(reclaimed)} freed` : '';
+  const gap = deleted !== expected ? ` (${expected} expected)` : '';
   return `${volumes}${freed}${gap}.`;
 }
 

@@ -7,6 +7,7 @@ import { EmptyState } from '../../../../src/components/EmptyState';
 import { ErrorView } from '../../../../src/components/ErrorView';
 import { Loader } from '../../../../src/components/Loader';
 import { StackCard } from '../../../../src/components/StackCard';
+import { plural } from '../../../../src/lib/format';
 import { groupByStack, mergeStacks } from '../../../../src/lib/stacks';
 import { theme } from '../../../../src/theme';
 
@@ -29,7 +30,7 @@ export default function StacksScreen() {
   }, [overviews, search]);
 
   if (containers.isPending || (stacks.isPending && !stacks.error)) {
-    return <Loader label="Chargement des stacks…" />;
+    return <Loader label="Loading stacks…" />;
   }
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
 
@@ -59,29 +60,28 @@ export default function StacksScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Filtrer par nom"
+            placeholder="Filter by name"
             placeholderTextColor={theme.colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.search}
           />
           <Text style={styles.summary}>
-            {overviews.length} stack{overviews.length > 1 ? 's' : ''} · {managed} gérée
-            {managed > 1 ? 's' : ''} par Portainer
-            {external > 0 ? ` · ${external} externe${external > 1 ? 's' : ''}` : ''}
+            {plural(overviews.length, 'stack')} · {managed} managed by Portainer
+            {external > 0 ? ` · ${external} external` : ''}
           </Text>
           {stacks.error ? (
             <Text style={styles.warning}>
-              Détails Portainer indisponibles :{' '}
-              {stacks.error instanceof Error ? stacks.error.message : 'erreur inconnue'}
+              Portainer details unavailable:{' '}
+              {stacks.error instanceof Error ? stacks.error.message : 'unknown error'}
             </Text>
           ) : null}
         </View>
       }
       ListEmptyComponent={
         <EmptyState
-          title="Aucune stack"
-          subtitle={search ? 'Aucun résultat pour ce filtre.' : undefined}
+          title="No stacks"
+          subtitle={search ? 'Nothing matches this filter.' : undefined}
         />
       }
       renderItem={({ item }) => <StackCard endpointId={id} overview={item} />}

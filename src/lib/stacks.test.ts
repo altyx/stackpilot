@@ -32,7 +32,7 @@ describe('groupByStack', () => {
     expect(groupByStack(containers)).toMatchObject([
       { title: 'api', ungrouped: false },
       { title: 'blog', ungrouped: false },
-      { title: 'Sans stack', ungrouped: true },
+      { title: 'No stack', ungrouped: true },
     ]);
   });
 
@@ -52,7 +52,7 @@ describe('groupByStack', () => {
 
   it('drops stacks with no visible member', () => {
     const sections = groupByStack(containers, (container) => container.Names[0] === '/alone');
-    expect(sections).toMatchObject([{ title: 'Sans stack', ungrouped: true }]);
+    expect(sections).toMatchObject([{ title: 'No stack', ungrouped: true }]);
   });
 });
 
@@ -106,15 +106,15 @@ describe('describeStackResult', () => {
   it('counts the successes', () => {
     expect(describeStackResult(blog, 'start', { succeeded: 2, failures: [] })).toEqual({
       title: 'blog',
-      message: '2 conteneurs démarrés.',
+      message: '2 containers started.',
     });
   });
 
   it('details each failure', () => {
     const { message } = describeStackResult(blog, 'stop', {
       succeeded: 1,
-      failures: [{ name: 'db', message: 'refusé' }],
+      failures: [{ name: 'db', message: 'refused' }],
     });
-    expect(message).toBe('1 conteneurs arrêtés, 1 en échec.\n\n• db : refusé');
+    expect(message).toBe('1 container stopped, 1 failed.\n\n• db: refused');
   });
 });

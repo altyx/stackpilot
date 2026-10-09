@@ -222,13 +222,13 @@ describe('removeImage', () => {
     requestMock.mockRejectedValue(new PortainerError('Conflit', 409, 'image is being used'));
     await expect(removeImage(session, 1, 'sha256:abc', false)).rejects.toMatchObject({
       status: 409,
-      message: expect.stringContaining('Image utilisée') as unknown,
+      message: expect.stringContaining('Image in use') as unknown,
       detail: 'image is being used',
     });
   });
 
   it('lets other errors through untouched', async () => {
-    const error = new PortainerError('Ressource introuvable sur cette instance.', 404);
+    const error = new PortainerError('Resource not found on this instance.', 404);
     requestMock.mockRejectedValue(error);
     await expect(removeImage(session, 1, 'sha256:abc', false)).rejects.toBe(error);
   });
@@ -236,7 +236,7 @@ describe('removeImage', () => {
   it('rejects an invalid environment id before calling Portainer', async () => {
     requestMock.mockClear();
     await expect(removeImage(session, Number.NaN, 'sha256:abc', false)).rejects.toThrow(
-      /Identifiant d'environnement invalide/,
+      /Invalid environment id/,
     );
     expect(requestMock).not.toHaveBeenCalled();
   });
@@ -339,7 +339,7 @@ describe('removeVolume', () => {
     requestMock.mockRejectedValue(new PortainerError('Conflit', 409, 'volume is in use'));
     await expect(removeVolume(session, 1, 'pgdata')).rejects.toMatchObject({
       status: 409,
-      message: expect.stringContaining('Volume utilisé') as unknown,
+      message: expect.stringContaining('Volume in use') as unknown,
       detail: 'volume is in use',
     });
   });
@@ -429,7 +429,7 @@ describe('redeployStack', () => {
     requestMock.mockClear();
     requestMock.mockResolvedValueOnce({ StackFileContent: '' });
     await expect(redeployStack(session, makeStack(), { pullImages: false })).rejects.toThrow(
-      /Fichier de la stack vide/,
+      /stack file is empty/,
     );
     expect(requestMock).toHaveBeenCalledTimes(1);
   });

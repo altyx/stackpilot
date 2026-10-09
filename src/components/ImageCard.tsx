@@ -33,9 +33,9 @@ export function ImageCard({
           {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
         </Text>
 
-        {updateAvailable ? <Text style={styles.update}>Nouvelle version disponible</Text> : null}
+        {updateAvailable ? <Text style={styles.update}>New version available</Text> : null}
 
-        {isDangling(image) ? <Text style={styles.dangling}>Image sans tag (dangling)</Text> : null}
+        {isDangling(image) ? <Text style={styles.dangling}>Untagged image (dangling)</Text> : null}
 
         {usedBy.length > 0 ? (
           <Text style={styles.usedBy} numberOfLines={2}>
@@ -52,7 +52,7 @@ export function ImageCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={`Supprimer ${imageLabel(image)}`}
+          accessibilityLabel={`Delete ${imageLabel(image)}`}
           onPress={onDelete}
         />
       ) : null}

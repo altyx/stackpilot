@@ -145,7 +145,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
         <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, { opacity: progress }]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Fermer"
+            accessibilityLabel="Close"
             style={StyleSheet.absoluteFill}
             onPress={() => callbacks.current.onRequestClose()}
           />

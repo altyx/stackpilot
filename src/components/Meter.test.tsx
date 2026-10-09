@@ -4,8 +4,8 @@ import { Meter } from './Meter';
 
 describe('Meter', () => {
   it('announces its value and fills to the ratio', () => {
-    render(<Meter label="Mémoire" value="2 Go / 8 Go" ratio={0.25} />);
-    const meter = screen.getByRole('progressbar', { name: 'Mémoire : 2 Go / 8 Go' });
+    render(<Meter label="Memory" value="2 GB / 8 GB" ratio={0.25} />);
+    const meter = screen.getByRole('progressbar', { name: 'Memory: 2 GB / 8 GB' });
     expect(meter).toHaveProp('accessibilityValue', { min: 0, max: 100, now: 25 });
   });
 

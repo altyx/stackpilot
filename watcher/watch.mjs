@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Surveille le flux d'événements Docker exposé par Portainer et pousse une
- * notification Expo quand un conteneur tombe.
+ * Watches the Docker event stream exposed by Portainer and pushes an Expo
+ * notification when a container goes down.
  *
- * Le flux `/events` est une connexion HTTP longue qui émet un objet JSON par
- * ligne. On la garde ouverte et on la rétablit avec un recul exponentiel, plutôt
- * que d'interroger l'API en boucle.
+ * The `/events` stream is a long-lived HTTP connection that emits one JSON
+ * object per line. It is kept open and re-established with exponential
+ * backoff, rather than polling the API in a loop.
  */
 
 import http from 'node:http';
@@ -21,66 +21,66 @@ const config = {
     .split(',')
     .map((token) => token.trim())
     .filter(Boolean),
-  /** Conteneurs à ignorer, par nom exact, séparés par des virgules. */
+  /** Containers to ignore, by exact name, comma-separated. */
   ignore: new Set(
     (process.env.IGNORE_CONTAINERS ?? '')
       .split(',')
       .map((name) => name.trim())
       .filter(Boolean),
   ),
-  /** Fenêtre anti-doublon : une même alerte n'est pas répétée avant ce délai. */
+  /** De-duplication window: the same alert is not repeated within this delay. */
   dedupeSeconds: Number(process.env.DEDUPE_SECONDS ?? 120),
-  /** Accepte le certificat auto-signé de Portainer, pour ce flux uniquement. */
+  /** Accepts Portainer's self-signed certificate, for this stream only. */
   insecureTls: /^(1|true|yes|on)$/i.test(process.env.PORTAINER_INSECURE_TLS ?? ''),
 };
 
 function required(name) {
   const value = process.env[name];
   if (!value) {
-    console.error(`Variable d'environnement manquante : ${name}`);
+    console.error(`Missing environment variable: ${name}`);
     process.exit(1);
   }
   return value;
 }
 
 if (Number.isNaN(config.endpointId)) {
-  console.error('ENDPOINT_ID doit être un entier.');
+  console.error('ENDPOINT_ID must be an integer.');
   process.exit(1);
 }
 
-/** Surchargeable pour les tests ; en production, laisser la valeur par défaut. */
+/** Overridable for tests; in production, keep the default. */
 const EXPO_PUSH_URL = process.env.EXPO_PUSH_URL ?? 'https://exp.host/--/api/v2/push/send';
 
 /**
- * Ce qui mérite de réveiller quelqu'un. `die` est volontairement filtré sur le
- * code de sortie : un arrêt demandé depuis l'application sort en 0, et n'a pas à
- * déclencher d'alerte.
+ * What deserves waking someone up. `die` is deliberately filtered on the exit
+ * code: a stop requested from the app exits with 0, and must not trigger an
+ * alert.
  */
 function describeEvent(event) {
   const action = event.Action ?? '';
   const attributes = event.Actor?.Attributes ?? {};
-  const name = attributes.name ?? event.Actor?.ID?.slice(0, 12) ?? 'conteneur';
+  const name = attributes.name ?? event.Actor?.ID?.slice(0, 12) ?? 'container';
 
   if (action === 'die') {
     const exitCode = attributes.exitCode ?? '0';
     if (exitCode === '0') return null;
-    return { name, reason: `Arrêt anormal (code ${exitCode})`, key: `die:${exitCode}` };
+    return { name, reason: `Exited abnormally (code ${exitCode})`, key: `die:${exitCode}` };
   }
   if (action === 'health_status: unhealthy') {
-    return { name, reason: 'Passé en unhealthy', key: 'unhealthy' };
+    return { name, reason: 'Became unhealthy', key: 'unhealthy' };
   }
   if (action === 'oom') {
-    return { name, reason: 'Mémoire épuisée (OOM)', key: 'oom' };
+    return { name, reason: 'Out of memory (OOM)', key: 'oom' };
   }
   if (action === 'restart') {
-    return { name, reason: 'Redémarrage', key: 'restart' };
+    return { name, reason: 'Restarted', key: 'restart' };
   }
   return null;
 }
 
 const recentAlerts = new Map();
 
-/** Docker peut répéter un événement quand un conteneur boucle sur un redémarrage. */
+/** Docker can repeat an event when a container is stuck in a restart loop. */
 function isDuplicate(containerId, key) {
   const now = Date.now();
   for (const [seen, at] of recentAlerts) {
@@ -115,18 +115,18 @@ async function push(alert, containerId) {
   });
 
   if (!response.ok) {
-    console.error(`Envoi refusé par Expo (HTTP ${response.status}) : ${await response.text()}`);
+    console.error(`Expo refused the push (HTTP ${response.status}): ${await response.text()}`);
     return;
   }
 
-  // Expo répond 200 même quand un jeton est invalide : le détail est dans les tickets.
+  // Expo answers 200 even when a token is invalid: the detail is in the tickets.
   const { data } = await response.json();
   for (const ticket of data ?? []) {
     if (ticket.status === 'error') {
-      console.error(`Ticket en erreur : ${ticket.message} (${ticket.details?.error ?? '?'})`);
+      console.error(`Ticket error: ${ticket.message} (${ticket.details?.error ?? '?'})`);
     }
   }
-  console.log(`Alerte envoyée : ${alert.name} — ${alert.reason}`);
+  console.log(`Alert sent: ${alert.name} — ${alert.reason}`);
 }
 
 function eventsUrl() {
@@ -135,10 +135,10 @@ function eventsUrl() {
 }
 
 /**
- * Le flux passe par `node:https` et non par `fetch`, afin de n'assouplir la
- * vérification TLS que sur cette connexion. `NODE_TLS_REJECT_UNAUTHORIZED=0`
- * l'assouplirait pour tout le processus, donc aussi pour l'envoi vers Expo, qui
- * traverse Internet.
+ * The stream goes through `node:https` rather than `fetch`, so TLS
+ * verification is only relaxed on this connection. `NODE_TLS_REJECT_UNAUTHORIZED=0`
+ * would relax it for the whole process, including the push to Expo, which
+ * crosses the Internet.
  */
 function openEventStream() {
   const url = new URL(eventsUrl());
@@ -167,17 +167,17 @@ const TLS_ERRORS = new Set([
 function describeConnectionError(error) {
   if (TLS_ERRORS.has(error?.code)) {
     return (
-      `Certificat refusé (${error.code}). Portainer présente par défaut un ` +
-      'certificat auto-signé : si ce service et Portainer sont sur la même ' +
-      'machine, posez PORTAINER_INSECURE_TLS=1. Sinon, donnez un certificat ' +
-      'valide à Portainer.'
+      `Certificate rejected (${error.code}). By default Portainer presents a ` +
+      'self-signed certificate: if this service and Portainer run on the same ' +
+      'machine, set PORTAINER_INSECURE_TLS=1. Otherwise, give Portainer a valid ' +
+      'certificate.'
     );
   }
-  // Un échec de connexion remonte souvent en AggregateError (double pile
-  // IPv4/IPv6), dont le message est vide : sans ce cas, le journal ne dirait rien.
+  // A connection failure often surfaces as an AggregateError (dual IPv4/IPv6
+  // stack) with an empty message: without this case, the log would say nothing.
   if (error instanceof AggregateError) {
     const causes = [...new Set(error.errors.map((e) => e.code || e.message).filter(Boolean))];
-    return `Connexion impossible (${causes.join(', ') || 'cause inconnue'}).`;
+    return `Cannot connect (${causes.join(', ') || 'unknown cause'}).`;
   }
   return error?.message || error?.code || String(error);
 }
@@ -198,16 +198,16 @@ async function consumeEvents() {
 
   if (response.statusCode < 200 || response.statusCode >= 300) {
     const body = await readAll(response);
-    throw new Error(`Portainer a refusé le flux (HTTP ${response.statusCode}) : ${body.trim()}`);
+    throw new Error(`Portainer refused the stream (HTTP ${response.statusCode}): ${body.trim()}`);
   }
 
-  console.log(`Connecté au flux d'événements de l'environnement ${config.endpointId}.`);
+  console.log(`Connected to the event stream of environment ${config.endpointId}.`);
 
   let buffer = '';
   for await (const chunk of response) {
     buffer += Buffer.from(chunk).toString('utf8');
 
-    // Le flux est du NDJSON : une ligne peut arriver coupée en deux paquets.
+    // The stream is NDJSON: a line can arrive split across two packets.
     let newline;
     while ((newline = buffer.indexOf('\n')) !== -1) {
       const line = buffer.slice(0, newline).trim();
@@ -216,7 +216,7 @@ async function consumeEvents() {
     }
   }
 
-  throw new Error('Le flux a été fermé par le serveur.');
+  throw new Error('The server closed the stream.');
 }
 
 function handleLine(line) {
@@ -224,7 +224,7 @@ function handleLine(line) {
   try {
     event = JSON.parse(line);
   } catch {
-    console.error(`Ligne illisible ignorée : ${line.slice(0, 120)}`);
+    console.error(`Ignoring unreadable line: ${line.slice(0, 120)}`);
     return;
   }
 
@@ -235,16 +235,16 @@ function handleLine(line) {
   const containerId = event.Actor?.ID ?? '';
   if (isDuplicate(containerId, alert.key)) return;
 
-  push(alert, containerId).catch((error) => console.error(`Envoi échoué : ${error.message}`));
+  push(alert, containerId).catch((error) => console.error(`Push failed: ${error.message}`));
 }
 
 async function main() {
   console.log(
-    `Surveillance de ${config.portainerUrl} · environnement ${config.endpointId} · ${config.pushTokens.length} appareil(s).`,
+    `Watching ${config.portainerUrl} · environment ${config.endpointId} · ${config.pushTokens.length} device(s).`,
   );
   if (config.insecureTls) {
     console.log(
-      "Vérification TLS désactivée pour le flux Portainer. L'envoi vers Expo reste vérifié.",
+      'TLS verification disabled for the Portainer stream. The push to Expo is still verified.',
     );
   }
 
@@ -254,9 +254,9 @@ async function main() {
       await consumeEvents();
       backoff = 1000;
     } catch (error) {
-      console.error(`Flux interrompu : ${error.message}`);
+      console.error(`Stream interrupted: ${error.message}`);
     }
-    console.log(`Nouvelle tentative dans ${Math.round(backoff / 1000)} s.`);
+    console.log(`Retrying in ${Math.round(backoff / 1000)} s.`);
     await new Promise((resolve) => setTimeout(resolve, backoff));
     backoff = Math.min(backoff * 2, 60_000);
   }

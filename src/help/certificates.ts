@@ -24,43 +24,43 @@ export interface CertificateSolution {
 }
 
 export const CERTIFICATE_HELP_INTRO =
-  "iOS et Android refusent les certificats auto-signés, comme celui que Portainer génère par défaut sur le port 9443. L'application ne peut pas passer outre : la solution est de présenter à l'appareil un certificat qu'il reconnaît. Voici trois façons d'y arriver, de la plus simple à la plus manuelle.";
+  "iOS and Android reject self-signed certificates, like the one Portainer generates by default on port 9443. The app can't override this: the fix is to present the device with a certificate it trusts. Here are three ways to get there, from the simplest to the most hands-on.";
 
 export const CERTIFICATE_SOLUTIONS: readonly CertificateSolution[] = [
   {
     id: 'tailscale',
     title: 'Tailscale',
-    bestFor: 'Idéal pour joindre votre serveur de partout, sans ouvrir de port.',
+    bestFor: 'Best for reaching your server from anywhere, without opening a port.',
     summary:
-      "Tailscale fournit un certificat Let's Encrypt valide pour l'adresse de votre serveur sur votre réseau Tailscale.",
+      "Tailscale provides a valid Let's Encrypt certificate for your server's address on your Tailscale network.",
     steps: [
-      { text: 'Installez Tailscale sur le serveur et sur ce téléphone, sur le même réseau.' },
+      { text: 'Install Tailscale on the server and on this phone, on the same network.' },
       {
-        text: "Dans la console d'administration Tailscale, activez MagicDNS et les certificats HTTPS (onglet DNS).",
+        text: 'In the Tailscale admin console, enable MagicDNS and HTTPS certificates (DNS tab).',
       },
       {
-        text: 'Sur le serveur, exposez Portainer en HTTPS :',
+        text: 'On the server, serve Portainer over HTTPS:',
         code: 'tailscale serve --bg https+insecure://localhost:9443',
       },
       {
-        text: "Connectez-vous avec l'adresse de la machine sur votre réseau Tailscale :",
-        code: 'https://serveur.votre-reseau.ts.net',
+        text: "Sign in with the machine's address on your Tailscale network:",
+        code: 'https://server.your-tailnet.ts.net',
       },
     ],
-    note: '« https+insecure » ne concerne que le trajet local entre Tailscale et Portainer, sur le serveur lui-même : ce téléphone, lui, reçoit un certificat valide.',
+    note: '"https+insecure" only covers the local hop between Tailscale and Portainer, on the server itself: this phone still gets a valid certificate.',
   },
   {
     id: 'reverse-proxy',
-    title: "Reverse proxy et Let's Encrypt",
-    bestFor: 'Idéal si vous avez déjà un nom de domaine.',
+    title: "Reverse proxy and Let's Encrypt",
+    bestFor: 'Best if you already own a domain name.',
     summary:
-      "Un reverse proxy obtient un certificat Let's Encrypt et le présente à la place de celui de Portainer.",
+      "A reverse proxy obtains a Let's Encrypt certificate and presents it in place of Portainer's.",
     steps: [
       {
-        text: 'Faites pointer un nom, par exemple portainer.example.com, vers votre reverse proxy.',
+        text: 'Point a name, for example portainer.example.com, at your reverse proxy.',
       },
       {
-        text: 'Déclarez Portainer derrière le proxy. Avec Caddy, sur le même réseau Docker que le conteneur portainer :',
+        text: 'Put Portainer behind the proxy. With Caddy, on the same Docker network as the portainer container:',
         code: [
           'portainer.example.com {',
           '  reverse_proxy https://portainer:9443 {',
@@ -72,24 +72,24 @@ export const CERTIFICATE_SOLUTIONS: readonly CertificateSolution[] = [
         ].join('\n'),
       },
       {
-        text: "Pour un nom joignable uniquement sur votre réseau local, utilisez le challenge DNS de Let's Encrypt : Caddy, Traefik et Nginx Proxy Manager le prennent en charge avec la plupart des fournisseurs DNS.",
+        text: "For a name only reachable on your local network, use Let's Encrypt's DNS challenge: Caddy, Traefik and Nginx Proxy Manager support it with most DNS providers.",
       },
-      { text: "Connectez-vous avec l'adresse du proxy :", code: 'https://portainer.example.com' },
+      { text: "Sign in with the proxy's address:", code: 'https://portainer.example.com' },
     ],
   },
   {
     id: 'own-ca',
-    title: 'Votre propre autorité avec mkcert',
-    bestFor: 'Idéal pour un réseau local, sans nom de domaine.',
+    title: 'Your own authority with mkcert',
+    bestFor: 'Best for a local network, without a domain name.',
     summary:
-      'Vous créez votre propre autorité de certification, vous signez avec elle le certificat de Portainer, puis vous installez cette autorité sur ce téléphone.',
+      "You create your own certificate authority, sign Portainer's certificate with it, then install that authority on this phone.",
     steps: [
       {
-        text: "Sur un ordinateur, installez mkcert, puis créez un certificat pour les adresses que vous saisissez dans l'application (nom, IP, ou les deux) :",
+        text: 'On a computer, install mkcert, then create a certificate for the addresses you type in the app (name, IP, or both):',
         code: 'mkcert portainer.lan 192.168.1.10',
       },
       {
-        text: 'Démarrez Portainer avec ce certificat, placé dans un dossier certs monté sur /certs :',
+        text: 'Start Portainer with this certificate, placed in a certs folder mounted on /certs:',
         code: [
           'docker run -d -p 9443:9443 --name portainer \\',
           '  -v /var/run/docker.sock:/var/run/docker.sock \\',
@@ -100,40 +100,40 @@ export const CERTIFICATE_SOLUTIONS: readonly CertificateSolution[] = [
         ].join('\n'),
       },
       {
-        text: "Récupérez l'autorité : c'est le fichier rootCA.pem du dossier indiqué par cette commande.",
+        text: "Get the authority: it's the rootCA.pem file in the folder this command prints.",
         code: 'mkcert -CAROOT',
       },
       {
-        text: 'Envoyez rootCA.pem sur ce téléphone (AirDrop, e-mail, fichier), puis installez-le comme indiqué plus bas.',
+        text: 'Send rootCA.pem to this phone (AirDrop, email, file), then install it as shown below.',
       },
     ],
-    note: 'Ne transférez jamais rootCA-key.pem : quiconque détient cette clé peut créer des certificats que ce téléphone acceptera, pour n’importe quel site.',
+    note: 'Never share rootCA-key.pem: anyone holding this key can create certificates this phone will accept, for any website.',
   },
 ];
 
-export const DEVICE_TRUST_TITLE = "Installer l'autorité sur ce téléphone";
+export const DEVICE_TRUST_TITLE = 'Install the authority on this phone';
 
 /** Installing a user CA differs enough between the platforms to need its own steps. */
 export const DEVICE_TRUST_STEPS: Record<'ios' | 'android', readonly HelpStep[]> = {
   ios: [
-    { text: "Ouvrez rootCA.pem sur l'iPhone : iOS propose de télécharger un profil." },
-    { text: "Réglages › Général › VPN et gestion de l'appareil : installez le profil." },
+    { text: 'Open rootCA.pem on the iPhone: iOS offers to download a profile.' },
+    { text: 'Settings › General › VPN & Device Management: install the profile.' },
     {
-      text: 'Réglages › Général › Informations › Réglages des certificats : activez la confiance totale pour ce certificat. Sans cette étape, iOS installe le profil mais refuse toujours la connexion.',
+      text: 'Settings › General › About › Certificate Trust Settings: turn on full trust for this certificate. Without this step, iOS installs the profile but still refuses the connection.',
     },
   ],
   android: [
     {
-      text: "Copiez rootCA.pem sur le téléphone. Renommez-le en rootCA.crt si le système ne le propose pas à l'installation.",
+      text: "Copy rootCA.pem to the phone. Rename it to rootCA.crt if the system doesn't offer to install it.",
     },
     {
-      text: 'Paramètres › Sécurité › Chiffrement et identifiants › Installer un certificat › Certificat CA. Le chemin varie selon le fabricant : cherchez « certificat » dans les paramètres.',
+      text: 'Settings › Security › Encryption & credentials › Install a certificate › CA certificate. The path varies by manufacturer: search the settings for "certificate".',
     },
     {
-      text: 'Beaucoup d’applications ignorent les autorités installées ainsi. StackPilot, non : elle les accepte au même titre que celles du système.',
+      text: 'Many apps ignore authorities installed this way. StackPilot does not: it accepts them just like the system ones.',
     },
   ],
 };
 
 export const CERTIFICATE_HELP_FOOTNOTE =
-  "Et accepter tel quel le certificat par défaut de Portainer ? Il faudrait que l'application contourne la vérification du système, ce qu'elle ne fait pas : les solutions ci-dessus protègent réellement la connexion, sans exception à gérer.";
+  "Why not just accept Portainer's default certificate? The app would have to bypass the system's verification, which it doesn't do: the solutions above genuinely protect the connection, with no exception to manage.";

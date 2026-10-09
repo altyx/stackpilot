@@ -19,7 +19,7 @@ export function Meter({ label, value, ratio }: { label: string; value: string; r
       style={styles.meter}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel={`${label} : ${value}`}
+      accessibilityLabel={`${label}: ${value}`}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(clamped * 100) }}>
       <View style={styles.header}>
         <Text style={styles.label}>{label}</Text>

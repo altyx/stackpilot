@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import type { Endpoint } from '../api/types';
 import { isKubernetes, isOnline } from '../lib/endpoints';
+import { plural } from '../lib/format';
 import { theme } from '../theme';
 import { Card } from './Card';
 
@@ -17,21 +18,19 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
           {endpoint.Name}
         </Text>
         <Text style={[styles.badge, online ? styles.badgeUp : styles.badgeDown]}>
-          {online ? 'En ligne' : 'Hors ligne'}
+          {online ? 'Online' : 'Offline'}
         </Text>
       </View>
       <Text style={styles.url} numberOfLines={1}>
-        {endpoint.URL || 'socket local'}
+        {endpoint.URL || 'local socket'}
       </Text>
       {kubernetes ? (
-        <Text style={styles.unsupported}>
-          Environnement Kubernetes — non pris en charge par l&apos;application.
-        </Text>
+        <Text style={styles.unsupported}>Kubernetes environment — not supported by the app.</Text>
       ) : (
         <Text style={styles.stats}>
           {snapshot
-            ? `${snapshot.RunningContainerCount ?? 0} en cours · ${snapshot.StoppedContainerCount ?? 0} arrêtés · ${snapshot.ImageCount ?? 0} images`
-            : 'Aucun instantané disponible'}
+            ? `${snapshot.RunningContainerCount ?? 0} running · ${snapshot.StoppedContainerCount ?? 0} stopped · ${plural(snapshot.ImageCount ?? 0, 'image')}`
+            : 'No snapshot available'}
         </Text>
       )}
     </Card>

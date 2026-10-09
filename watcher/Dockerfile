@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-# Le service n'a aucune dépendance npm : il n'utilise que le fetch natif de Node.
+# The service has no npm dependency: it only uses Node's native fetch.
 WORKDIR /app
 COPY watch.mjs ./
 

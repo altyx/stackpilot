@@ -49,24 +49,24 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
       </View>
 
       <ScrollView contentContainerStyle={styles.items} alwaysBounceVertical={false}>
-        {item('Environnements', 'server-outline', '/endpoints')}
+        {item('Environments', 'server-outline', '/endpoints')}
 
         <Text style={styles.caption} numberOfLines={1}>
-          {endpointBase === null ? 'Aucun environnement ouvert' : (endpointName ?? 'Environnement')}
+          {endpointBase === null ? 'No environment open' : (endpointName ?? 'Environment')}
         </Text>
-        {item("Vue d'ensemble", 'speedometer-outline', endpointBase && `${endpointBase}/overview`)}
-        {item('Conteneurs', 'cube-outline', endpointBase)}
+        {item('Overview', 'speedometer-outline', endpointBase && `${endpointBase}/overview`)}
+        {item('Containers', 'cube-outline', endpointBase)}
         {item('Stacks', 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
         {item('Images', 'layers-outline', endpointBase && `${endpointBase}/images`)}
         {item('Volumes', 'save-outline', endpointBase && `${endpointBase}/volumes`)}
 
         <View style={styles.separator} />
-        {item('Réglages', 'settings-outline', '/settings')}
+        {item('Settings', 'settings-outline', '/settings')}
       </ScrollView>
 
       <View style={styles.footer}>
         <DrawerLink
-          label="Déconnexion"
+          label="Sign out"
           icon="log-out-outline"
           tone="danger"
           onPress={() => {

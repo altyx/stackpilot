@@ -13,14 +13,14 @@ export const RELEASES_URL = `${SOURCE_CODE_URL}/releases`;
  */
 export function newIssueUrl(): string {
   const body = [
-    '### Problème rencontré',
+    '### What happened',
     '',
     '',
-    '### Étapes pour le reproduire',
+    '### Steps to reproduce',
     '',
     '1. ',
     '',
-    '### Contexte',
+    '### Context',
     '',
     diagnostics(),
     '',
