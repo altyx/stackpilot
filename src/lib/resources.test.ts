@@ -57,7 +57,7 @@ describe('summarizeResources', () => {
     expect(summary.containers.map((c) => c.name)).toEqual(['db', 'api', 'new']);
   });
 
-  it('caps the host CPU at 100 %', () => {
+  it('caps the host CPU at 100%', () => {
     const summary = summarizeResources({ NCPU: 1, MemTotal: 1 }, [
       { container: makeContainer(), stats: stats(300, 0) },
     ]);
@@ -67,7 +67,7 @@ describe('summarizeResources', () => {
 
 describe('formatPercent', () => {
   it('keeps a decimal only for small values', () => {
-    expect(formatPercent(3.24)).toBe('3,2 %');
-    expect(formatPercent(42.6)).toBe('43 %');
+    expect(formatPercent(3.24)).toBe('3.2%');
+    expect(formatPercent(42.6)).toBe('43%');
   });
 });

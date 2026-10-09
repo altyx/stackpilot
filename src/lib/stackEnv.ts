@@ -30,10 +30,10 @@ export function validateEnv(drafts: EnvDraft[]): Map<string, string> {
   for (const draft of drafts) {
     const name = draft.name.trim();
     if (name === '' && draft.value === '') continue;
-    if (name === '') errors.set(draft.key, 'Nom requis.');
+    if (name === '') errors.set(draft.key, 'Name required.');
     else if (!VALID_NAME.test(name)) {
-      errors.set(draft.key, 'Lettres, chiffres et _ uniquement, sans commencer par un chiffre.');
-    } else if (seen.has(name)) errors.set(draft.key, `${name} est déjà défini plus haut.`);
+      errors.set(draft.key, 'Letters, digits and _ only, not starting with a digit.');
+    } else if (seen.has(name)) errors.set(draft.key, `${name} is already defined above.`);
     else seen.set(name, draft.key);
   }
   return errors;

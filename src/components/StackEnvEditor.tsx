@@ -59,9 +59,9 @@ export function StackEnvEditor({
               <TextInput
                 value={draft.name}
                 onChangeText={(name) => update(draft.key, { name })}
-                placeholder="NOM"
+                placeholder="NAME"
                 placeholderTextColor={theme.colors.textMuted}
-                accessibilityLabel="Nom de la variable"
+                accessibilityLabel="Variable name"
                 autoCapitalize="characters"
                 autoCorrect={false}
                 spellCheck={false}
@@ -71,9 +71,9 @@ export function StackEnvEditor({
                 <TextInput
                   value={draft.value}
                   onChangeText={(value) => update(draft.key, { value })}
-                  placeholder="valeur"
+                  placeholder="value"
                   placeholderTextColor={theme.colors.textMuted}
-                  accessibilityLabel={`Valeur de ${draft.name || 'la variable'}`}
+                  accessibilityLabel={`Value of ${draft.name || 'the variable'}`}
                   autoCapitalize="none"
                   autoCorrect={false}
                   spellCheck={false}
@@ -85,7 +85,7 @@ export function StackEnvEditor({
                 {isSensitiveName(draft.name) ? (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={masked ? `Afficher ${draft.name}` : `Masquer ${draft.name}`}
+                    accessibilityLabel={masked ? `Show ${draft.name}` : `Hide ${draft.name}`}
                     hitSlop={8}
                     onPress={() => toggleReveal(draft.key)}>
                     <Ionicons
@@ -101,7 +101,7 @@ export function StackEnvEditor({
             <IconButton
               icon="remove-circle-outline"
               variant="danger"
-              accessibilityLabel={`Retirer ${draft.name || 'la variable'}`}
+              accessibilityLabel={`Remove ${draft.name || 'the variable'}`}
               onPress={() => setDrafts((current) => current.filter((d) => d.key !== draft.key))}
             />
           </View>
@@ -112,13 +112,13 @@ export function StackEnvEditor({
         accessibilityRole="button"
         onPress={() => setDrafts((current) => [...current, emptyDraft()])}
         style={styles.add}>
-        + Ajouter une variable
+        + Add a variable
       </Text>
 
       <View style={styles.actions}>
-        <Button label="Annuler" variant="secondary" onPress={onCancel} style={styles.action} />
+        <Button label="Cancel" variant="secondary" onPress={onCancel} style={styles.action} />
         <Button
-          label="Enregistrer"
+          label="Save"
           onPress={save}
           loading={busy}
           disabled={submitted && errors.size > 0}

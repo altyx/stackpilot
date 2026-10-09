@@ -21,7 +21,7 @@ export function StackEnvRow({ variable }: { variable: StackEnv }) {
       {sensitive ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={revealed ? `Masquer ${variable.name}` : `Afficher ${variable.name}`}
+          accessibilityLabel={revealed ? `Hide ${variable.name}` : `Show ${variable.name}`}
           hitSlop={8}
           onPress={() => setRevealed((current) => !current)}
           style={({ pressed }) => pressed && styles.pressed}>

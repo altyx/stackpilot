@@ -12,8 +12,8 @@ describe('newIssueUrl', () => {
     expect(url.startsWith(prefix)).toBe(true);
 
     const body = decodeURIComponent(url.slice(prefix.length));
-    expect(body).toContain('### Problème rencontré');
-    expect(body).toContain('### Étapes pour le reproduire');
+    expect(body).toContain('### What happened');
+    expect(body).toContain('### Steps to reproduce');
     expect(body).toContain('StackPilot 1.0.0 (7) · abc1234\niOS 19.0 · iPhone 17');
   });
 });

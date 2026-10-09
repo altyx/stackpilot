@@ -10,16 +10,16 @@ const SWARM_SERVICE_ID = 'com.docker.swarm.service.id';
  */
 export function imageUpdateBlocker(container: ContainerInspect): string | null {
   if (container.IsPortainer) {
-    return "Portainer ne peut pas recréer son propre conteneur : mettez-le à jour depuis l'hôte.";
+    return 'Portainer cannot recreate its own container: update it from the host.';
   }
   if (container.Config.Labels?.[SWARM_SERVICE_ID]) {
-    return 'Ce conteneur appartient à un service Swarm : mettez à jour le service.';
+    return 'This container belongs to a Swarm service: update the service instead.';
   }
   if (container.HostConfig.AutoRemove) {
-    return 'Ce conteneur se supprime à son arrêt (--rm) : il ne peut pas être recréé.';
+    return 'This container removes itself when it stops (--rm): it cannot be recreated.';
   }
   if (!container.Config.Image || container.Config.Image.toLowerCase().startsWith('sha256')) {
-    return "L'image n'a pas de tag : rien à télécharger depuis un registre.";
+    return 'The image has no tag: there is nothing to pull from a registry.';
   }
   return null;
 }

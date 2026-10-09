@@ -12,8 +12,8 @@ type Step = 'choose' | ImagePruneScope;
 type Outcome = ImagePruneScope | 'cancel';
 
 const SCOPE_LABELS: Record<ImagePruneScope, string> = {
-  dangling: 'Images sans tag',
-  unused: 'Toutes les images inutilisées',
+  dangling: 'Untagged images',
+  unused: 'All unused images',
 };
 
 /**
@@ -60,8 +60,8 @@ export function ImagePruneSheet({
       {step === 'choose' ? (
         <>
           <SheetHeader
-            title="Nettoyer les images"
-            message="Seules les images qu'aucun conteneur n'utilise, même arrêté, sont supprimées."
+            title="Clean up images"
+            message="Only images that no container uses, even a stopped one, are deleted."
           />
           <SheetActions>
             <Button
@@ -76,7 +76,7 @@ export function ImagePruneSheet({
               disabled={unused.length === 0}
               onPress={() => setStep('unused')}
             />
-            <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
           </SheetActions>
         </>
       ) : (
@@ -87,8 +87,8 @@ export function ImagePruneSheet({
           />
           <ImagePruneList images={step === 'dangling' ? dangling : unused} />
           <SheetActions>
-            <Button label="Nettoyer" variant="danger" onPress={() => close(step)} />
-            <Button label="Retour" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label="Clean up" variant="danger" onPress={() => close(step)} />
+            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
           </SheetActions>
         </>
       )}
@@ -101,17 +101,17 @@ function totalSize(images: ImageSummary[]): number {
 }
 
 function describeOption(scope: ImagePruneScope, images: ImageSummary[]): string {
-  if (images.length === 0) return `${SCOPE_LABELS[scope]} · aucune`;
+  if (images.length === 0) return `${SCOPE_LABELS[scope]} · none`;
   return `${SCOPE_LABELS[scope]} · ${images.length} · ${formatBytes(totalSize(images))}`;
 }
 
 function describeTitle(images: ImageSummary[]): string {
-  return images.length > 1 ? `Supprimer ${images.length} images ?` : "Supprimer l'image ?";
+  return images.length > 1 ? `Delete ${images.length} images?` : 'Delete image?';
 }
 
 function describeImpact(scope: ImagePruneScope): string {
   return scope === 'dangling'
-    ? 'Les images sans tag, restes de builds ou de mises à jour, seront supprimées.'
-    : 'Toutes les images inutilisées seront supprimées, y compris celles portant un tag. ' +
-        'Il faudra les retélécharger pour recréer un conteneur à partir de celles-ci.';
+    ? 'Untagged images, left over from builds or updates, will be deleted.'
+    : 'All unused images will be deleted, tagged ones included. ' +
+        'They will have to be pulled again to create a container from them.';
 }

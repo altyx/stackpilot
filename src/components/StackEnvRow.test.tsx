@@ -13,10 +13,10 @@ describe('StackEnvRow', () => {
     expect(screen.queryByText('hunter2')).toBeNull();
     expect(screen.getByText('••••••••')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Afficher DB_PASSWORD' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show DB_PASSWORD' }));
     expect(screen.getByText('hunter2')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Masquer DB_PASSWORD' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Hide DB_PASSWORD' }));
     expect(screen.queryByText('hunter2')).toBeNull();
   });
 });

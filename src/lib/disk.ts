@@ -42,7 +42,7 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
     },
     {
       key: 'containers',
-      label: 'Conteneurs',
+      label: 'Containers',
       size: sum(containers.map((container) => known(container.SizeRw))),
       reclaimable: sum(
         containers
@@ -62,7 +62,7 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
     },
     {
       key: 'buildCache',
-      label: 'Cache de build',
+      label: 'Build cache',
       size: sum(cache.map((entry) => known(entry.Size))),
       reclaimable: sum(cache.filter((entry) => !entry.InUse).map((entry) => known(entry.Size))),
     },

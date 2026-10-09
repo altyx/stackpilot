@@ -38,28 +38,26 @@ function renderSheet(props: Partial<ComponentProps<typeof VolumePruneSheet>> = {
 describe('VolumePruneSheet', () => {
   it('previews both scopes with count and size', () => {
     renderSheet();
-    expect(screen.getByRole('button', { name: 'Volumes anonymes · 1 · 1,0 ko' })).toBeEnabled();
-    expect(
-      screen.getByRole('button', { name: 'Tous les volumes inutilisés · 2 · 2,0 Go' }),
-    ).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Anonymous volumes · 1 · 1.0 kB' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'All unused volumes · 2 · 2.0 GB' })).toBeEnabled();
   });
 
   it('hides the anonymous scope on engines that would prune named volumes too', () => {
     renderSheet({ anonymousScopeAvailable: false });
-    expect(screen.queryByRole('button', { name: /^Volumes anonymes/ })).toBeNull();
-    expect(screen.getByText(/antérieur à la version 23/)).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: /^Anonymous volumes/ })).toBeNull();
+    expect(screen.getByText(/older than version 23/)).toBeOnTheScreen();
   });
 
   it('lists what goes and waits for the typed word before deleting', async () => {
     const { onConfirm, onClose } = renderSheet();
-    fireEvent.press(screen.getByRole('button', { name: /^Tous les volumes inutilisés/ }));
-    expect(screen.getByText('Supprimer 2 volumes ?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: /^All unused volumes/ }));
+    expect(screen.getByText('Delete 2 volumes?')).toBeOnTheScreen();
     expect(screen.getByText('pgdata')).toBeOnTheScreen();
     expect(screen.queryByText('used')).toBeNull();
 
-    const confirm = screen.getByRole('button', { name: 'Supprimer définitivement' });
+    const confirm = screen.getByRole('button', { name: 'Delete permanently' });
     expect(confirm).toBeDisabled();
-    fireEvent.changeText(screen.getByLabelText('Saisissez supprimer pour confirmer'), 'supprimer');
+    fireEvent.changeText(screen.getByLabelText('Type delete to confirm'), 'delete');
     fireEvent.press(confirm);
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledWith('all'));
@@ -68,9 +66,9 @@ describe('VolumePruneSheet', () => {
 
   it('clears the typed word when going back to the choice', () => {
     renderSheet();
-    fireEvent.press(screen.getByRole('button', { name: /^Volumes anonymes/ }));
-    fireEvent.changeText(screen.getByLabelText('Saisissez supprimer pour confirmer'), 'supprimer');
-    fireEvent.press(screen.getByRole('button', { name: 'Retour' }));
+    fireEvent.press(screen.getByRole('button', { name: /^Anonymous volumes/ }));
+    fireEvent.changeText(screen.getByLabelText('Type delete to confirm'), 'delete');
+    fireEvent.press(screen.getByRole('button', { name: 'Back' }));
     screen.rerender(
       <VolumePruneSheet
         visible={false}
@@ -91,7 +89,7 @@ describe('VolumePruneSheet', () => {
         onClose={jest.fn()}
       />,
     );
-    fireEvent.press(screen.getByRole('button', { name: /^Volumes anonymes/ }));
-    expect(screen.getByRole('button', { name: 'Supprimer définitivement' })).toBeDisabled();
+    fireEvent.press(screen.getByRole('button', { name: /^Anonymous volumes/ }));
+    expect(screen.getByRole('button', { name: 'Delete permanently' })).toBeDisabled();
   });
 });

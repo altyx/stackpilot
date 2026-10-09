@@ -50,7 +50,7 @@ import type {
  * only serves to type that case.
  */
 function requireSession(session: Session | null): Session {
-  if (!session) throw new PortainerError('Session expirée. Reconnectez-vous.');
+  if (!session) throw new PortainerError('Session expired. Sign in again.');
   return session;
 }
 
@@ -504,7 +504,7 @@ export function useStackAction(endpointId: number) {
         } catch (error) {
           failures.push({
             name: containerName(container),
-            message: error instanceof Error ? error.message : 'Erreur inconnue.',
+            message: error instanceof Error ? error.message : 'Unknown error.',
           });
         }
       }

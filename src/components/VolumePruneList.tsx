@@ -28,11 +28,7 @@ export function VolumePruneList({
           </View>
         );
       })}
-      {hidden > 0 ? (
-        <Text style={styles.more}>
-          et {hidden} autre{hidden > 1 ? 's' : ''}
-        </Text>
-      ) : null}
+      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
     </View>
   );
 }

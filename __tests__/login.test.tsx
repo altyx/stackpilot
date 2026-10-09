@@ -41,7 +41,7 @@ async function renderLogin() {
     { initialUrl: '/login' },
   );
   // Lets the provider finish restoring the (empty) session.
-  await screen.findByText('Connexion à Portainer');
+  await screen.findByText('Sign in to Portainer');
 }
 
 beforeEach(() => {
@@ -54,15 +54,15 @@ describe('login screen', () => {
     await renderLogin();
     const token = screen.getByPlaceholderText('ptr_…');
     expect(token).toHaveProp('secureTextEntry', true);
-    fireEvent.press(screen.getByRole('button', { name: 'Afficher la saisie' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show input' }));
     expect(token).toHaveProp('secureTextEntry', false);
   });
 
   it('switches to username and password', async () => {
     await renderLogin();
-    fireEvent.press(screen.getByRole('button', { name: 'Identifiants' }));
-    expect(screen.getByText('Utilisateur')).toBeOnTheScreen();
-    expect(screen.getByText('Mot de passe')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Credentials' }));
+    expect(screen.getByText('Username')).toBeOnTheScreen();
+    expect(screen.getByText('Password')).toBeOnTheScreen();
     expect(screen.queryByPlaceholderText('ptr_…')).toBeNull();
   });
 
@@ -74,7 +74,7 @@ describe('login screen', () => {
     });
     await renderLogin();
 
-    const submit = screen.getByRole('button', { name: 'Se connecter' });
+    const submit = screen.getByRole('button', { name: 'Sign in' });
     expect(submit).toBeDisabled();
     fireEvent.changeText(
       screen.getByPlaceholderText('https://portainer.local:9443'),
@@ -95,28 +95,28 @@ describe('login screen', () => {
       'portainer.lan',
     );
     fireEvent.changeText(screen.getByPlaceholderText('ptr_…'), 'ptr_abc');
-    fireEvent.press(screen.getByRole('button', { name: 'Se connecter' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Sign in' }));
   }
 
   it('points at the certificate help when the HTTPS connection is refused', async () => {
     jest
       .mocked(loginWithApiKey)
-      .mockRejectedValue(new PortainerError('Connexion refusée.', undefined, 'x', 'certificate'));
+      .mockRejectedValue(new PortainerError('Connection refused.', undefined, 'x', 'certificate'));
     await renderLogin();
     submitToken();
 
-    fireEvent.press(await screen.findByText('Résoudre un problème de certificat'));
+    fireEvent.press(await screen.findByText('Fix a certificate problem'));
     await waitFor(() => expect(screen).toHavePathname('/certificates'));
   });
 
   it('offers no certificate help for other errors', async () => {
     jest
       .mocked(loginWithApiKey)
-      .mockRejectedValue(new PortainerError('Authentification refusée.', 401));
+      .mockRejectedValue(new PortainerError('Authentication refused.', 401));
     await renderLogin();
     submitToken();
 
-    expect(await screen.findByText('Authentification refusée.')).toBeOnTheScreen();
-    expect(screen.queryByText('Résoudre un problème de certificat')).toBeNull();
+    expect(await screen.findByText('Authentication refused.')).toBeOnTheScreen();
+    expect(screen.queryByText('Fix a certificate problem')).toBeNull();
   });
 });

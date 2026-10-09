@@ -13,7 +13,7 @@ export default function EndpointsScreen() {
   const { session } = useAuth();
   const { endpointId } = useCurrentEndpoint();
 
-  if (isPending) return <Loader label="Chargement des environnements…" />;
+  if (isPending) return <Loader label="Loading environments…" />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   return (
@@ -31,8 +31,8 @@ export default function EndpointsScreen() {
       ListHeaderComponent={session ? <Text style={styles.instance}>{session.baseUrl}</Text> : null}
       ListEmptyComponent={
         <EmptyState
-          title="Aucun environnement"
-          subtitle="Ce compte n'a accès à aucun environnement sur cette instance."
+          title="No environments"
+          subtitle="This account cannot access any environment on this instance."
         />
       }
       renderItem={({ item }) => <EndpointCard endpoint={item} current={item.Id === endpointId} />}

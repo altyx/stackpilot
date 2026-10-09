@@ -24,15 +24,15 @@ describe('StackActionSheet', () => {
   it('offers start and stop, then asks for confirmation with the members listed', () => {
     render(<StackActionSheet section={stack('blog')} onConfirm={jest.fn()} onClose={jest.fn()} />);
     expect(screen.getByText('blog')).toBeOnTheScreen();
-    expect(screen.getByText('1/2 en cours · 2 conteneurs')).toBeOnTheScreen();
+    expect(screen.getByText('1/2 running · 2 containers')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Arrêter la stack' }));
-    expect(screen.getByText('Arrêter la stack ?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Stop stack' }));
+    expect(screen.getByText('Stop stack?')).toBeOnTheScreen();
     expect(screen.getByText('blog-db')).toBeOnTheScreen();
     expect(screen.getByText('blog-web')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Retour' }));
-    expect(screen.getByText('1/2 en cours · 2 conteneurs')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByText('1/2 running · 2 containers')).toBeOnTheScreen();
   });
 
   it('reports the action once the sheet has closed', async () => {
@@ -41,8 +41,8 @@ describe('StackActionSheet', () => {
     const onClose = jest.fn();
     render(<StackActionSheet section={section} onConfirm={onConfirm} onClose={onClose} />);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Démarrer la stack' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Démarrer' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Start stack' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Start' }));
     expect(onConfirm).not.toHaveBeenCalled();
 
     await waitFor(() => expect(onConfirm).toHaveBeenCalledWith(section, 'start'));
@@ -53,20 +53,20 @@ describe('StackActionSheet', () => {
     const onConfirm = jest.fn();
     const onClose = jest.fn();
     render(<StackActionSheet section={stack('blog')} onConfirm={onConfirm} onClose={onClose} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Annuler' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
   it('starts over at the choice step when another stack opens', () => {
     render(<StackActionSheet section={stack('blog')} onConfirm={jest.fn()} onClose={jest.fn()} />);
-    fireEvent.press(screen.getByRole('button', { name: 'Arrêter la stack' }));
-    expect(screen.getByText('Arrêter la stack ?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Stop stack' }));
+    expect(screen.getByText('Stop stack?')).toBeOnTheScreen();
 
     screen.rerender(
       <StackActionSheet section={stack('shop')} onConfirm={jest.fn()} onClose={jest.fn()} />,
     );
     expect(screen.getByText('shop')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Arrêter la stack' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Stop stack' })).toBeOnTheScreen();
   });
 });

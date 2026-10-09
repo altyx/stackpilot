@@ -13,7 +13,11 @@ d'écrire du code touchant aux modules Expo.
 - Toutes les couleurs et espacements viennent de `src/theme.ts` — pas de valeur en dur.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
-- L'UI et les messages d'erreur sont en français.
+- L'UI, les messages d'erreur, les textes légaux, le changelog et les alertes du
+  `watcher/` sont en anglais. Ce qui vient de Portainer ou de Docker (noms,
+  statuts, messages d'erreur renvoyés par l'API) s'affiche tel quel, sans
+  traduction. Les comptes passent par `plural` (`src/lib/format.ts`) : en
+  anglais, 0 prend le pluriel.
 - `react-dom` est épinglé via `overrides` dans `package.json` pour aligner son peer
   `react` sur la version imposée par Expo — ne pas retirer sans revérifier `npm install`.
 - Les dossiers `ios/` et `android/` ne sont pas versionnés : ils sont regénérés

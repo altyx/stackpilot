@@ -24,7 +24,7 @@ export function CodeBlock({ code }: { code: string }) {
       </Text>
       <IconButton
         icon={copied ? 'checkmark' : 'copy-outline'}
-        accessibilityLabel={copied ? 'Copié' : 'Copier'}
+        accessibilityLabel={copied ? 'Copied' : 'Copy'}
         onPress={() => void copy()}
       />
     </View>

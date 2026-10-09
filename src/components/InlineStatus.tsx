@@ -18,11 +18,11 @@ export function InlineStatus({
     return (
       <View style={styles.row}>
         <Text style={styles.error}>
-          {error instanceof Error ? error.message : 'Données indisponibles.'}
+          {error instanceof Error ? error.message : 'Data unavailable.'}
         </Text>
         {onRetry ? (
           <Text accessibilityRole="button" onPress={onRetry} style={styles.retry}>
-            Réessayer
+            Retry
           </Text>
         ) : null}
       </View>

@@ -18,14 +18,14 @@ const query = (partial: Partial<Query>) =>
 describe('ImageStatusIcon', () => {
   it('describes each status for screen readers', () => {
     render(<ImageStatusIcon status="updated" />);
-    expect(screen.getByLabelText('Image à jour')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Image up to date')).toBeOnTheScreen();
     screen.rerender(<ImageStatusIcon status="outdated" />);
-    expect(screen.getByLabelText("Mise à jour de l'image disponible")).toBeOnTheScreen();
+    expect(screen.getByLabelText('Image update available')).toBeOnTheScreen();
   });
 
   it('spells the status out when asked', () => {
     render(<ImageStatusIcon status="outdated" withLabel />);
-    expect(screen.getByText("Mise à jour de l'image disponible")).toBeOnTheScreen();
+    expect(screen.getByText('Image update available')).toBeOnTheScreen();
   });
 });
 
@@ -39,7 +39,7 @@ describe('ContainerImageStatus', () => {
   it('shows the icon once Portainer has answered', () => {
     query({ data: 'outdated' });
     render(<ContainerImageStatus endpointId={1} containerId="abc" />);
-    expect(screen.getByLabelText("Mise à jour de l'image disponible")).toBeOnTheScreen();
+    expect(screen.getByLabelText('Image update available')).toBeOnTheScreen();
   });
 
   it('keeps an up-to-date image off the card but says so on the detail screen', () => {
@@ -48,7 +48,7 @@ describe('ContainerImageStatus', () => {
     expect(screen.toJSON()).toBeNull();
 
     screen.rerender(<ContainerImageStatus endpointId={1} containerId="abc" withLabel />);
-    expect(screen.getByText('Image à jour')).toBeOnTheScreen();
+    expect(screen.getByText('Image up to date')).toBeOnTheScreen();
   });
 
   it('keeps an undecided status off the card but names it on the detail screen', () => {
@@ -57,12 +57,12 @@ describe('ContainerImageStatus', () => {
     expect(screen.toJSON()).toBeNull();
 
     screen.rerender(<ContainerImageStatus endpointId={1} containerId="abc" withLabel />);
-    expect(screen.getByText("Statut de l'image indéterminé")).toBeOnTheScreen();
+    expect(screen.getByText('Image status unknown')).toBeOnTheScreen();
   });
 
   it('shows the check in progress on the detail screen only', () => {
     query({ isPending: true, fetchStatus: 'fetching' });
     render(<ContainerImageStatus endpointId={1} containerId="abc" withLabel />);
-    expect(screen.getByText("Vérification de l'image…")).toBeOnTheScreen();
+    expect(screen.getByText('Checking image…')).toBeOnTheScreen();
   });
 });

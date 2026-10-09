@@ -31,32 +31,32 @@ export function LogControls({
     <View style={styles.row}>
       <IconButton
         icon={follow ? 'pause' : 'play'}
-        accessibilityLabel="Suivre en direct"
+        accessibilityLabel="Follow live"
         active={follow}
         onPress={onToggleFollow}
       />
       <IconButton
         icon="time-outline"
-        accessibilityLabel="Afficher l'heure"
+        accessibilityLabel="Show timestamps"
         active={timestamps}
         onPress={onToggleTimestamps}
       />
       <View style={styles.spacer} />
       <IconButton
         icon={copied ? 'checkmark' : 'copy-outline'}
-        accessibilityLabel={copied ? 'Logs copiés' : 'Copier les logs'}
+        accessibilityLabel={copied ? 'Logs copied' : 'Copy logs'}
         disabled={disabled}
         onPress={onCopy}
       />
       <IconButton
         icon="share-outline"
-        accessibilityLabel="Partager les logs"
+        accessibilityLabel="Share logs"
         disabled={disabled}
         onPress={onShare}
       />
       <IconButton
         icon={fullscreen ? 'contract-outline' : 'expand-outline'}
-        accessibilityLabel={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+        accessibilityLabel={fullscreen ? 'Exit full screen' : 'Full screen'}
         onPress={onToggleFullscreen}
       />
     </View>

@@ -40,16 +40,16 @@ describe('StackCard', () => {
     render(<StackCard endpointId={1} overview={overview} />);
     expect(screen.getByText('blog')).toBeOnTheScreen();
     expect(screen.getByText('Compose')).toBeOnTheScreen();
-    expect(screen.getByText('1/2 en cours')).toBeOnTheScreen();
-    expect(screen.getByText(/^Créée le 16\/09\/2026 .* par admin$/)).toBeOnTheScreen();
-    expect(screen.getByText('Git · main · mise à jour auto toutes les 5m')).toBeOnTheScreen();
+    expect(screen.getByText('1/2 running')).toBeOnTheScreen();
+    expect(screen.getByText(/^Created 16 Sep 2026, .* by admin$/)).toBeOnTheScreen();
+    expect(screen.getByText('Git · main · auto update every 5m')).toBeOnTheScreen();
   });
 
   it('flags a stack Portainer never deployed', () => {
     const [overview] = mergeStacks(sections, []);
     render(<StackCard endpointId={1} overview={overview} />);
-    expect(screen.getByText('Externe')).toBeOnTheScreen();
-    expect(screen.getByText('Déployée hors de Portainer')).toBeOnTheScreen();
+    expect(screen.getByText('External')).toBeOnTheScreen();
+    expect(screen.getByText('Deployed outside Portainer')).toBeOnTheScreen();
   });
 
   it('says when a Portainer stack has no container left', () => {
@@ -58,8 +58,8 @@ describe('StackCard', () => {
       [makeStack({ Name: 'blog', CreationDate: 0, CreatedBy: '' })],
     );
     render(<StackCard endpointId={1} overview={overview} />);
-    expect(screen.getByText('Aucun conteneur')).toBeOnTheScreen();
-    expect(screen.getByText('Gérée par Portainer')).toBeOnTheScreen();
+    expect(screen.getByText('No containers')).toBeOnTheScreen();
+    expect(screen.getByText('Managed by Portainer')).toBeOnTheScreen();
   });
 
   it("shows the stack's image status once Portainer reports it", () => {
@@ -71,7 +71,7 @@ describe('StackCard', () => {
     } as never);
     const [overview] = mergeStacks(sections, [makeStack({ Id: 7, Name: 'blog' })]);
     render(<StackCard endpointId={1} overview={overview} />);
-    expect(screen.getByLabelText("Mise à jour d'image disponible")).toBeOnTheScreen();
+    expect(screen.getByLabelText('Image update available')).toBeOnTheScreen();
     expect(useStackImageStatus).toHaveBeenCalledWith(1, 7);
   });
 
@@ -84,7 +84,7 @@ describe('StackCard', () => {
     } as never);
     const [overview] = mergeStacks(sections, [makeStack({ Id: 7, Name: 'blog' })]);
     render(<StackCard endpointId={1} overview={overview} />);
-    expect(screen.queryByLabelText('Images à jour')).toBeNull();
+    expect(screen.queryByLabelText('Images up to date')).toBeNull();
   });
 
   it('asks nothing for a stack Portainer does not manage', () => {

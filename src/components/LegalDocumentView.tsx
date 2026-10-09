@@ -11,7 +11,7 @@ export function LegalDocumentView({ document }: { document: LegalDocument }) {
         <Text accessibilityRole="header" style={styles.title}>
           {document.title}
         </Text>
-        <Text style={styles.updated}>Dernière mise à jour : {document.updatedAt}</Text>
+        <Text style={styles.updated}>Last updated: {document.updatedAt}</Text>
       </View>
 
       <Text selectable style={styles.paragraph}>

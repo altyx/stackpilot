@@ -29,12 +29,12 @@ describe('shortId', () => {
 describe('formatDate', () => {
   it('reads Docker timestamps in seconds', () => {
     const formatted = formatDate(Date.UTC(2026, 8, 16, 14, 5) / 1000);
-    expect(formatted).toContain('16/09/2026');
+    expect(formatted).toContain('16 Sep 2026');
     expect(formatted).toContain('14:05');
   });
 
   it('reads ISO strings', () => {
-    expect(formatDate('2026-09-16T14:05:00Z')).toContain('16/09/2026');
+    expect(formatDate('2026-09-16T14:05:00Z')).toContain('16 Sep 2026');
   });
 
   it('shows a dash for an unreadable date', () => {
@@ -44,8 +44,8 @@ describe('formatDate', () => {
 
 describe('stateLabel', () => {
   it('translates known Docker states', () => {
-    expect(stateLabel('running')).toBe('En cours');
-    expect(stateLabel('exited')).toBe('Arrêté');
+    expect(stateLabel('running')).toBe('Running');
+    expect(stateLabel('exited')).toBe('Stopped');
   });
 
   it('passes unknown states through', () => {
@@ -54,19 +54,19 @@ describe('stateLabel', () => {
 });
 
 describe('formatBytes', () => {
-  it('uses base 1000 units with a French decimal separator', () => {
-    expect(formatBytes(512)).toBe('512 o');
-    expect(formatBytes(1_500)).toBe('1,5 ko');
-    expect(formatBytes(2_000_000_000)).toBe('2,0 Go');
+  it('uses base 1000 units with a decimal point', () => {
+    expect(formatBytes(512)).toBe('512 B');
+    expect(formatBytes(1_500)).toBe('1.5 kB');
+    expect(formatBytes(2_000_000_000)).toBe('2.0 GB');
   });
 
   it('drops the decimal from three-digit values', () => {
-    expect(formatBytes(100_000)).toBe('100 ko');
+    expect(formatBytes(100_000)).toBe('100 kB');
   });
 
   it('shows zero for empty or invalid sizes', () => {
-    expect(formatBytes(0)).toBe('0 o');
-    expect(formatBytes(-5)).toBe('0 o');
-    expect(formatBytes(Number.NaN)).toBe('0 o');
+    expect(formatBytes(0)).toBe('0 B');
+    expect(formatBytes(-5)).toBe('0 B');
+    expect(formatBytes(Number.NaN)).toBe('0 B');
   });
 });

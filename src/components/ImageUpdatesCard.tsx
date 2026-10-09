@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useImageUpdates } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
+import { plural } from '../lib/format';
 import { theme } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
@@ -25,9 +26,8 @@ export function ImageUpdatesCard({
     return (
       <Card>
         <Text style={styles.muted}>
-          Portainer ne compare pas les images de cet environnement avec leur registre. Cette
-          vérification existe dans Portainer Business, une fois l&apos;indicateur de mise à jour
-          activé sur l&apos;environnement.
+          Portainer does not compare this environment&apos;s images with their registry. This check
+          is part of Portainer Business, once the update indicator is turned on for the environment.
         </Text>
       </Card>
     );
@@ -35,7 +35,7 @@ export function ImageUpdatesCard({
   if (updates.isPending) {
     return (
       <Card>
-        <InlineStatus loading="Comparaison avec les registres…" />
+        <InlineStatus loading="Comparing with registries…" />
       </Card>
     );
   }
@@ -45,12 +45,12 @@ export function ImageUpdatesCard({
     return (
       <Card style={styles.row}>
         <Ionicons name="checkmark-circle-outline" size={22} color={theme.colors.success} />
-        <Text style={styles.title}>Toutes les images sont à jour</Text>
+        <Text style={styles.title}>All images are up to date</Text>
       </Card>
     );
   }
 
-  const label = `${count} image${count > 1 ? 's' : ''} à mettre à jour`;
+  const label = `${plural(count, 'image')} to update`;
   return (
     <Pressable
       accessibilityRole="link"
@@ -61,7 +61,7 @@ export function ImageUpdatesCard({
         <Ionicons name="arrow-up-circle-outline" size={22} color={theme.colors.accent} />
         <View style={styles.text}>
           <Text style={styles.title}>{label}</Text>
-          <Text style={styles.muted}>Voir les images concernées</Text>
+          <Text style={styles.muted}>See which images</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Card>

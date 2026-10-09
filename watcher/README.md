@@ -1,212 +1,205 @@
 # portainer-watcher
 
-Service de surveillance qui écoute le flux d'événements Docker de Portainer et
-pousse une notification vers l'application StackPilot quand un conteneur tombe.
+A monitoring service that listens to Portainer's Docker event stream and pushes
+a notification to the StackPilot app when a container goes down.
 
-Il existe parce qu'**une application mobile ne peut pas faire ce travail**. iOS et
-Android suspendent les applications en arrière-plan : elles ne peuvent pas
-sonder un serveur en continu, ni être réveillées à la demande. Une alerte fiable
-doit venir de l'extérieur.
+It exists because **a mobile app cannot do this job**. iOS and Android suspend
+apps in the background: they can neither poll a server continuously nor be
+woken up on demand. A reliable alert has to come from the outside.
 
-## Ce qui déclenche une alerte
+## What triggers an alert
 
-| Événement Docker                 | Alerte                 |
-| -------------------------------- | ---------------------- |
-| `die` avec un code de sortie ≠ 0 | Arrêt anormal (code N) |
-| `health_status: unhealthy`       | Passé en unhealthy     |
-| `oom`                            | Mémoire épuisée        |
-| `restart`                        | Redémarrage            |
+| Docker event                | Alert                      |
+| --------------------------- | -------------------------- |
+| `die` with an exit code ≠ 0 | Exited abnormally (code N) |
+| `health_status: unhealthy`  | Became unhealthy           |
+| `oom`                       | Out of memory (OOM)        |
+| `restart`                   | Restarted                  |
 
-Un `die` avec le code 0 est **ignoré volontairement** : c'est un arrêt demandé,
-typiquement depuis l'application. Sans ce filtre, chaque action volontaire
-déclencherait une alerte.
+A `die` with code 0 is **deliberately ignored**: it is a requested stop,
+typically from the app. Without this filter, every intentional action would
+trigger an alert.
 
-Une même alerte pour un même conteneur n'est pas répétée avant `DEDUPE_SECONDS`,
-sinon un conteneur qui boucle sur un redémarrage inonderait le téléphone.
+The same alert for the same container is not repeated within
+`DEDUPE_SECONDS`, otherwise a container stuck in a restart loop would flood the
+phone.
 
 ## Configuration
 
-Partez de [`.env.example`](.env.example) :
+Start from [`.env.example`](.env.example):
 
 ```bash
 cp .env.example .env
 ```
 
-| Variable                 | Requis | Rôle                                                     |
-| ------------------------ | ------ | -------------------------------------------------------- |
-| `PORTAINER_NETWORK`      | oui    | Réseau Docker que le service rejoint                     |
-| `PORTAINER_URL`          | oui    | URL de Portainer vue depuis ce réseau, sans `/api`       |
-| `PORTAINER_TOKEN`        | oui    | Access token Portainer (`ptr_…`)                         |
-| `ENDPOINT_ID`            | oui    | Identifiant de l'environnement à surveiller              |
-| `EXPO_PUSH_TOKENS`       | oui    | Jetons des appareils, séparés par des virgules           |
-| `PORTAINER_INSECURE_TLS` | non    | Accepte le certificat auto-signé du flux, `0` par défaut |
-| `IGNORE_CONTAINERS`      | non    | Noms de conteneurs à ignorer, séparés par des virgules   |
-| `DEDUPE_SECONDS`         | non    | Fenêtre anti-doublon, 120 par défaut                     |
+| Variable                 | Required | Purpose                                                      |
+| ------------------------ | -------- | ------------------------------------------------------------ |
+| `PORTAINER_NETWORK`      | yes      | Docker network the service joins                             |
+| `PORTAINER_URL`          | yes      | Portainer URL as seen from that network, without `/api`      |
+| `PORTAINER_TOKEN`        | yes      | Portainer access token (`ptr_…`)                             |
+| `ENDPOINT_ID`            | yes      | Id of the environment to watch                               |
+| `EXPO_PUSH_TOKENS`       | yes      | Device tokens, comma-separated                               |
+| `PORTAINER_INSECURE_TLS` | no       | Accepts the stream's self-signed certificate, `0` by default |
+| `IGNORE_CONTAINERS`      | no       | Container names to ignore, comma-separated                   |
+| `DEDUPE_SECONDS`         | no       | De-duplication window, 120 by default                        |
 
-### Trouver `ENDPOINT_ID`
+### Finding `ENDPOINT_ID`
 
-C'est l'identifiant Portainer de l'**environnement** : ce que la liste
-« Environnements » de l'application affiche, et ce que Portainer met dans son
-URL. Souvent `1`, mais pas toujours — le compteur avance si un environnement a
-été supprimé puis réajouté.
+It is Portainer's id for the **environment**: the one the app's _Environments_
+list shows, and the one Portainer puts in its URL. Often `1`, but not always —
+the counter moves on when an environment is removed and added again.
 
 ```bash
-curl -sk -H "X-API-Key: ptr_xxx" https://VOTRE_PORTAINER/api/endpoints | jq '.[] | {Id, Name}'
+curl -sk -H "X-API-Key: ptr_xxx" https://YOUR_PORTAINER/api/endpoints | jq '.[] | {Id, Name}'
 ```
 
-### Trouver `PORTAINER_NETWORK`
+### Finding `PORTAINER_NETWORK`
 
 ```bash
 docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' portainer
 ```
 
-Si la réponse est `bridge`, Portainer tourne sur le réseau par défaut, qui **ne
-résout pas les noms de conteneurs**. Rattachez-le à un réseau nommé, ou visez
-son port publié sur l'hôte.
+If the answer is `bridge`, Portainer runs on the default network, which **does
+not resolve container names**. Attach it to a named network, or target its
+port published on the host.
 
-### Trouver le jeton d'appareil
+### Finding the device token
 
-Dans l'application : **Environnements → icône cloche → Autoriser les
-notifications**, puis _Copier le jeton_.
+In the app: **Settings → Alerts for your containers → Allow notifications**,
+then _Copy token_.
 
-## Aucun volume n'est nécessaire
+## No volume needed
 
-Le service ne lit ni n'écrit de fichier : pas de dépendance npm, pas de base, pas
-d'état sur disque. Toute sa configuration passe par des variables
-d'environnement, et sa fenêtre anti-doublon vit en mémoire. Un redémarrage
-repart donc simplement d'une fenêtre vide.
+The service reads and writes no file: no npm dependency, no database, no state
+on disk. All its configuration goes through environment variables, and its
+de-duplication window lives in memory. A restart simply starts again with an
+empty window.
 
-Le `PORTAINER_TOKEN` reste lisible par `docker inspect`. Pour éviter de le voir
-apparaître dans un historique de shell, placez-le dans un fichier `.env` à côté
-du `compose.yaml` — Compose le charge automatiquement, et ce fichier ne doit pas
-être versionné.
+`PORTAINER_TOKEN` stays readable through `docker inspect`. To keep it out of
+your shell history, put it in a `.env` file next to `compose.yaml` — Compose
+loads it automatically, and that file must not be committed.
 
-## Déploiement
+## Deployment
 
-### Option 1 — construire sur le serveur (le plus simple)
+### Option 1 — build on the server (simplest)
 
-Copiez le dossier `watcher/` sur le serveur, puis :
+Copy the `watcher/` folder to the server, then:
 
 ```bash
-cp .env.example .env   # puis renseignez-le
+cp .env.example .env   # then fill it in
 docker compose up -d --build
 ```
 
-Aucun registry, aucune question d'architecture : l'image est construite là où
-elle tourne.
+No registry, no architecture question: the image is built where it runs.
 
-### Option 2 — en tant que stack Portainer
+### Option 2 — as a Portainer stack
 
-Dans Portainer : **Stacks → Add stack → Web editor**, collez le contenu de
-`compose.yaml` en remplaçant `build: .` par une image déjà publiée, et
-renseignez les variables dans _Environment variables_. Le service apparaît
-ensuite comme n'importe quelle autre stack.
+In Portainer: **Stacks → Add stack → Web editor**, paste the content of
+`compose.yaml`, replacing `build: .` with an already published image, and fill
+in the variables under _Environment variables_. The service then shows up like
+any other stack.
 
-### Option 3 — publier sur un registry
+### Option 3 — publish to a registry
 
-Attention à l'architecture : une image construite sur un Mac Apple Silicon est
-en `arm64` et **ne démarrera pas** sur un serveur x86. Vérifiez d'abord la cible :
+Mind the architecture: an image built on an Apple Silicon Mac is `arm64` and
+**will not start** on an x86 server. Check the target first:
 
 ```bash
 uname -m
 ```
 
-`x86_64` correspond à `linux/amd64`, `aarch64` à `linux/arm64`.
+`x86_64` matches `linux/amd64`, `aarch64` matches `linux/arm64`.
 
-Construisez et publiez en une étape, en visant explicitement cette
-architecture :
-
-```bash
-docker buildx build --platform linux/amd64 -t ghcr.io/VOTRE_COMPTE/portainer-watcher:1.0.0 --push watcher/
-```
-
-Pour couvrir les deux architectures d'un coup :
-`--platform linux/amd64,linux/arm64`.
-
-L'authentification se fait au préalable, avec un jeton GitHub disposant de la
-portée `write:packages` :
+Build and publish in one step, explicitly targeting that architecture:
 
 ```bash
-docker login ghcr.io -u VOTRE_COMPTE
+docker buildx build --platform linux/amd64 -t ghcr.io/YOUR_ACCOUNT/portainer-watcher:1.0.0 --push watcher/
 ```
 
-Sur le serveur, remplacez alors `build: .` par la référence publiée :
+To cover both architectures at once: `--platform linux/amd64,linux/arm64`.
+
+Authenticate beforehand, with a GitHub token that has the `write:packages`
+scope:
+
+```bash
+docker login ghcr.io -u YOUR_ACCOUNT
+```
+
+On the server, then replace `build: .` with the published reference:
 
 ```yaml
 services:
   portainer-watcher:
-    image: ghcr.io/VOTRE_COMPTE/portainer-watcher:1.0.0
+    image: ghcr.io/YOUR_ACCOUNT/portainer-watcher:1.0.0
     restart: unless-stopped
     environment:
-      # …identique
+      # …unchanged
 ```
 
-Si le paquet est privé, le serveur doit lui aussi s'authentifier
-(`docker login ghcr.io`, jeton en `read:packages`).
+If the package is private, the server must authenticate too
+(`docker login ghcr.io`, token with `read:packages`).
 
-Docker Hub fonctionne à l'identique, avec `docker login` sans hôte et des
-références de la forme `VOTRE_COMPTE/portainer-watcher:1.0.0`.
+Docker Hub works the same way, with `docker login` without a host and
+references of the form `YOUR_ACCOUNT/portainer-watcher:1.0.0`.
 
-## Vérifier que ça tourne
+## Checking that it runs
 
 ```bash
 docker compose logs -f portainer-watcher
 ```
 
-Vous devez voir `Connecté au flux d'événements de l'environnement 1.` Si le flux
-est refusé, c'est le jeton Portainer ou l'identifiant d'environnement.
+You should see `Connected to the event stream of environment 1.` If the stream
+is refused, check the Portainer token or the environment id.
 
-## Comment le service joint Portainer
+## How the service reaches Portainer
 
-Il rejoint le **réseau Docker où Portainer tourne déjà** et l'appelle par son
-nom de conteneur, sur son port interne :
+It joins the **Docker network Portainer already runs on** and calls it by its
+container name, on its internal port:
 
 ```
 PORTAINER_URL=https://portainer:9443
 ```
 
-C'est le port interne, pas celui publié sur l'hôte. Aucun port supplémentaire
-n'est exposé, et le trafic ne quitte jamais la machine.
+That is the internal port, not the one published on the host. No extra port is
+exposed, and the traffic never leaves the machine.
 
-### Le certificat
+### The certificate
 
-Portainer génère par défaut un **certificat auto-signé**, que Node refuse —
-comme le fait l'application mobile. Posez alors :
+By default Portainer generates a **self-signed certificate**, which Node
+rejects — as the mobile app does. In that case, set:
 
 ```
 PORTAINER_INSECURE_TLS=1
 ```
 
-Cette variable n'assouplit la vérification que **pour la connexion à
-Portainer**. L'envoi vers Expo, qui lui traverse Internet, reste vérifié dans
-tous les cas. C'est pourquoi le service n'utilise pas
-`NODE_TLS_REJECT_UNAUTHORIZED`, qui désactiverait la vérification pour tout le
-processus, envoi vers Expo compris.
+This variable only relaxes verification **for the connection to Portainer**.
+The push to Expo, which crosses the Internet, is always verified. That is why
+the service does not use `NODE_TLS_REJECT_UNAUTHORIZED`, which would disable
+verification for the whole process, the push to Expo included.
 
-Si votre instance dispose d'un vrai certificat — reverse proxy, ou
-`tailscale serve` dans un tailnet — laissez la variable à `0`.
+If your instance has a real certificate — reverse proxy, or `tailscale serve`
+in a tailnet — keep the variable at `0`.
 
-### Si Portainer est sur une autre machine
+### If Portainer runs on another machine
 
-Le service doit alors joindre un nom que son conteneur ne sait pas forcément
-résoudre : le MagicDNS de Tailscale, un DNS interne. Viser l'IP ne règle rien,
-puisque le certificat est émis pour un **nom** et que TLS échouerait sur la
-non-correspondance.
+The service then has to reach a name its container may not be able to resolve:
+Tailscale's MagicDNS, an internal DNS. Targeting the IP does not help, since
+the certificate is issued for a **name** and TLS would fail on the mismatch.
 
-`extra_hosts` écrit la correspondance dans le `/etc/hosts` du conteneur : le nom
-reste utilisé, donc le certificat reste valide, mais il est résolu sans DNS.
+`extra_hosts` writes the mapping into the container's `/etc/hosts`: the name is
+still used, so the certificate stays valid, but it is resolved without DNS.
 
 ```yaml
 extra_hosts:
-  - 'portainer.exemple.ts.net:100.x.y.z'
+  - 'portainer.example.ts.net:100.x.y.z'
 ```
 
-## Limites
+## Limitations
 
-- Un seul environnement par instance du service. Pour en surveiller plusieurs,
-  lancez plusieurs conteneurs avec des `ENDPOINT_ID` différents.
-- Les jetons d'appareil sont fournis par configuration, sans enregistrement
-  automatique : c'est ce qui évite d'avoir à héberger un backend. Après une
-  réinstallation de l'application, le jeton change et doit être recopié.
-- Le service ne conserve rien : les événements survenus pendant une coupure sont
-  perdus. Le flux Docker n'a pas de reprise sur curseur.
+- One environment per service instance. To watch several, run several
+  containers with different `ENDPOINT_ID` values.
+- Device tokens come from the configuration, with no automatic registration:
+  that is what avoids hosting a backend. After the app is reinstalled, its
+  token changes and must be copied again.
+- The service keeps nothing: events that occur during an outage are lost. The
+  Docker stream cannot resume from a cursor.

@@ -10,101 +10,101 @@ import { PRIVACY_POLICY_URL, PUBLISHER } from './publisher';
  * date must follow.
  */
 export const PRIVACY: LegalDocument = {
-  title: 'Politique de confidentialité',
-  updatedAt: '7 octobre 2026',
+  title: 'Privacy Policy',
+  updatedAt: 'October 9, 2026',
   intro:
-    "Cette politique explique quelles données l'application mobile StackPilot (l'« Application ») utilise, où elles sont conservées et quels tiers peuvent y avoir accès. En résumé : l'éditeur ne collecte aucune donnée par l'intermédiaire de l'Application, qui communique directement avec votre instance Portainer.",
+    'This policy explains what data the StackPilot mobile application (the "App") uses, where it is kept and which third parties may access it. In short: the publisher collects no data through the App, which communicates directly with your Portainer instance.',
   sections: [
     {
-      title: 'Responsable du traitement',
+      title: 'Data controller',
       body: [
-        `Le responsable du traitement est ${PUBLISHER.name} (${PUBLISHER.legalStatus}), ${PUBLISHER.address}, joignable à l'adresse ${PUBLISHER.email}.`,
-        "L'éditeur n'exploite aucun serveur pour l'Application : il n'a accès ni à vos identifiants, ni aux données de vos instances Portainer.",
+        `The data controller is ${PUBLISHER.name} (${PUBLISHER.legalStatus}), ${PUBLISHER.address}, reachable at ${PUBLISHER.email}.`,
+        'The publisher operates no server for the App: it has access neither to your credentials nor to the data of your Portainer instances.',
       ],
     },
     {
-      title: 'Données conservées sur votre appareil',
+      title: 'Data kept on your device',
       body: [
-        "Pour vous connecter, l'Application enregistre dans le trousseau sécurisé de l'appareil (Keychain sur iOS, Keystore sur Android) :",
+        "To sign you in, the App stores in the device's secure keychain (Keychain on iOS, Keystore on Android):",
         [
-          "l'adresse de votre instance Portainer et le mode de connexion choisi ;",
-          "votre nom d'utilisateur Portainer, si vous vous connectez avec vos identifiants ;",
-          "votre access token, ou le jeton de session obtenu avec votre mot de passe. Le mot de passe lui-même n'est jamais enregistré.",
+          'the address of your Portainer instance and the sign-in method chosen;',
+          'your Portainer username, if you sign in with your credentials;',
+          'your access token, or the session token obtained with your password. The password itself is never stored.',
         ],
-        "Elle y enregistre aussi l'identifiant du dernier environnement consulté sur cette instance, pour rouvrir l'Application sur ses conteneurs, ainsi que vos réglages, comme l'intervalle de rafraîchissement choisi.",
-        "Les informations lues sur votre instance (environnements, conteneurs, stacks et leurs fichiers Compose, images, volumes, journaux) sont affichées sans être enregistrées : elles restent en mémoire pendant l'utilisation, et sont effacées à la déconnexion ou à la fermeture de l'Application.",
-        "Ces données ne quittent l'appareil que pour être envoyées directement à votre instance Portainer.",
+        'It also stores there the identifier of the last environment viewed on that instance, to reopen the App on its containers, as well as your settings, such as the chosen refresh interval.',
+        'The information read from your instance (environments, containers, stacks and their Compose files, images, volumes, logs) is displayed without being stored: it stays in memory while you use the App, and is cleared when you sign out or close the App.',
+        'This data only leaves the device to be sent directly to your Portainer instance.',
       ],
     },
     {
-      title: 'Durée de conservation',
+      title: 'Retention period',
       body: [
-        "Le jeton est supprimé à la déconnexion, ou automatiquement dès que votre instance le refuse. L'adresse de l'instance, le mode de connexion et le nom d'utilisateur sont conservés après la déconnexion, pour pré-remplir la connexion suivante ; l'identifiant du dernier environnement consulté l'est aussi, pour rouvrir le même environnement.",
-        "Sur Android, la désinstallation de l'Application efface ces informations. Sur iOS, le système peut les conserver dans le trousseau après la désinstallation : elles sont alors retrouvées si vous réinstallez l'Application.",
+        'The token is deleted when you sign out, or automatically as soon as your instance rejects it. The instance address, sign-in method and username are kept after you sign out, to pre-fill the next sign-in; so is the identifier of the last environment viewed, to reopen the same environment.',
+        'On Android, uninstalling the App erases this information. On iOS, the system may keep it in the keychain after the App is uninstalled: it is then found again if you reinstall the App.',
       ],
     },
     {
       title: 'Notifications',
       body: [
-        "Les notifications sont facultatives et ne fonctionnent qu'avec le service de surveillance que vous déployez vous-même sur votre infrastructure.",
-        "Lorsque vous les activez, l'Application demande un jeton de notification au service d'Expo. Expo reçoit à cette occasion l'identifiant de notification attribué à l'appareil par Apple ou Google, un identifiant d'installation généré par l'Application et l'identifiant de l'Application. Vous recopiez ensuite ce jeton dans la configuration de votre service de surveillance : l'éditeur ne le reçoit pas.",
-        "Pour chaque alerte, votre service de surveillance transmet à Expo le jeton, le nom du conteneur, le motif de l'alerte et les identifiants de l'environnement et du conteneur. Expo relaie l'alerte à Apple Push Notification service (iOS) ou à Firebase Cloud Messaging (Android), qui la délivrent à l'appareil.",
-        "Pour ne plus recevoir d'alertes, retirez l'autorisation de notifications dans les réglages de l'appareil, ou retirez le jeton de la configuration du service de surveillance.",
+        'Notifications are optional and only work with the monitoring service you deploy yourself on your infrastructure.',
+        "When you turn them on, the App requests a notification token from Expo's service. Expo then receives the notification identifier Apple or Google assigned to the device, an installation identifier generated by the App and the App's identifier. You then copy this token into your monitoring service's configuration: the publisher does not receive it.",
+        'For each alert, your monitoring service sends Expo the token, the container name, the reason for the alert and the environment and container identifiers. Expo relays the alert to Apple Push Notification service (iOS) or Firebase Cloud Messaging (Android), which deliver it to the device.',
+        "To stop receiving alerts, remove the notification permission in the device settings, or remove the token from the monitoring service's configuration.",
       ],
     },
     {
-      title: 'Signalement de problème',
+      title: 'Reporting a problem',
       body: [
-        "L'écran « Réglages » propose de signaler un problème. Le lien ouvre le formulaire d'issue de GitHub dans votre navigateur, avec un message pré-rempli contenant la version de l'Application, son numéro de build, l'identifiant du commit, le modèle de votre appareil et la version de son système.",
-        "Aucune information sur votre instance Portainer n'y figure : ni son adresse, ni vos identifiants, ni le nom de vos conteneurs. Rien n'est envoyé automatiquement : vous relisez le message, le complétez et décidez de le publier. Une issue GitHub est publique, et son traitement relève de la politique de confidentialité de GitHub : https://docs.github.com/privacy.",
+        'The "Settings" screen lets you report a problem. The link opens GitHub\'s issue form in your browser, with a pre-filled message containing the App\'s version, its build number, the commit identifier, your device model and its system version.',
+        "No information about your Portainer instance is included: neither its address, nor your credentials, nor the names of your containers. Nothing is sent automatically: you review the message, complete it and decide whether to publish it. A GitHub issue is public, and its handling falls under GitHub's privacy policy: https://docs.github.com/privacy.",
       ],
     },
     {
-      title: 'Données communiquées par les stores',
+      title: 'Data shared by the stores',
       body: [
-        "L'Application est distribuée par l'App Store et par Google Play, dont l'utilisation relève des politiques de confidentialité d'Apple et de Google.",
-        "Selon vos réglages de partage, Apple et Google peuvent communiquer à l'éditeur des statistiques d'utilisation agrégées et des rapports de plantage, qui ne permettent pas de vous identifier.",
-        "Si vous participez à un test de l'Application (TestFlight ou piste de test Google Play), l'éditeur connaît l'adresse e-mail utilisée pour vous inviter, et reçoit les retours que vous choisissez d'envoyer : commentaires, captures d'écran, rapports de plantage.",
+        "The App is distributed through the App Store and Google Play, whose use is governed by Apple's and Google's privacy policies.",
+        'Depending on your sharing settings, Apple and Google may provide the publisher with aggregated usage statistics and crash reports, which do not identify you.',
+        'If you take part in testing the App (TestFlight or a Google Play testing track), the publisher knows the email address used to invite you, and receives the feedback you choose to send: comments, screenshots, crash reports.',
       ],
     },
     {
-      title: "Échanges avec l'éditeur",
+      title: 'Contacting the publisher',
       body: [
-        `Si vous écrivez à ${PUBLISHER.email}, l'éditeur utilise votre adresse e-mail et le contenu de votre message uniquement pour vous répondre, sur la base de son intérêt légitime à traiter vos demandes. Ces échanges sont conservés au plus trois ans après le dernier message.`,
+        `If you write to ${PUBLISHER.email}, the publisher uses your email address and the content of your message only to reply to you, on the basis of its legitimate interest in handling your requests. These exchanges are kept for at most three years after the last message.`,
       ],
     },
     {
-      title: 'Partage et transferts',
+      title: 'Sharing and transfers',
       body: [
-        "L'éditeur ne vend ni ne partage aucune donnée. L'Application ne contient ni outil de mesure d'audience, ni publicité.",
-        "Les journaux d'un conteneur ne quittent l'Application que si vous les copiez ou les partagez vous-même : le partage passe par la feuille de partage du système, vers l'application que vous choisissez. Ces journaux peuvent contenir des informations sensibles de vos services ; vérifiez-les avant de les transmettre.",
-        "Les prestataires mentionnés sont établis notamment aux États-Unis : les données qui transitent par eux peuvent être traitées hors de l'Union européenne, dans les conditions prévues par leurs politiques :",
+        'The publisher neither sells nor shares any data. The App contains neither analytics tools nor advertising.',
+        "A container's logs only leave the App if you copy or share them yourself: sharing goes through the system share sheet, to the app you choose. These logs may contain sensitive information about your services; review them before passing them on.",
+        'The providers mentioned are established in particular in the United States: data passing through them may be processed outside the European Union, under the conditions set out in their policies:',
         [
-          'Expo : https://expo.dev/privacy',
-          'Apple : https://www.apple.com/legal/privacy/',
-          'Google : https://policies.google.com/privacy',
+          'Expo: https://expo.dev/privacy',
+          'Apple: https://www.apple.com/legal/privacy/',
+          'Google: https://policies.google.com/privacy',
         ],
       ],
     },
     {
-      title: 'Sécurité',
+      title: 'Security',
       body: [
-        "Les identifiants sont chiffrés par le trousseau sécurisé du système et ne sont lisibles que par l'Application.",
-        'La confidentialité des échanges avec votre instance dépend de sa configuration : privilégiez une connexion chiffrée (HTTPS), et des access tokens limités aux droits nécessaires.',
+        "Credentials are encrypted by the system's secure keychain and can only be read by the App.",
+        'The confidentiality of exchanges with your instance depends on its configuration: prefer an encrypted connection (HTTPS), and access tokens limited to the permissions needed.',
       ],
     },
     {
-      title: 'Vos droits',
+      title: 'Your rights',
       body: [
-        "Conformément au règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez de droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité sur les données vous concernant.",
-        "Les données de connexion n'étant conservées que sur votre appareil, vous les maîtrisez directement, dans les conditions décrites à la section « Durée de conservation ».",
-        `Pour toute autre demande, écrivez à ${PUBLISHER.email}. Vous pouvez aussi introduire une réclamation auprès de la CNIL : https://www.cnil.fr.`,
+        'Under the General Data Protection Regulation (GDPR) and the French Data Protection Act (loi Informatique et Libertés), you have the rights of access, rectification, erasure, restriction, objection and portability over data concerning you.',
+        'Since sign-in data is only kept on your device, you control it directly, under the conditions described in the "Retention period" section.',
+        `For any other request, write to ${PUBLISHER.email}. You may also lodge a complaint with the CNIL, the French data protection authority: https://www.cnil.fr.`,
       ],
     },
     {
-      title: 'Modification de la politique',
+      title: 'Changes to this policy',
       body: [
-        `L'éditeur peut modifier cette politique, notamment lorsque le fonctionnement de l'Application évolue. La date de dernière mise à jour figure en tête du document. La version en vigueur est consultable dans l'Application et à l'adresse ${PRIVACY_POLICY_URL}.`,
+        `The publisher may change this policy, in particular when the way the App works changes. The date of the last update appears at the top of the document. The current version is available in the App and at ${PRIVACY_POLICY_URL}.`,
       ],
     },
   ],

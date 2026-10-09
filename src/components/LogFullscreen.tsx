@@ -60,7 +60,7 @@ export function LogFullscreen({
           onContentSizeChange={() =>
             stick.follow(() => list.current?.scrollToEnd({ animated: false }))
           }
-          ListEmptyComponent={<Text style={styles.empty}>Aucune sortie sur cette période.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No output in this range.</Text>}
         />
       </View>
     </Modal>

@@ -19,7 +19,7 @@ export function TypedConfirmation({
   return (
     <View style={styles.block}>
       <Text style={styles.label}>
-        Pour confirmer, saisissez <Text style={styles.phrase}>{phrase}</Text>
+        To confirm, type <Text style={styles.phrase}>{phrase}</Text>
       </Text>
       <TextInput
         value={value}
@@ -27,7 +27,7 @@ export function TypedConfirmation({
         autoCapitalize="none"
         autoCorrect={false}
         spellCheck={false}
-        accessibilityLabel={`Saisissez ${phrase} pour confirmer`}
+        accessibilityLabel={`Type ${phrase} to confirm`}
         style={styles.input}
       />
     </View>

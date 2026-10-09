@@ -38,7 +38,7 @@ jest.mock('../src/api/portainer', () => ({
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const Layout = createTestLayout(queryClient);
-const Container = () => <Text>Détail conteneur</Text>;
+const Container = () => <Text>Container detail</Text>;
 
 const compose = (project: string) => ({ 'com.docker.compose.project': project });
 const containers = [
@@ -86,26 +86,26 @@ describe('stacks screen', () => {
     expect(await screen.findByText('blog')).toBeOnTheScreen();
     expect(screen.getByText('legacy')).toBeOnTheScreen();
     expect(screen.getByText('archived')).toBeOnTheScreen();
-    expect(screen.queryByText('Sans stack')).toBeNull();
-    expect(screen.getByText('3 stacks · 2 gérées par Portainer · 1 externe')).toBeOnTheScreen();
-    expect(screen.getByText('1/2 en cours')).toBeOnTheScreen();
-    expect(screen.getByText('Aucun conteneur')).toBeOnTheScreen();
+    expect(screen.queryByText('No stack')).toBeNull();
+    expect(screen.getByText('3 stacks · 2 managed by Portainer · 1 external')).toBeOnTheScreen();
+    expect(screen.getByText('1/2 running')).toBeOnTheScreen();
+    expect(screen.getByText('No containers')).toBeOnTheScreen();
   });
 
   it('filters by name', async () => {
     renderAt('/endpoints/1/stacks');
     await screen.findByText('blog');
-    fireEvent.changeText(screen.getByPlaceholderText('Filtrer par nom'), 'leg');
+    fireEvent.changeText(screen.getByPlaceholderText('Filter by name'), 'leg');
     expect(screen.queryByText('blog')).toBeNull();
     expect(screen.getByText('legacy')).toBeOnTheScreen();
   });
 
   it('still lists the stacks the containers reveal when Portainer refuses the stack list', async () => {
-    jest.mocked(listStacks).mockRejectedValue(new PortainerError('Accès refusé', 403));
+    jest.mocked(listStacks).mockRejectedValue(new PortainerError('Access denied', 403));
     renderAt('/endpoints/1/stacks');
     expect(await screen.findByText('blog')).toBeOnTheScreen();
-    expect(screen.getAllByText('Externe')).toHaveLength(2);
-    expect(screen.getByText(/Détails Portainer indisponibles : Accès refusé/)).toBeOnTheScreen();
+    expect(screen.getAllByText('External')).toHaveLength(2);
+    expect(screen.getByText(/Portainer details unavailable: Access denied/)).toBeOnTheScreen();
   });
 
   it('opens a stack', async () => {
@@ -119,35 +119,35 @@ describe('stack detail screen', () => {
   it('shows Portainer details, members and the Compose file on demand', async () => {
     jest.mocked(fetchStackFile).mockResolvedValue('services:\n  web:\n    image: nginx');
     renderAt('/endpoints/1/stacks/blog');
-    expect(await screen.findByText('1/2 en cours')).toBeOnTheScreen();
+    expect(await screen.findByText('1/2 running')).toBeOnTheScreen();
     expect(screen.getByText('admin')).toBeOnTheScreen();
     expect(screen.getByText('docker-compose.yml')).toBeOnTheScreen();
     expect(screen.getByText('blog-web')).toBeOnTheScreen();
     expect(screen.getByText('blog-db')).toBeOnTheScreen();
     expect(screen.getByText('Europe/Paris')).toBeOnTheScreen();
     expect(screen.queryByText('hunter2')).toBeNull();
-    fireEvent.press(screen.getByRole('button', { name: 'Afficher DB_PASSWORD' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show DB_PASSWORD' }));
     expect(screen.getByText('hunter2')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Afficher le fichier Compose' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show Compose file' }));
     expect(await screen.findByText('services:\n  web:\n    image: nginx')).toBeOnTheScreen();
     expect(fetchStackFile).toHaveBeenCalledWith(expect.anything(), 7);
   });
 
   it('describes an external stack without Portainer details', async () => {
     renderAt('/endpoints/1/stacks/legacy');
-    expect(await screen.findByText('1/1 en cours')).toBeOnTheScreen();
-    expect(screen.getByText(/déployée hors de Portainer/i)).toBeOnTheScreen();
-    expect(screen.queryByText('Afficher le fichier Compose')).toBeNull();
+    expect(await screen.findByText('1/1 running')).toBeOnTheScreen();
+    expect(screen.getByText(/deployed outside Portainer/i)).toBeOnTheScreen();
+    expect(screen.queryByText('Show Compose file')).toBeNull();
     expect(screen.getByText('legacy-app')).toBeOnTheScreen();
   });
 
   it('stops the whole stack after confirmation', async () => {
     jest.mocked(runContainerAction).mockResolvedValue(undefined);
     renderAt('/endpoints/1/stacks/blog');
-    fireEvent.press(await screen.findByRole('button', { name: 'Marche / arrêt' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Arrêter la stack' }));
-    fireEvent.press(screen.getByRole('button', { name: 'Arrêter' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Start / stop' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Stop stack' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Stop' }));
     await waitFor(() => expect(runContainerAction).toHaveBeenCalledTimes(2));
     expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'w', 'stop');
     expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'd', 'stop');
@@ -161,7 +161,7 @@ describe('stack detail screen', () => {
 
   it('explains a stack that no longer exists', async () => {
     renderAt('/endpoints/1/stacks/ghost');
-    expect(await screen.findByText('Stack introuvable')).toBeOnTheScreen();
+    expect(await screen.findByText('Stack not found')).toBeOnTheScreen();
   });
 
   describe('redeploy', () => {
@@ -172,12 +172,10 @@ describe('stack detail screen', () => {
 
     it('pulls the images and redeploys after confirmation', async () => {
       renderAt('/endpoints/1/stacks/blog');
-      fireEvent.press(await screen.findByRole('button', { name: 'Redéployer' }));
-      fireEvent.press(
-        await screen.findByRole('button', { name: 'Retélécharger les images et redéployer' }),
-      );
-      expect(screen.getByText(/plusieurs minutes/)).toBeOnTheScreen();
-      fireEvent.press(screen.getAllByRole('button', { name: 'Redéployer' }).at(-1)!);
+      fireEvent.press(await screen.findByRole('button', { name: 'Redeploy' }));
+      fireEvent.press(await screen.findByRole('button', { name: 'Pull images and redeploy' }));
+      expect(screen.getByText(/several minutes/)).toBeOnTheScreen();
+      fireEvent.press(screen.getAllByRole('button', { name: 'Redeploy' }).at(-1)!);
 
       await waitFor(() =>
         expect(redeployStack).toHaveBeenCalledWith(
@@ -187,7 +185,7 @@ describe('stack detail screen', () => {
         ),
       );
       await waitFor(() =>
-        expect(Alert.alert).toHaveBeenCalledWith('Stack redéployée', 'blog a été redéployée.'),
+        expect(Alert.alert).toHaveBeenCalledWith('Stack redeployed', 'blog was redeployed.'),
       );
     });
 
@@ -204,33 +202,33 @@ describe('stack detail screen', () => {
         }),
       ]);
       renderAt('/endpoints/1/stacks/blog');
-      fireEvent.press(await screen.findByRole('button', { name: 'Redéployer' }));
-      expect(await screen.findByText(/dernière version de main/)).toBeOnTheScreen();
-      expect(screen.getByRole('button', { name: 'Mettre à jour depuis Git' })).toBeOnTheScreen();
+      fireEvent.press(await screen.findByRole('button', { name: 'Redeploy' }));
+      expect(await screen.findByText(/latest version of main/)).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Update from Git' })).toBeOnTheScreen();
     });
 
     it('does not offer it for an external stack', async () => {
       renderAt('/endpoints/1/stacks/legacy');
-      await screen.findByText('1/1 en cours');
-      expect(screen.queryByRole('button', { name: 'Redéployer' })).toBeNull();
+      await screen.findByText('1/1 running');
+      expect(screen.queryByRole('button', { name: 'Redeploy' })).toBeNull();
     });
 
     it('edits the variables, shows what changes, then redeploys with them', async () => {
       renderAt('/endpoints/1/stacks/blog');
-      fireEvent.press(await screen.findByRole('button', { name: 'Modifier' }));
+      fireEvent.press(await screen.findByRole('button', { name: 'Edit' }));
 
       fireEvent.changeText(screen.getByDisplayValue('Europe/Paris'), 'UTC');
-      fireEvent.press(screen.getByRole('button', { name: 'Retirer DB_PASSWORD' }));
-      fireEvent.press(screen.getByRole('button', { name: '+ Ajouter une variable' }));
-      const names = screen.getAllByLabelText('Nom de la variable');
+      fireEvent.press(screen.getByRole('button', { name: 'Remove DB_PASSWORD' }));
+      fireEvent.press(screen.getByRole('button', { name: '+ Add a variable' }));
+      const names = screen.getAllByLabelText('Variable name');
       fireEvent.changeText(names.at(-1)!, 'LOG_LEVEL');
-      fireEvent.changeText(screen.getAllByLabelText(/^Valeur de/).at(-1)!, ' debug ');
-      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer' }));
+      fireEvent.changeText(screen.getAllByLabelText(/^Value of/).at(-1)!, ' debug ');
+      fireEvent.press(screen.getByRole('button', { name: 'Save' }));
 
       expect(
-        await screen.findByText(/Ajoutées : LOG_LEVEL\. Modifiées : TZ\. Retirées : DB_PASSWORD\./),
+        await screen.findByText(/Added: LOG_LEVEL\. Changed: TZ\. Removed: DB_PASSWORD\./),
       ).toBeOnTheScreen();
-      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer et redéployer' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Save and redeploy' }));
 
       await waitFor(() =>
         expect(redeployStack).toHaveBeenCalledWith(
@@ -250,13 +248,13 @@ describe('stack detail screen', () => {
 
     it('refuses to save duplicate names', async () => {
       renderAt('/endpoints/1/stacks/blog');
-      fireEvent.press(await screen.findByRole('button', { name: 'Modifier' }));
-      fireEvent.press(screen.getByRole('button', { name: '+ Ajouter une variable' }));
-      fireEvent.changeText(screen.getAllByLabelText('Nom de la variable').at(-1)!, 'TZ');
-      fireEvent.press(screen.getByRole('button', { name: 'Enregistrer' }));
+      fireEvent.press(await screen.findByRole('button', { name: 'Edit' }));
+      fireEvent.press(screen.getByRole('button', { name: '+ Add a variable' }));
+      fireEvent.changeText(screen.getAllByLabelText('Variable name').at(-1)!, 'TZ');
+      fireEvent.press(screen.getByRole('button', { name: 'Save' }));
 
-      expect(screen.getByText('TZ est déjà défini plus haut.')).toBeOnTheScreen();
-      expect(screen.queryByText('Enregistrer et redéployer ?')).toBeNull();
+      expect(screen.getByText('TZ is already defined above.')).toBeOnTheScreen();
+      expect(screen.queryByText('Save and redeploy?')).toBeNull();
       expect(redeployStack).not.toHaveBeenCalled();
     });
   });
@@ -270,7 +268,7 @@ describe('stack detail screen', () => {
       // The member rows check their own image too, once the indicator is on.
       jest.mocked(fetchImageStatus).mockResolvedValue('updated');
       renderAt('/endpoints/1/stacks/blog');
-      expect(await screen.findByText("Mise à jour d'image disponible")).toBeOnTheScreen();
+      expect(await screen.findByText('Image update available')).toBeOnTheScreen();
       expect(fetchStackImageStatus).toHaveBeenCalledWith(expect.anything(), 7);
     });
 
@@ -284,19 +282,19 @@ describe('stack detail screen', () => {
       renderAt('/endpoints/1/stacks');
       await screen.findByText('blog');
       await waitFor(() => expect(fetchStackImageStatus).toHaveBeenCalled());
-      expect(screen.queryByLabelText('Images à jour')).toBeNull();
+      expect(screen.queryByLabelText('Images up to date')).toBeNull();
 
       fireEvent.press(screen.getByText('blog'));
-      expect(await screen.findByText('Images à jour')).toBeOnTheScreen();
+      expect(await screen.findByText('Images up to date')).toBeOnTheScreen();
     });
 
     it('asks nothing when the environment has no indicator', async () => {
       jest.mocked(fetchStackImageStatus).mockClear();
       renderAt('/endpoints/1/stacks/blog');
-      await screen.findByText('1/2 en cours');
+      await screen.findByText('1/2 running');
       await waitFor(() => expect(listEndpoints).toHaveBeenCalled());
       expect(fetchStackImageStatus).not.toHaveBeenCalled();
-      expect(screen.queryByText('Images à jour')).toBeNull();
+      expect(screen.queryByText('Images up to date')).toBeNull();
     });
   });
 });

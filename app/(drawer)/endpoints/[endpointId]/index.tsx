@@ -19,7 +19,7 @@ import { Loader } from '../../../../src/components/Loader';
 import { Segmented } from '../../../../src/components/Segmented';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
 import { StackHeader } from '../../../../src/components/StackHeader';
-import { containerName } from '../../../../src/lib/format';
+import { containerName, plural } from '../../../../src/lib/format';
 import {
   countStacks,
   describeStackResult,
@@ -74,15 +74,15 @@ export default function ContainersScreen() {
         },
         onError: (e) =>
           Alert.alert(
-            'Action échouée',
-            e instanceof Error ? e.message : "L'action n'a pas pu être appliquée.",
+            'Action failed',
+            e instanceof Error ? e.message : 'The action could not be applied.',
           ),
         onSettled: () => setPendingStack(null),
       },
     );
   }
 
-  if (isPending) return <Loader label="Chargement des conteneurs…" />;
+  if (isPending) return <Loader label="Loading containers…" />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   const shown = sections.reduce((sum, section) => sum + section.data.length, 0);
@@ -108,7 +108,7 @@ export default function ContainersScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Filtrer par nom ou image"
+              placeholder="Filter by name or image"
               placeholderTextColor={theme.colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -118,14 +118,14 @@ export default function ContainersScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: 'Tous' },
-                { value: 'running', label: 'En cours' },
-                { value: 'stopped', label: 'Arrêtés' },
+                { value: 'all', label: 'All' },
+                { value: 'running', label: 'Running' },
+                { value: 'stopped', label: 'Stopped' },
               ]}
             />
             <Text style={styles.summary}>
-              {shown} conteneur{shown > 1 ? 's' : ''}
-              {stackCount > 0 ? ` · ${stackCount} stack${stackCount > 1 ? 's' : ''}` : ''}
+              {plural(shown, 'container')}
+              {stackCount > 0 ? ` · ${plural(stackCount, 'stack')}` : ''}
             </Text>
           </View>
         }
@@ -139,8 +139,8 @@ export default function ContainersScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            title="Aucun conteneur"
-            subtitle={search || filter !== 'all' ? 'Aucun résultat pour ce filtre.' : undefined}
+            title="No containers"
+            subtitle={search || filter !== 'all' ? 'Nothing matches this filter.' : undefined}
           />
         }
         renderItem={({ item }) => <ContainerRow endpointId={id} container={item} />}

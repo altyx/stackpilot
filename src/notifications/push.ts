@@ -26,7 +26,7 @@ export async function registerForPush(): Promise<PushRegistration> {
     return {
       status: 'unsupported',
       reason:
-        'Les notifications distantes exigent un appareil physique : APNs ne délivre pas de jeton à un simulateur.',
+        'Remote notifications need a physical device: APNs does not issue a token to a simulator.',
     };
   }
 
@@ -36,7 +36,7 @@ export async function registerForPush(): Promise<PushRegistration> {
     return {
       status: 'unsupported',
       reason:
-        "Expo Go ne reçoit pas les notifications distantes. Installez une version compilée de l'application (dev build) pour les activer.",
+        'Expo Go does not receive remote notifications. Install a compiled build of the app (dev build) to turn them on.',
     };
   }
 
@@ -44,7 +44,7 @@ export async function registerForPush(): Promise<PushRegistration> {
     // Without an explicit channel, Android files alerts at default importance,
     // with no sound or banner.
     await Notifications.setNotificationChannelAsync('containers', {
-      name: 'Alertes conteneurs',
+      name: 'Container alerts',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
     });
@@ -63,8 +63,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   if (!projectId) {
     return {
       status: 'unsupported',
-      reason:
-        "Aucun projectId EAS dans la configuration : lancez `eas init`, puis reconstruisez l'application.",
+      reason: 'No EAS projectId in the configuration: run `eas init`, then rebuild the app.',
     };
   }
 
@@ -83,6 +82,6 @@ export function readAlertPayload(data: unknown): ContainerAlertPayload | null {
     endpointId,
     containerId,
     containerName: typeof containerName === 'string' ? containerName : containerId.slice(0, 12),
-    reason: typeof reason === 'string' ? reason : 'Changement d’état',
+    reason: typeof reason === 'string' ? reason : 'State change',
   };
 }

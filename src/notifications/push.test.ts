@@ -54,7 +54,7 @@ afterEach(() => jest.restoreAllMocks());
 describe('registerForPush', () => {
   it('refuses simulators', async () => {
     device.isDevice = false;
-    await expect(unsupportedReason()).resolves.toContain('appareil physique');
+    await expect(unsupportedReason()).resolves.toContain('physical device');
   });
 
   it('refuses Expo Go', async () => {
@@ -122,7 +122,7 @@ describe('readAlertPayload', () => {
       endpointId: 3,
       containerId: 'abcdef0123456789',
       containerName: 'abcdef012345',
-      reason: 'Changement d’état',
+      reason: 'State change',
     });
   });
 

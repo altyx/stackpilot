@@ -10,7 +10,7 @@ export function ReleaseCard({ release, installed }: { release: Release; installe
         <Text accessibilityRole="header" style={styles.version}>
           Version {release.version}
         </Text>
-        {installed ? <Text style={styles.badge}>Installée</Text> : null}
+        {installed ? <Text style={styles.badge}>Installed</Text> : null}
       </View>
       <Text style={styles.date}>{release.date}</Text>
       {release.changes.map((change) => (

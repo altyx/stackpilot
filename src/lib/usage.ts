@@ -159,7 +159,7 @@ export function volumeSizes(df: DiskUsageResponse | undefined): Map<string, numb
  * readable one, a fixed word for anonymous volumes and their 64-character ids.
  */
 export function volumeConfirmPhrase(volume: VolumeSummary): string {
-  return isAnonymousVolume(volume) || volume.Name.length > 40 ? 'supprimer' : volume.Name;
+  return isAnonymousVolume(volume) || volume.Name.length > 40 ? 'delete' : volume.Name;
 }
 
 function push(map: Map<string, string[]>, key: string, value: string): void {

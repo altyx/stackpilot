@@ -54,7 +54,7 @@ export default function OverviewScreen() {
     [volumes.data, list],
   );
 
-  if (containers.isPending) return <Loader label="Chargement de l'environnement…" />;
+  if (containers.isPending) return <Loader label="Loading environment…" />;
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
 
   function refresh() {
@@ -81,68 +81,62 @@ export default function OverviewScreen() {
       }>
       <HealthCard endpointId={id} problems={problems} />
 
-      <Section title="En un coup d'œil">
+      <Section title="At a glance">
         <View style={styles.tiles}>
           <StatTile
-            label="Conteneurs"
+            label="Containers"
             value={`${counts.running}/${counts.total}`}
-            caption="en cours"
+            caption="running"
             href={base}
           />
           <StatTile
             label="Stacks"
             value={stacks.isPending ? '—' : `${stackCounts.complete}/${stackCounts.total}`}
-            caption={stacks.isPending ? 'chargement…' : describeStacks(stackCounts)}
+            caption={stacks.isPending ? 'loading…' : describeStacks(stackCounts)}
             alert={stackCounts.partial > 0}
             href={`${base}/stacks`}
           />
           <StatTile
             label="Images"
             value={images.data ? String(images.data.length) : '—'}
-            caption={images.data ? describeUnused(unusedImages, 'feminine') : 'chargement…'}
+            caption={images.data ? describeUnused(unusedImages) : 'loading…'}
             href={`${base}/images`}
           />
           <StatTile
             label="Volumes"
             value={volumes.data ? String(volumes.data.length) : '—'}
-            caption={volumes.data ? describeUnused(unusedVolumes, 'masculine') : 'chargement…'}
+            caption={volumes.data ? describeUnused(unusedVolumes) : 'loading…'}
             href={`${base}/volumes`}
           />
         </View>
         <HealthCounts counts={counts} />
       </Section>
 
-      <Section title="Ressources">
+      <Section title="Resources">
         <ResourcesCard endpointId={id} running={running} />
       </Section>
 
-      <Section title="Espace disque">
+      <Section title="Disk space">
         <DiskUsageCard endpointId={id} />
       </Section>
 
-      <Section title="Mises à jour des images">
+      <Section title="Image updates">
         <ImageUpdatesCard endpointId={id} containers={running} />
       </Section>
     </ScrollView>
   );
 }
 
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count > 1 ? 's' : ''}`;
-}
-
 /** Under the complete/total ratio: only what's off, a partial stack first. */
 function describeStacks(counts: StackCounts): string {
-  if (counts.total === 0) return 'aucune stack';
-  if (counts.partial > 0) return plural(counts.partial, 'partielle');
-  if (counts.stopped > 0) return plural(counts.stopped, 'arrêtée');
-  return 'complètes';
+  if (counts.total === 0) return 'no stacks';
+  if (counts.partial > 0) return `${counts.partial} partial`;
+  if (counts.stopped > 0) return `${counts.stopped} stopped`;
+  return 'all running';
 }
 
-/** Images are feminine in French, volumes masculine. */
-function describeUnused(count: number, gender: 'feminine' | 'masculine'): string {
-  if (gender === 'feminine') return count === 0 ? 'toutes utilisées' : plural(count, 'inutilisée');
-  return count === 0 ? 'tous utilisés' : plural(count, 'inutilisé');
+function describeUnused(count: number): string {
+  return count === 0 ? 'all in use' : `${count} unused`;
 }
 
 const styles = StyleSheet.create({

@@ -32,7 +32,7 @@ export function LoginField({
         {secret ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={revealed ? 'Masquer la saisie' : 'Afficher la saisie'}
+            accessibilityLabel={revealed ? 'Hide input' : 'Show input'}
             hitSlop={theme.spacing(2)}
             onPress={() => setRevealed((value) => !value)}
             style={({ pressed }) => [styles.reveal, pressed && styles.revealPressed]}>

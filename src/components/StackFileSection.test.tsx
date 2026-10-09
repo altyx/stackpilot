@@ -10,8 +10,7 @@ const query = (partial: Partial<Query>) =>
     .mocked(useStackFile)
     .mockReturnValue({ data: undefined, isPending: false, error: null, ...partial } as Query);
 
-const open = () =>
-  fireEvent.press(screen.getByRole('button', { name: 'Afficher le fichier Compose' }));
+const open = () => fireEvent.press(screen.getByRole('button', { name: 'Show Compose file' }));
 
 describe('StackFileSection', () => {
   it('loads the file only once asked, and closes again', () => {
@@ -22,18 +21,18 @@ describe('StackFileSection', () => {
     open();
     expect(useStackFile).toHaveBeenLastCalledWith(7);
     expect(screen.getByText('services:\n  web: {}')).toBeOnTheScreen();
-    expect(screen.queryByText(/Révéler les secrets/)).toBeNull();
+    expect(screen.queryByText(/Reveal secrets/)).toBeNull();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Masquer le fichier Compose' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Hide Compose file' }));
     expect(screen.queryByText('services:\n  web: {}')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Afficher le fichier Compose' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Show Compose file' })).toBeOnTheScreen();
   });
 
   it('closes from the header link as well', () => {
     query({ data: 'services: {}' });
     render(<StackFileSection stackId={7} />);
     open();
-    fireEvent.press(screen.getByRole('button', { name: 'Fermer' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByText('services: {}')).toBeNull();
   });
 
@@ -43,15 +42,15 @@ describe('StackFileSection', () => {
     open();
     expect(screen.getByText('environment:\n  DB_PASSWORD: ••••••••')).toBeOnTheScreen();
 
-    fireEvent.press(screen.getByRole('button', { name: 'Révéler les secrets (1)' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Reveal secrets (1)' }));
     expect(screen.getByText('environment:\n  DB_PASSWORD: hunter2')).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Masquer les secrets' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Hide secrets' })).toBeOnTheScreen();
   });
 
   it('reports a file it cannot read', () => {
-    query({ error: new Error('Accès refusé') });
+    query({ error: new Error('Access denied') });
     render(<StackFileSection stackId={7} />);
     open();
-    expect(screen.getByText('Accès refusé')).toBeOnTheScreen();
+    expect(screen.getByText('Access denied')).toBeOnTheScreen();
   });
 });

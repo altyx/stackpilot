@@ -2,7 +2,7 @@ import { StyleSheet, Text } from 'react-native';
 import { STACK_KIND_LABELS, type StackKind } from '../lib/stacks';
 import { theme } from '../theme';
 
-/** "Compose" / "Swarm" for stacks Portainer manages, "Externe" otherwise. */
+/** "Compose" / "Swarm" for stacks Portainer manages, "External" otherwise. */
 export function StackKindBadge({ kind }: { kind: StackKind }) {
   return (
     <Text style={[styles.badge, kind === 'external' ? styles.external : styles.managed]}>

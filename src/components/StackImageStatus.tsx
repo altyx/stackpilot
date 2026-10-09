@@ -4,10 +4,10 @@ import { ImageStatusIcon } from './ImageStatusIcon';
 
 /** A stack holds several images: Portainer says outdated as soon as one is. */
 const STACK_LABELS: Record<ImageStatus, string> = {
-  updated: 'Images à jour',
-  outdated: "Mise à jour d'image disponible",
-  processing: 'Vérification des images…',
-  unknown: 'Statut des images indéterminé',
+  updated: 'Images up to date',
+  outdated: 'Image update available',
+  processing: 'Checking images…',
+  unknown: 'Image status unknown',
 };
 
 /**

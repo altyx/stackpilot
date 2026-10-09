@@ -4,8 +4,8 @@ import { LoginModeTab } from './LoginModeTab';
 describe('LoginModeTab', () => {
   it('exposes its selection state and reacts to presses', () => {
     const onPress = jest.fn();
-    render(<LoginModeTab label="Identifiants" active={false} onPress={onPress} />);
-    const tab = screen.getByRole('button', { name: 'Identifiants' });
+    render(<LoginModeTab label="Credentials" active={false} onPress={onPress} />);
+    const tab = screen.getByRole('button', { name: 'Credentials' });
     expect(tab).not.toBeSelected();
     fireEvent.press(tab);
     expect(onPress).toHaveBeenCalledTimes(1);

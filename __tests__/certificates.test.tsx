@@ -29,14 +29,14 @@ describe('certificate help screen', () => {
   it('shows the iPhone steps on iOS', () => {
     Platform.OS = 'ios';
     renderScreen();
-    expect(screen.getByText(/confiance totale/)).toBeOnTheScreen();
-    expect(screen.queryByText(/Chiffrement et identifiants/)).toBeNull();
+    expect(screen.getByText(/full trust/)).toBeOnTheScreen();
+    expect(screen.queryByText(/Encryption & credentials/)).toBeNull();
   });
 
   it('shows the Android steps on Android', () => {
     Platform.OS = 'android';
     renderScreen();
-    expect(screen.getByText(/Chiffrement et identifiants/)).toBeOnTheScreen();
-    expect(screen.queryByText(/confiance totale/)).toBeNull();
+    expect(screen.getByText(/Encryption & credentials/)).toBeOnTheScreen();
+    expect(screen.queryByText(/full trust/)).toBeNull();
   });
 });

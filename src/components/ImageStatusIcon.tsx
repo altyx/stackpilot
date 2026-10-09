@@ -4,10 +4,10 @@ import type { ImageStatus } from '../api/types';
 import { theme } from '../theme';
 
 export const IMAGE_STATUS_LABELS: Record<ImageStatus, string> = {
-  updated: 'Image à jour',
-  outdated: "Mise à jour de l'image disponible",
-  processing: "Vérification de l'image…",
-  unknown: "Statut de l'image indéterminé",
+  updated: 'Image up to date',
+  outdated: 'Image update available',
+  processing: 'Checking image…',
+  unknown: 'Image status unknown',
 };
 
 const ICONS: Record<Exclude<ImageStatus, 'processing'>, { name: IconName; color: string }> = {

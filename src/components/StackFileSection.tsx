@@ -24,48 +24,44 @@ export function StackFileSection({ stackId }: { stackId: number }) {
 
   if (!visible) {
     return (
-      <Button
-        label="Afficher le fichier Compose"
-        variant="secondary"
-        onPress={() => setVisible(true)}
-      />
+      <Button label="Show Compose file" variant="secondary" onPress={() => setVisible(true)} />
     );
   }
 
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Fichier Compose</Text>
+        <Text style={styles.sectionTitle}>Compose file</Text>
         <View style={styles.headerActions}>
           {content.masked > 0 ? (
             <Text
               accessibilityRole="button"
               onPress={() => setRevealed((current) => !current)}
               style={styles.link}>
-              {revealed ? 'Masquer les secrets' : `Révéler les secrets (${content.masked})`}
+              {revealed ? 'Hide secrets' : `Reveal secrets (${content.masked})`}
             </Text>
           ) : null}
           <Text accessibilityRole="button" onPress={close} style={styles.link}>
-            Fermer
+            Close
           </Text>
         </View>
       </View>
       {file.isPending ? (
-        <Text style={styles.muted}>Chargement…</Text>
+        <Text style={styles.muted}>Loading…</Text>
       ) : file.error ? (
         <Text style={styles.error}>
-          {file.error instanceof Error ? file.error.message : 'Fichier indisponible.'}
+          {file.error instanceof Error ? file.error.message : 'File unavailable.'}
         </Text>
       ) : (
         // Horizontal only: the page scrolls vertically, so the whole file is
         // reachable. A bounded box here would clip it with no way to scroll.
         <ScrollView horizontal style={styles.box} contentContainerStyle={styles.boxContent}>
           <Text selectable={revealed || content.masked === 0} style={styles.code}>
-            {(revealed ? file.data.trim() : content.text) || 'Fichier vide.'}
+            {(revealed ? file.data.trim() : content.text) || 'Empty file.'}
           </Text>
         </ScrollView>
       )}
-      <Button label="Masquer le fichier Compose" variant="secondary" onPress={close} />
+      <Button label="Hide Compose file" variant="secondary" onPress={close} />
     </Card>
   );
 }

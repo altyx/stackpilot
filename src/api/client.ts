@@ -21,7 +21,7 @@ export class PortainerError extends Error {
 /** Strips the trailing `/` and any `/api` suffix the user typed. */
 export function normalizeBaseUrl(raw: string): string {
   let url = raw.trim();
-  if (!url) throw new PortainerError("L'URL de l'instance est requise.");
+  if (!url) throw new PortainerError('The instance URL is required.');
   if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
   url = url.replace(/\/+$/, '');
   url = url.replace(/\/api$/i, '');
@@ -102,7 +102,7 @@ async function rawRequest(
   } catch (error) {
     if (error instanceof PortainerError) throw error;
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new PortainerError("L'instance Portainer n'a pas répondu à temps.", undefined, url);
+      throw new PortainerError('The Portainer instance did not respond in time.', undefined, url);
     }
     throw new PortainerError(
       unreachableMessage(url),
@@ -125,12 +125,12 @@ async function rawRequest(
 function unreachableMessage(url: string): string {
   if (url.startsWith('https://')) {
     return (
-      "Connexion refusée. Si l'instance répond depuis un navigateur, c'est " +
-      'presque toujours son certificat TLS : un certificat auto-signé est rejeté ' +
-      "par le système, sans possibilité de l'accepter depuis l'application."
+      'Connection refused. If the instance responds in a browser, the cause is ' +
+      'almost always its TLS certificate: the system rejects a self-signed ' +
+      'certificate, and the app has no way to accept it.'
     );
   }
-  return "Impossible de joindre l'instance Portainer. Vérifiez l'URL et le réseau.";
+  return 'Cannot reach the Portainer instance. Check the URL and the network.';
 }
 
 function describeCause(url: string, error: unknown): string {
@@ -148,13 +148,13 @@ async function toError(response: Response): Promise<PortainerError> {
     // non-JSON body: keep the raw text
   }
   const messages: Record<number, string> = {
-    401: 'Authentification refusée : token invalide ou expiré.',
-    403: "Accès refusé : ce compte n'a pas les droits sur cette ressource.",
-    404: 'Ressource introuvable sur cette instance.',
-    409: 'Conflit : la ressource est déjà dans cet état.',
+    401: 'Authentication refused: invalid or expired token.',
+    403: 'Access denied: this account has no rights on this resource.',
+    404: 'Resource not found on this instance.',
+    409: 'Conflict: the resource is already in that state.',
   };
   return new PortainerError(
-    messages[response.status] ?? `Erreur Portainer (HTTP ${response.status}).`,
+    messages[response.status] ?? `Portainer error (HTTP ${response.status}).`,
     response.status,
     detail.slice(0, 500),
   );

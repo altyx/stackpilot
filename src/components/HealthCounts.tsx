@@ -9,25 +9,25 @@ import { Card } from './Card';
  */
 export function HealthCounts({ counts }: { counts: ContainerCounts }) {
   const columns = [
-    { label: 'Sains', value: counts.healthy, color: theme.colors.success },
+    { label: 'Healthy', value: counts.healthy, color: theme.colors.success },
     {
-      label: 'En mauvaise santé',
+      label: 'Unhealthy',
       value: counts.unhealthy,
       color: counts.unhealthy > 0 ? theme.colors.danger : theme.colors.textMuted,
     },
-    { label: 'Sans healthcheck', value: counts.unchecked, color: theme.colors.textMuted },
+    { label: 'No healthcheck', value: counts.unchecked, color: theme.colors.textMuted },
   ];
   return (
     <Card style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>
-        Santé des conteneurs
+        Container health
       </Text>
       <View style={styles.columns}>
         {columns.map((column, index) => (
           <View
             key={column.label}
             accessible
-            accessibilityLabel={`${column.label} : ${column.value}`}
+            accessibilityLabel={`${column.label}: ${column.value}`}
             style={[styles.column, index === 0 ? styles.columnFirst : styles.columnDivided]}>
             <Text style={[styles.value, { color: column.color }]}>{column.value}</Text>
             <Text style={styles.label} numberOfLines={2}>
@@ -37,10 +37,7 @@ export function HealthCounts({ counts }: { counts: ContainerCounts }) {
         ))}
       </View>
       {counts.starting > 0 ? (
-        <Text style={styles.footnote}>
-          {counts.starting} en cours de démarrage, pas encore évalué
-          {counts.starting > 1 ? 's' : ''}.
-        </Text>
+        <Text style={styles.footnote}>{counts.starting} starting, not checked yet.</Text>
       ) : null}
     </Card>
   );

@@ -3,15 +3,15 @@ import { LoginField } from './LoginField';
 
 describe('LoginField', () => {
   it('masks a secret and reveals it on demand', () => {
-    render(<LoginField label="Mot de passe" value="hunter2" onChangeText={jest.fn()} secret />);
+    render(<LoginField label="Password" value="hunter2" onChangeText={jest.fn()} secret />);
     const input = screen.getByDisplayValue('hunter2');
     expect(input).toHaveProp('secureTextEntry', true);
     expect(input).toHaveProp('autoCapitalize', 'none');
 
-    fireEvent.press(screen.getByRole('button', { name: 'Afficher la saisie' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show input' }));
     expect(input).toHaveProp('secureTextEntry', false);
 
-    fireEvent.press(screen.getByRole('button', { name: 'Masquer la saisie' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Hide input' }));
     expect(input).toHaveProp('secureTextEntry', true);
   });
 
@@ -24,9 +24,9 @@ describe('LoginField', () => {
   it('shows its label and forwards input props', () => {
     const onChangeText = jest.fn();
     render(
-      <LoginField label="Utilisateur" value="" onChangeText={onChangeText} placeholder="admin" />,
+      <LoginField label="Username" value="" onChangeText={onChangeText} placeholder="admin" />,
     );
-    expect(screen.getByText('Utilisateur')).toBeOnTheScreen();
+    expect(screen.getByText('Username')).toBeOnTheScreen();
     fireEvent.changeText(screen.getByPlaceholderText('admin'), 'root');
     expect(onChangeText).toHaveBeenCalledWith('root');
   });

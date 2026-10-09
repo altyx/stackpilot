@@ -16,10 +16,7 @@ export default function NotificationsScreen() {
     try {
       setRegistration(await registerForPush());
     } catch (error) {
-      Alert.alert(
-        'Enregistrement impossible',
-        error instanceof Error ? error.message : 'Erreur inconnue.',
-      );
+      Alert.alert('Registration failed', error instanceof Error ? error.message : 'Unknown error.');
     } finally {
       setBusy(false);
     }
@@ -27,35 +24,32 @@ export default function NotificationsScreen() {
 
   async function handleCopy(token: string) {
     await Clipboard.setStringAsync(token);
-    Alert.alert('Copié', 'Le jeton est dans le presse-papiers.');
+    Alert.alert('Copied', 'The token is on the clipboard.');
   }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.intro}>
-        Les alertes sont poussées par un service qui surveille le flux d&apos;événements Docker sur
-        votre serveur. Cet écran fournit le jeton dont ce service a besoin pour joindre cet
-        appareil.
+        Alerts are pushed by a service that watches the Docker event stream on your server. This
+        screen provides the token that service needs to reach this device.
       </Text>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>Jeton de cet appareil</Text>
+        <Text style={styles.sectionTitle}>This device&apos;s token</Text>
 
         {registration === null ? (
-          <Text style={styles.muted}>
-            Autorisez les notifications pour obtenir le jeton de cet appareil.
-          </Text>
+          <Text style={styles.muted}>Allow notifications to get this device&apos;s token.</Text>
         ) : registration.status === 'granted' ? (
           <>
             <Text selectable style={styles.token}>
               {registration.token}
             </Text>
-            <Button label="Copier le jeton" onPress={() => handleCopy(registration.token)} />
+            <Button label="Copy token" onPress={() => handleCopy(registration.token)} />
           </>
         ) : registration.status === 'denied' ? (
           <Text style={styles.warning}>
-            Notifications refusées. Réactivez-les dans les réglages du système, puis relancez
-            l&apos;enregistrement.
+            Notifications are turned off. Turn them back on in the system settings, then register
+            again.
           </Text>
         ) : (
           <Text style={styles.warning}>{registration.reason}</Text>
@@ -63,7 +57,7 @@ export default function NotificationsScreen() {
 
         {registration?.status !== 'granted' ? (
           <Button
-            label="Autoriser les notifications"
+            label="Allow notifications"
             onPress={handleRegister}
             loading={busy}
             variant={registration === null ? 'primary' : 'secondary'}
@@ -72,21 +66,18 @@ export default function NotificationsScreen() {
       </Card>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>Mise en service</Text>
-        <NumberedStep
-          n={1}
-          text="Déployez le service watcher/ sur votre serveur (voir son README)."
-        />
-        <NumberedStep n={2} text="Collez ce jeton dans sa variable EXPO_PUSH_TOKENS." />
+        <Text style={styles.sectionTitle}>Setup</Text>
+        <NumberedStep n={1} text="Deploy the watcher/ service on your server (see its README)." />
+        <NumberedStep n={2} text="Paste this token into its EXPO_PUSH_TOKENS variable." />
         <NumberedStep
           n={3}
-          text="Le service vous alerte sur un arrêt anormal, un passage en unhealthy, un redémarrage ou un dépassement mémoire."
+          text="The service alerts you when a container crashes, turns unhealthy, restarts or runs out of memory."
         />
       </Card>
 
       <Text style={styles.footnote}>
-        Les notifications distantes exigent un appareil physique et une version compilée de
-        l&apos;application : elles ne fonctionnent ni en simulateur, ni dans Expo Go.
+        Remote notifications need a physical device and a compiled build of the app: they work
+        neither in a simulator nor in Expo Go.
       </Text>
     </ScrollView>
   );

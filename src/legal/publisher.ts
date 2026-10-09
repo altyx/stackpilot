@@ -7,8 +7,8 @@
 export const PUBLISHER = {
   /** First and last name, or company name. */
   name: 'Moutawakil Samir',
-  /** "Particulier" (individual), "Entrepreneur individuel, SIREN …" or "SAS au capital de … €, RCS …" — the French legal-status wording, as it must appear in a French legal document. */
-  legalStatus: 'Particulier',
+  /** "Individual", "Sole proprietor, SIREN …" or "SAS with a share capital of … €, RCS …": the legal status the legal texts state. */
+  legalStatus: 'Individual',
   address: '',
   /** Address users can write to. */
   email: 'samir@altyxlab.fr',

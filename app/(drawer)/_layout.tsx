@@ -17,19 +17,19 @@ export default function DrawerLayout() {
         headerTintColor: theme.colors.text,
         headerTitleStyle: { color: theme.colors.text },
         headerLeft: ({ tintColor }) => (
-          <DrawerToggleButton tintColor={tintColor} accessibilityLabel="Ouvrir le menu" />
+          <DrawerToggleButton tintColor={tintColor} accessibilityLabel="Open menu" />
         ),
         drawerStyle: { backgroundColor: theme.colors.surface },
         overlayColor: theme.colors.backdrop,
         sceneStyle: { backgroundColor: theme.colors.bg },
       }}>
-      <Drawer.Screen name="endpoints/[endpointId]/overview" options={{ title: "Vue d'ensemble" }} />
-      <Drawer.Screen name="endpoints/[endpointId]/index" options={{ title: 'Conteneurs' }} />
+      <Drawer.Screen name="endpoints/[endpointId]/overview" options={{ title: 'Overview' }} />
+      <Drawer.Screen name="endpoints/[endpointId]/index" options={{ title: 'Containers' }} />
       <Drawer.Screen name="endpoints/[endpointId]/stacks" options={{ title: 'Stacks' }} />
       <Drawer.Screen name="endpoints/[endpointId]/images" options={{ title: 'Images' }} />
       <Drawer.Screen name="endpoints/[endpointId]/volumes" options={{ title: 'Volumes' }} />
-      <Drawer.Screen name="endpoints/index" options={{ title: 'Environnements' }} />
-      <Drawer.Screen name="settings" options={{ title: 'Réglages' }} />
+      <Drawer.Screen name="endpoints/index" options={{ title: 'Environments' }} />
+      <Drawer.Screen name="settings" options={{ title: 'Settings' }} />
     </Drawer>
   );
 }

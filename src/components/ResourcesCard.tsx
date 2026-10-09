@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useContainerStats, useDockerInfo } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
-import { formatBytes } from '../lib/format';
+import { formatBytes, plural } from '../lib/format';
 import { formatPercent, summarizeResources } from '../lib/resources';
 import { theme } from '../theme';
 import { Card } from './Card';
@@ -25,7 +25,7 @@ export function ResourcesCard({
   if (running.length === 0) {
     return (
       <Card>
-        <Text style={styles.muted}>Aucun conteneur en cours : rien à mesurer.</Text>
+        <Text style={styles.muted}>No running containers: nothing to measure.</Text>
       </Card>
     );
   }
@@ -34,7 +34,7 @@ export function ResourcesCard({
     return (
       <Card>
         <InlineStatus
-          loading="Mesure de la consommation…"
+          loading="Measuring usage…"
           error={error}
           onRetry={() => {
             void info.refetch();
@@ -52,18 +52,18 @@ export function ResourcesCard({
   return (
     <Card style={styles.card}>
       <Meter
-        label="Processeur"
-        value={`${formatPercent(summary.cpuPercent)} de ${info.data.NCPU} cœur${info.data.NCPU > 1 ? 's' : ''}`}
+        label="CPU"
+        value={`${formatPercent(summary.cpuPercent)} of ${plural(info.data.NCPU, 'core')}`}
         ratio={summary.cpuPercent / 100}
       />
       <Meter
-        label="Mémoire"
+        label="Memory"
         value={`${formatBytes(summary.memoryUsed)} / ${formatBytes(summary.memoryTotal)}`}
         ratio={summary.memoryTotal > 0 ? summary.memoryUsed / summary.memoryTotal : 0}
       />
 
       <View style={styles.top}>
-        <Text style={styles.topTitle}>Plus gros consommateurs</Text>
+        <Text style={styles.topTitle}>Top consumers</Text>
         {top.map((usage) => (
           <View key={usage.id} style={styles.topRow}>
             <Text style={styles.topName} numberOfLines={1}>
@@ -80,10 +80,8 @@ export function ResourcesCard({
       </View>
 
       <Text style={styles.footnote}>
-        Mesure instantanée des conteneurs en cours. 100 % par conteneur équivaut à un cœur entier.
-        {missing > 0
-          ? ` ${missing} conteneur${missing > 1 ? 's' : ''} n'${missing > 1 ? 'ont' : 'a'} pas répondu.`
-          : ''}
+        A snapshot of the running containers. 100% for a container means one full core.
+        {missing > 0 ? ` ${plural(missing, 'container')} did not respond.` : ''}
       </Text>
     </Card>
   );

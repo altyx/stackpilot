@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
+import { plural } from '../lib/format';
 import { PROBLEM_LABELS, type ContainerProblem } from '../lib/overview';
 import { theme } from '../theme';
 import { Card } from './Card';
@@ -29,14 +30,12 @@ export function HealthCard({
         />
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.title}>
-            {ok
-              ? 'Tout fonctionne'
-              : `${problems.length} conteneur${problems.length > 1 ? 's' : ''} à surveiller`}
+            {ok ? 'All good' : `${plural(problems.length, 'container')} to check`}
           </Text>
           <Text style={styles.subtitle}>
             {ok
-              ? 'Aucun conteneur en mauvaise santé, en boucle ou arrêté anormalement.'
-              : 'Touchez un conteneur pour voir ses logs et agir.'}
+              ? 'No container is unhealthy, stuck restarting or exited abnormally.'
+              : 'Tap a container to see its logs and act on it.'}
           </Text>
         </View>
       </View>
@@ -49,11 +48,7 @@ export function HealthCard({
           tone="warning"
         />
       ))}
-      {hidden > 0 ? (
-        <Text style={styles.more}>
-          et {hidden} autre{hidden > 1 ? 's' : ''}
-        </Text>
-      ) : null}
+      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
     </Card>
   );
 }

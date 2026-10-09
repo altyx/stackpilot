@@ -21,14 +21,14 @@ export function StackHeader({
         {title}
       </Text>
       <Text style={[styles.sectionCount, running === members.length && styles.sectionCountFull]}>
-        {running}/{members.length} en cours
+        {running}/{members.length} running
       </Text>
       {section.ungrouped ? null : busy ? (
         <ActivityIndicator color={theme.colors.accent} size="small" style={styles.sectionAction} />
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Actions sur la stack ${title}`}
+          accessibilityLabel={`Actions for the ${title} stack`}
           accessibilityState={{ disabled }}
           disabled={disabled}
           hitSlop={12}

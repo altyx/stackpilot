@@ -70,7 +70,7 @@ describe('container detail screen', () => {
     await renderContainer();
     await waitFor(() => expect(listEndpoints).toHaveBeenCalled());
     expect(fetchImageStatus).not.toHaveBeenCalled();
-    expect(screen.queryByText("Statut de l'image indéterminé")).toBeNull();
+    expect(screen.queryByText('Image status unknown')).toBeNull();
   });
 
   it('shows the image status when Portainer provides it', async () => {
@@ -79,7 +79,7 @@ describe('container detail screen', () => {
       .mockResolvedValue([makeEndpoint({ Id: 1, EnableImageNotification: true })]);
     jest.mocked(fetchImageStatus).mockResolvedValue('outdated');
     await renderContainer();
-    expect(await screen.findByText("Mise à jour de l'image disponible")).toBeOnTheScreen();
+    expect(await screen.findByText('Image update available')).toBeOnTheScreen();
     expect(fetchImageStatus).toHaveBeenCalledWith(expect.anything(), 1, 'old');
   });
 
@@ -87,15 +87,15 @@ describe('container detail screen', () => {
     jest.mocked(recreateContainer).mockResolvedValue(makeContainerInspect({ Id: 'new' }));
     await renderContainer();
 
-    fireEvent.press(screen.getByRole('button', { name: "Mettre à jour l'image" }));
-    expect(screen.getByText("Mettre à jour l'image ?")).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Mettre à jour' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Update image' }));
+    expect(screen.getByText('Update image?')).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Update' }));
 
     await waitFor(() =>
       expect(recreateContainer).toHaveBeenCalledWith(expect.anything(), 1, 'old', true),
     );
     await waitFor(() => expect(screen).toHavePathname('/endpoints/1/containers/new'));
-    expect(Alert.alert).toHaveBeenCalledWith('Image mise à jour', expect.stringContaining('web'));
+    expect(Alert.alert).toHaveBeenCalledWith('Image updated', expect.stringContaining('web'));
   });
 
   it('withholds the update from the container running Portainer', async () => {
@@ -103,25 +103,25 @@ describe('container detail screen', () => {
       .mocked(inspectContainer)
       .mockResolvedValue(makeContainerInspect({ Id: 'old', IsPortainer: true }));
     await renderContainer();
-    expect(screen.queryByRole('button', { name: "Mettre à jour l'image" })).toBeNull();
-    expect(screen.getByText(/son propre conteneur/)).toBeOnTheScreen();
+    expect(screen.queryByRole('button', { name: 'Update image' })).toBeNull();
+    expect(screen.getByText(/its own container/)).toBeOnTheScreen();
   });
 
   function openMenu() {
-    fireEvent.press(screen.getByRole('button', { name: "Plus d'actions" }));
+    fireEvent.press(screen.getByRole('button', { name: 'More actions' }));
   }
 
   it('keeps rarer actions behind the header menu and kills after confirmation', async () => {
     jest.mocked(runContainerAction).mockResolvedValue(undefined);
     await renderContainer();
-    expect(screen.queryByRole('button', { name: 'Tuer' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Kill' })).toBeNull();
 
     openMenu();
-    expect(await screen.findByRole('button', { name: 'Mettre en pause' })).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Tuer' }));
+    expect(await screen.findByRole('button', { name: 'Pause' })).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Kill' }));
 
-    expect(await screen.findByText('Tuer le conteneur ?')).toBeOnTheScreen();
-    fireEvent.press(screen.getAllByRole('button', { name: 'Tuer' }).at(-1)!);
+    expect(await screen.findByText('Kill container?')).toBeOnTheScreen();
+    fireEvent.press(screen.getAllByRole('button', { name: 'Kill' }).at(-1)!);
     await waitFor(() =>
       expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'old', 'kill'),
     );
@@ -132,9 +132,9 @@ describe('container detail screen', () => {
     await renderContainer();
 
     openMenu();
-    fireEvent.press(await screen.findByRole('button', { name: 'Supprimer le conteneur' }));
-    expect(await screen.findByText(/sera arrêté puis supprimé/)).toBeOnTheScreen();
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Delete container' }));
+    expect(await screen.findByText(/will be stopped, then deleted/)).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole('button', { name: 'Delete' }));
 
     await waitFor(() =>
       expect(removeContainer).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
@@ -156,13 +156,13 @@ describe('container detail screen', () => {
     await renderContainer();
 
     openMenu();
-    fireEvent.press(await screen.findByRole('button', { name: 'Supprimer le conteneur' }));
+    fireEvent.press(await screen.findByRole('button', { name: 'Delete container' }));
     fireEvent(
-      await screen.findByLabelText('Supprimer aussi ses volumes anonymes'),
+      await screen.findByLabelText('Also delete its anonymous volumes'),
       'valueChange',
       true,
     );
-    fireEvent.press(screen.getByRole('button', { name: 'Supprimer' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Delete' }));
     await waitFor(() =>
       expect(removeContainer).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
         force: true,
@@ -180,8 +180,8 @@ describe('container detail screen', () => {
       }),
     );
     await renderContainer();
-    expect(screen.queryByRole('button', { name: 'Redémarrer' })).toBeNull();
-    fireEvent.press(screen.getByRole('button', { name: 'Reprendre' }));
+    expect(screen.queryByRole('button', { name: 'Restart' })).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: 'Resume' }));
     await waitFor(() =>
       expect(runContainerAction).toHaveBeenCalledWith(expect.anything(), 1, 'old', 'unpause'),
     );
@@ -192,7 +192,7 @@ describe('container detail screen', () => {
       .mocked(inspectContainer)
       .mockResolvedValue(makeContainerInspect({ Id: 'old', IsPortainer: true }));
     await renderContainer();
-    expect(screen.queryByRole('button', { name: "Plus d'actions" })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'More actions' })).toBeNull();
   });
 
   describe('logs', () => {
@@ -203,7 +203,7 @@ describe('container detail screen', () => {
 
     async function openLogs() {
       await renderContainer();
-      fireEvent.press(screen.getByRole('button', { name: 'Afficher les logs' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Show logs' }));
       await screen.findByText('ready');
     }
 
@@ -214,13 +214,13 @@ describe('container detail screen', () => {
     it('loads only when asked, the last 500 lines by default', async () => {
       await renderContainer();
       expect(fetchContainerLogs).not.toHaveBeenCalled();
-      fireEvent.press(screen.getByRole('button', { name: 'Afficher les logs' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Show logs' }));
       expect(await screen.findByText('booting')).toBeOnTheScreen();
       expect(fetchContainerLogs).toHaveBeenCalledWith(expect.anything(), 1, 'old', {
         tail: 500,
         since: undefined,
       });
-      expect(screen.getByText('2 lignes')).toBeOnTheScreen();
+      expect(screen.getByText('2 lines')).toBeOnTheScreen();
     });
 
     it('switches to a period, asking Docker for the lines since then', async () => {
@@ -238,31 +238,31 @@ describe('container detail screen', () => {
       await openLogs();
       // The time is a Text nested in the line's: matched by substring.
       expect(screen.queryAllByText(/\d{2}:\d{2}:01\.200/)).toHaveLength(0);
-      fireEvent.press(screen.getByRole('button', { name: "Afficher l'heure" }));
+      fireEvent.press(screen.getByRole('button', { name: 'Show timestamps' }));
       expect(screen.queryAllByText(/\d{2}:\d{2}:01\.200/).length).toBeGreaterThan(0);
     });
 
     it('copies and shares the lines, with timestamps when shown', async () => {
       const shareSpy = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
       await openLogs();
-      fireEvent.press(screen.getByRole('button', { name: 'Copier les logs' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Copy logs' }));
       expect(Clipboard.setStringAsync).toHaveBeenCalledWith('booting\nready');
-      expect(await screen.findByRole('button', { name: 'Logs copiés' })).toBeOnTheScreen();
+      expect(await screen.findByRole('button', { name: 'Logs copied' })).toBeOnTheScreen();
 
-      fireEvent.press(screen.getByRole('button', { name: "Afficher l'heure" }));
-      fireEvent.press(screen.getByRole('button', { name: 'Partager les logs' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Show timestamps' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Share logs' }));
       expect(shareSpy).toHaveBeenCalledWith({
-        title: 'Logs de web',
+        title: 'Logs for web',
         message: '2026-10-07T12:00:00.100Z booting\n2026-10-07T12:00:01.200Z ready',
       });
     });
 
     it('opens and closes the full screen view with the same toggle', async () => {
       await openLogs();
-      fireEvent.press(screen.getByRole('button', { name: 'Plein écran' }));
+      fireEvent.press(screen.getByRole('button', { name: 'Full screen' }));
       expect(await screen.findByText('Logs · web')).toBeOnTheScreen();
       // The controls exist both in the card and over it: the modal's come last.
-      fireEvent.press(screen.getAllByRole('button', { name: 'Quitter le plein écran' }).at(-1)!);
+      fireEvent.press(screen.getAllByRole('button', { name: 'Exit full screen' }).at(-1)!);
       await waitFor(() => expect(screen.queryByText('Logs · web')).toBeNull());
     });
 
@@ -274,7 +274,7 @@ describe('container detail screen', () => {
           { timestamp: '2026-10-07T12:00:01.200Z', text: 'ready' },
           { timestamp: '2026-10-07T12:00:02.300Z', text: 'request served' },
         ]);
-        fireEvent.press(screen.getByRole('button', { name: 'Suivre en direct' }));
+        fireEvent.press(screen.getByRole('button', { name: 'Follow live' }));
         // Past the poll, plus React Query's batched notification (a timer too).
         await act(async () => {
           await jest.advanceTimersByTimeAsync(2100);
@@ -286,7 +286,7 @@ describe('container detail screen', () => {
         expect(screen.getByText('request served')).toBeOnTheScreen();
         // The repeated last line isn't doubled.
         expect(screen.getAllByText('ready')).toHaveLength(1);
-        expect(screen.getByText('3 lignes · en direct')).toBeOnTheScreen();
+        expect(screen.getByText('3 lines · live')).toBeOnTheScreen();
         // Unmounted under fake timers, so the poll is cleared by the same clock.
         screen.unmount();
       } finally {

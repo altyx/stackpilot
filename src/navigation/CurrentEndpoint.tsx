@@ -84,7 +84,7 @@ export function CurrentEndpointProvider({ children }: { children: ReactNode }) {
 
 export function useCurrentEndpoint(): CurrentEndpointState {
   const ctx = useContext(CurrentEndpointContext);
-  if (!ctx) throw new Error('useCurrentEndpoint doit être utilisé sous <CurrentEndpointProvider>.');
+  if (!ctx) throw new Error('useCurrentEndpoint must be used within <CurrentEndpointProvider>.');
   return ctx;
 }
 
@@ -108,7 +108,7 @@ export function useEndpointParam(): number {
   );
 
   if (!Number.isInteger(id)) {
-    throw new Error(`Identifiant d'environnement invalide : « ${endpointId} ».`);
+    throw new Error(`Invalid environment id: "${endpointId}".`);
   }
   return id;
 }

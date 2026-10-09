@@ -12,24 +12,24 @@ const ROWS: Record<
 > = {
   pause: {
     icon: 'pause-outline',
-    label: 'Mettre en pause',
-    hint: 'Gèle ses processus sans les arrêter : il ne répond plus jusqu’à la reprise.',
+    label: 'Pause',
+    hint: 'Freezes its processes without stopping them: it stops responding until resumed.',
   },
   unpause: {
     icon: 'play-outline',
-    label: 'Reprendre',
-    hint: 'Relance ses processus là où ils étaient gelés.',
+    label: 'Resume',
+    hint: 'Restarts its processes where they were frozen.',
   },
   kill: {
     icon: 'flash-outline',
-    label: 'Tuer',
-    hint: 'Arrêt immédiat, sans laisser l’application se fermer proprement.',
+    label: 'Kill',
+    hint: 'Stops it at once, without letting the application shut down cleanly.',
     tone: 'danger',
   },
   remove: {
     icon: 'trash-outline',
-    label: 'Supprimer le conteneur',
-    hint: 'Ses volumes nommés sont conservés.',
+    label: 'Delete container',
+    hint: 'Its named volumes are kept.',
     tone: 'danger',
   },
 };
@@ -70,7 +70,7 @@ export function ContainerActionsSheet({
         <ActionRow key={action} {...ROWS[action]} onPress={() => close(action)} />
       ))}
       <SheetActions>
-        <Button label="Annuler" variant="secondary" onPress={() => close('cancel')} />
+        <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
       </SheetActions>
     </BottomSheet>
   );

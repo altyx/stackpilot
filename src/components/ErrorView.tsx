@@ -7,7 +7,7 @@ import { Centered } from './Centered';
 
 export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const { signOut } = useAuth();
-  const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
+  const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
   const detail =
     error && typeof error === 'object' && 'detail' in error
       ? String((error as { detail?: string }).detail ?? '')
@@ -21,9 +21,9 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
       <Text style={styles.errorTitle}>{message}</Text>
       {detail ? <Text style={styles.errorDetail}>{detail}</Text> : null}
       {unauthorized ? (
-        <Button label="Se reconnecter" onPress={() => void signOut()} style={styles.retry} />
+        <Button label="Sign in again" onPress={() => void signOut()} style={styles.retry} />
       ) : onRetry ? (
-        <Button label="Réessayer" onPress={onRetry} variant="secondary" style={styles.retry} />
+        <Button label="Retry" onPress={onRetry} variant="secondary" style={styles.retry} />
       ) : null}
     </Centered>
   );

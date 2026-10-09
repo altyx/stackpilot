@@ -15,11 +15,11 @@ export const DEFAULT_SETTINGS: Settings = { refreshIntervalMs: 15_000 };
 
 /** The only intervals offered, and therefore the only ones accepted on re-read. */
 export const REFRESH_INTERVALS: readonly { value: number | null; label: string }[] = [
-  { value: 10_000, label: 'Toutes les 10 secondes' },
-  { value: 15_000, label: 'Toutes les 15 secondes' },
-  { value: 30_000, label: 'Toutes les 30 secondes' },
-  { value: 60_000, label: 'Toutes les minutes' },
-  { value: null, label: 'Manuel' },
+  { value: 10_000, label: 'Every 10 seconds' },
+  { value: 15_000, label: 'Every 15 seconds' },
+  { value: 30_000, label: 'Every 30 seconds' },
+  { value: 60_000, label: 'Every minute' },
+  { value: null, label: 'Manual' },
 ];
 
 export async function saveSettings(settings: Settings): Promise<void> {
