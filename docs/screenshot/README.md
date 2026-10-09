@@ -1,6 +1,6 @@
 # Store screenshots
 
-Captured from the release build against a demo Portainer instance (fictional
+Captured from the release build against the [demo Portainer](../../demo) (fictional
 homelab data), dark theme, status bar at 9:41. PNG, no transparency.
 
 | Folder                 | Device                | Size (px)   | Store slot                      |

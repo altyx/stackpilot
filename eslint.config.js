@@ -28,11 +28,13 @@ module.exports = defineConfig([
   },
   {
     // Runs under Node, not in the app bundle: build scripts, config plugins,
-    // the companion watcher service and the tooling config files themselves.
+    // the companion watcher service, the demo Portainer and the tooling config
+    // files themselves.
     files: [
       'scripts/**',
       'plugins/**',
       'watcher/**',
+      'demo/**',
       '*.config.js',
       'jest.globalSetup.js',
       'app.config.ts',
