@@ -4,9 +4,10 @@
   command = "npm run build"
   publish = "dist"
   # Rebuild only when something the site reads changed: its own sources, the
-  # legal texts generated from the app, the screenshots or the app icon. The
-  # free plan counts build minutes, and most commits only touch the app.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml ../docs/legal ../docs/screenshot ../assets"
+  # legal texts and changelog generated from the app, the screenshots or the
+  # app icon. The free plan counts build minutes, and most commits only touch
+  # the app.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ../netlify.toml ../docs/legal ../docs/changelog.json ../docs/screenshot ../assets"
 
 [build.environment]
   NODE_VERSION = "24"

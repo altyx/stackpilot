@@ -57,7 +57,8 @@ Une publication tient dans une **PR de release**, qui ne fait que deux choses :
 
 1. Ajouter l'entrée de la version en tête de
    [`src/changelog.ts`](../src/changelog.ts) — c'est le texte que liront les
-   utilisateurs, dans l'app comme sur les stores.
+   utilisateurs, dans l'app, sur les stores et sur le site — puis lancer
+   `npm run changelog` pour régénérer `docs/changelog.json`, que lit le site.
 2. Porter `expo.version` à ce même numéro dans `app.json`.
 
 Les deux vont ensemble : `npm run changelog` échoue si l'un avance sans
@@ -90,7 +91,8 @@ version est refusée dès la préparation : il faut alors bumper à nouveau.
 
 `src/changelog.ts` est la source unique : l'app les affiche dans Réglages ›
 Nouveautés, et le workflow les reprend pour le corps de la GitHub Release, le
-« What to Test » de TestFlight et le « Nouveautés » de Google Play.
+« What to Test » de TestFlight et le « Nouveautés » de Google Play. Le site
+les publie sur `/changelog`, depuis la copie `docs/changelog.json`.
 
 ```bash
 npm run changelog -- --notes            # ce qui partira

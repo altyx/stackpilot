@@ -7,6 +7,8 @@ build/
 coverage/
 # Generated from src/legal by `npm run legal`.
 docs/legal/
+# Generated from src/changelog.ts by `npm run changelog`.
+docs/changelog.json
 package-lock.json
 # The website formats itself, with the Astro plugin (npm run format in site/).
 site/

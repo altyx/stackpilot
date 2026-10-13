@@ -4,6 +4,7 @@ on:
     paths:
       - 'site/**'
       - 'docs/legal/**'
+      - 'docs/changelog.json'
       - 'docs/screenshot/**'
       - 'assets/**'
       - 'netlify.toml'
