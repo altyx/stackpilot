@@ -90,6 +90,21 @@ d'écrire du code touchant aux modules Expo.
   le rendu (`useState` paresseux pour les valeurs animées) ; une promesse
   volontairement non attendue se préfixe de `void`.
 
+## Site web (`site/`)
+
+- `stackpilot.app` est un site statique Astro dans `site/`, déployé par
+  Netlify (`netlify.toml` à la racine, `base = "site"`). Il a son propre
+  `package.json`, son `tsconfig`, son Prettier (avec le plugin Astro) et son
+  workflow `site.yml` ; l'app l'exclut de son TypeScript, ESLint, Prettier et
+  Jest, et `ci.yml` ignore les changements qui ne touchent que lui.
+- Le site et l'app ne s'importent jamais l'un l'autre. Le site ne lit que des
+  fichiers de données du dépôt : `docs/legal` (pages `/privacy` et `/terms`),
+  `docs/screenshot` et l'icône dans `assets/`. Les valeurs qu'il partage avec
+  l'app (palette, liens, contact) sont recopiées dans `site/src/config.ts` et
+  `site/src/styles/global.css`, pas importées.
+- Le texte du site est en anglais, comme l'app, et décrit son comportement
+  réel, au même titre que `src/legal`.
+
 ## Vérifications avant commit
 
 Le workflow `ci.yml` rejoue les mêmes vérifications sur chaque PR.
@@ -102,4 +117,12 @@ npm test
 npx expo export --platform ios --output-dir /tmp/stackpilot-export-check
 npm run legal -- --check
 npm run changelog
+```
+
+Pour le site, depuis `site/` :
+
+```bash
+npm run check
+npm run format:check
+npm run build
 ```

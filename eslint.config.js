@@ -57,6 +57,8 @@ module.exports = defineConfig([
       'build/',
       'coverage/',
       'expo-env.d.ts',
+      // The website: a separate Astro project with its own checks.
+      'site/',
     ],
   },
 ]);

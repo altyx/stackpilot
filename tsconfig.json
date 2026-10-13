@@ -3,5 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "types": ["node", "jest"]
-  }
+  },
+  // Replaces expo/tsconfig.base's list, so it repeats it. site/ is the
+  // website, type-checked by its own Astro project.
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "android",
+    "ios",
+    "site"
+  ]
 }

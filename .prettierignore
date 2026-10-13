@@ -8,3 +8,5 @@ coverage/
 # Generated from src/legal by `npm run legal`.
 docs/legal/
 package-lock.json
+# The website formats itself, with the Astro plugin (npm run format in site/).
+site/

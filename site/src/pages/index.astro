@@ -1,0 +1,118 @@
+---
+import { Image } from 'astro:assets';
+import StoreButtons from '../components/StoreButtons.astro';
+import { SITE } from '../config';
+import Base from '../layouts/Base.astro';
+import overview from '../../../docs/screenshot/iphone/01-overview.png';
+import containers from '../../../docs/screenshot/iphone/02-containers.png';
+import container from '../../../docs/screenshot/iphone/03-container.png';
+import stack from '../../../docs/screenshot/iphone/06-stack.png';
+import images from '../../../docs/screenshot/iphone/07-images.png';
+
+const screenshots = [
+  { src: containers, alt: 'Containers grouped by stack, with image update badges' },
+  { src: container, alt: 'Container detail, actions and live logs' },
+  { src: stack, alt: 'Stack detail with Git deployment and environment variables' },
+  { src: images, alt: 'Images: usage, untagged images and available updates' },
+];
+
+const features = [
+  {
+    title: 'See what needs attention',
+    text: 'Each environment opens on an overview: unhealthy or crashed containers, CPU and memory use, Docker disk usage and pending image updates.',
+  },
+  {
+    title: 'Containers',
+    text: 'Browse them grouped by stack, search and filter. Start, stop, restart, pause, kill, delete or update a container to the latest version of its image.',
+  },
+  {
+    title: 'Logs',
+    text: 'Read the last lines or a time range, follow them live, show timestamps, switch to full screen, copy or share them.',
+  },
+  {
+    title: 'Stacks',
+    text: 'Start or stop a whole stack, redeploy it from Git or with fresh images, edit its environment variables and read its Compose file.',
+  },
+  {
+    title: 'Images and volumes',
+    text: 'See what is in use and how much space you can reclaim, then clean up unused images and orphaned volumes in one go.',
+  },
+  {
+    title: 'Alerts',
+    text: 'Get a push notification when a container crashes, turns unhealthy or runs out of memory, through a small service you run next to Portainer.',
+  },
+];
+---
+
+<Base>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <h1>{SITE.tagline}</h1>
+        <p class="lead">
+          {SITE.name} is a mobile app for <a href="https://www.portainer.io/">Portainer</a>,
+          Community and Business editions. Check on your Docker hosts, read logs and act on
+          containers and stacks from anywhere, without opening a laptop.
+        </p>
+        <StoreButtons />
+      </div>
+      <Image
+        class="phone"
+        src={overview}
+        width={330}
+        densities={[1, 2]}
+        loading="eager"
+        alt="Environment overview in StackPilot"
+      />
+    </div>
+  </section>
+
+  <section id="features" class="container section">
+    <h2>Everything you check on your laptop, on your phone</h2>
+    <ul class="features">
+      {features.map((feature) => (
+        <li>
+          <h3>{feature.title}</h3>
+          <p>{feature.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section gallery" aria-label="Screenshots">
+    <ul class="container gallery__list">
+      {screenshots.map((shot) => (
+        <li>
+          <Image class="phone" src={shot.src} width={240} densities={[1, 2]} alt={shot.alt} />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="container section private">
+    <h2>Private by design</h2>
+    <p>
+      {SITE.name} talks directly to your Portainer instance: no {SITE.name} server, no account, no
+      tracking. Your credentials stay in your device's secure keychain, and every action runs with
+      the permissions of your Portainer user, nothing more.
+    </p>
+    <p>
+      Reach Portainer on your local network, through a VPN such as Tailscale or WireGuard, or behind
+      a reverse proxy. Self-signed certificates work once their authority is installed on the
+      device: the app never turns off TLS verification.
+    </p>
+    <p>
+      <a href="/privacy">Read the privacy policy</a>
+    </p>
+  </section>
+
+  <section class="container section requirements">
+    <h2>Requirements</h2>
+    <ul>
+      <li>A Portainer instance, Community or Business Edition, that your phone can reach.</li>
+      <li>Docker standalone or Swarm environments. Kubernetes is not supported.</li>
+      <li>iOS / iPadOS 16.4 or later, or Android 7.0 or later.</li>
+    </ul>
+    <StoreButtons />
+  </section>
+</Base>
