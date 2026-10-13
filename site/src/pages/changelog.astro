@@ -1,0 +1,25 @@
+---
+import changelog from '../../../docs/changelog.json';
+import Base from '../layouts/Base.astro';
+
+// Generated from the app's src/changelog.ts by `npm run changelog` at the repo
+// root, so the site lists exactly the notes the app shows in What's new.
+const { releases } = changelog;
+---
+
+<Base title="What's new" description="Release notes for each version of the StackPilot app.">
+  <article class="container legal changelog">
+    <h1>What's new</h1>
+    {releases.map((release) => (
+      <section aria-labelledby={`v${release.version}`}>
+        <h2 id={`v${release.version}`}>Version {release.version}</h2>
+        <p class="changelog__date">{release.date}</p>
+        <ul>
+          {release.changes.map((change) => (
+            <li>{change}</li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </article>
+</Base>

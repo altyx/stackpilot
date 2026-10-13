@@ -59,7 +59,9 @@ d'écrire du code touchant aux modules Expo.
   porter la version d'`app.json`. `npm run changelog` le vérifie, et le workflow
   de publication refuse de compiler sinon. C'est aussi la source des notes
   publiées (GitHub Release, TestFlight, Google Play), via
-  `npm run changelog -- --notes`.
+  `npm run changelog -- --notes`, et de la page `/changelog` du site, via
+  `docs/changelog.json` : une copie générée par `npm run changelog`, jamais
+  éditée à la main, que `--check` vérifie en CI.
 - Publier, c'est bumper `expo.version` dans `app.json` : la voir changer sur
   `main` fait partir la production, et le workflow crée alors le tag `vX.Y.Z` et
   la GitHub Release une fois les envois réussis (voir `docs/release.md`). Ne
@@ -99,7 +101,10 @@ d'écrire du code touchant aux modules Expo.
   Jest, et `ci.yml` ignore les changements qui ne touchent que lui.
 - Le site et l'app ne s'importent jamais l'un l'autre. Le site ne lit que des
   fichiers de données du dépôt : `docs/legal` (pages `/privacy` et `/terms`),
-  `docs/screenshot` et l'icône dans `assets/`. Les valeurs qu'il partage avec
+  `docs/changelog.json` (page `/changelog`), `docs/screenshot` et l'icône dans
+  `assets/`. Un nouveau fichier lu par le site s'ajoute aussi à l'`ignore` de
+  `netlify.toml` et aux `paths` de `site.yml`, sans quoi sa mise à jour ne
+  redéploie rien. Les valeurs qu'il partage avec
   l'app (palette, liens, contact) sont recopiées dans `site/src/config.ts` et
   `site/src/styles/global.css`, pas importées.
 - Le texte du site est en anglais, comme l'app, et décrit son comportement
@@ -116,7 +121,7 @@ npm run format:check
 npm test
 npx expo export --platform ios --output-dir /tmp/stackpilot-export-check
 npm run legal -- --check
-npm run changelog
+npm run changelog -- --check
 ```
 
 Pour le site, depuis `site/` :

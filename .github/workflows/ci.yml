@@ -52,4 +52,4 @@ jobs:
         run: npm run legal -- --check
 
       - name: Changelog
-        run: npm run changelog
+        run: npm run changelog -- --check

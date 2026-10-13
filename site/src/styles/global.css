@@ -278,7 +278,8 @@ h3 {
   padding-left: 1.2em;
 }
 
-/* Legal pages, rendered from docs/legal */
+/* Legal pages, rendered from docs/legal, and the changelog page, from
+   docs/changelog.json */
 
 .legal {
   max-width: 760px;
@@ -301,4 +302,9 @@ h3 {
 
 .legal em {
   font-style: normal;
+}
+
+.changelog .changelog__date {
+  margin: 0 0 0.5em;
+  font-size: 15px;
 }
