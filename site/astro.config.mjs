@@ -8,5 +8,9 @@ export default defineConfig({
     // the store screenshots — never its code. The dev server must be allowed
     // to serve those files from outside site/.
     server: { fs: { allow: ['..'] } },
+    // Vite otherwise reads the tsconfig nearest to each file: for those
+    // outside site/, the app's, which extends expo/tsconfig.base — not
+    // installed when only site/ is (CI, Netlify).
+    tsconfig: 'tsconfig.json',
   },
 });
