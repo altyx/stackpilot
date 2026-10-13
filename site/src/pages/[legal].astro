@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+// One page per document in docs/legal: /privacy, /terms.
+export async function getStaticPaths() {
+  const documents = await getCollection('legal');
+  return documents.map((document) => ({ params: { legal: document.id }, props: { document } }));
+}
+
+const { document } = Astro.props;
+const { Content, headings } = await render(document);
+const title = headings.find((heading) => heading.depth === 1)?.text;
+---
+
+<Base title={title}>
+  <article class="container legal">
+    <Content />
+  </article>
+</Base>

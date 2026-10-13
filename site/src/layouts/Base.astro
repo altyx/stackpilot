@@ -1,0 +1,75 @@
+---
+import { getImage } from 'astro:assets';
+import appIcon from '../../../assets/ios-dark-1024.png';
+import { SITE } from '../config';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const [favicon, touchIcon, ogImage] = await Promise.all([
+  getImage({ src: appIcon, width: 64, format: 'png' }),
+  getImage({ src: appIcon, width: 180, format: 'png' }),
+  getImage({ src: appIcon, width: 512, format: 'png' }),
+]);
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0d1117" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href={favicon.src} />
+    <link rel="apple-touch-icon" href={touchIcon.src} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(ogImage.src, Astro.site)} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="brand" href="/">
+          <img src={favicon.src} width="32" height="32" alt="" />
+          <span>{SITE.name}</span>
+        </a>
+        <nav aria-label="Main">
+          <a href="/#features">Features</a>
+          <a href="/privacy">Privacy</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>
+          © {year} {SITE.name}
+        </p>
+        <nav aria-label="Footer">
+          <a href="/privacy">Privacy policy</a>
+          <a href="/terms">Terms of use</a>
+          <a href={SITE.sourceCodeUrl}>Source code</a>
+          <a href={`mailto:${SITE.contactEmail}`}>Contact</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

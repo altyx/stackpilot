@@ -1,0 +1,48 @@
+name: Site
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'docs/legal/**'
+      - 'docs/screenshot/**'
+      - 'assets/**'
+      - 'netlify.toml'
+      - '.github/workflows/site.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+# Netlify builds and deploys; this catches type and format errors before.
+jobs:
+  check:
+    name: Vérifications du site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: site
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - name: Types
+        run: npm run check
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Build
+        run: npm run build

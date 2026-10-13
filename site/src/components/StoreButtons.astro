@@ -1,0 +1,28 @@
+---
+import { SITE } from '../config';
+
+// Plain buttons until the listings exist. Once they do, swap them for the
+// official badges: Apple and Google require their unmodified artwork.
+const stores = [
+  { name: 'App Store', platforms: 'iPhone & iPad', url: SITE.appStoreUrl },
+  { name: 'Google Play', platforms: 'Android', url: SITE.playStoreUrl },
+];
+---
+
+<ul class="stores">
+  {stores.map((store) => (
+    <li>
+      {store.url ? (
+        <a class="store" href={store.url}>
+          <small>{store.platforms}</small>
+          {store.name}
+        </a>
+      ) : (
+        <span class="store store--soon">
+          <small>Coming soon</small>
+          {store.name}
+        </span>
+      )}
+    </li>
+  ))}
+</ul>
