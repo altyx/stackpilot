@@ -1,4 +1,4 @@
-# stackpilot.app — the website in site/, a static Astro build.
+# getstackpilot.app — the website in site/, a static Astro build.
 [build]
   base = "site"
   command = "npm run build"
