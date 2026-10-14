@@ -49,7 +49,10 @@ const year = new Date().getFullYear();
         </a>
         <nav aria-label="Main">
           <a href="/#features">Features</a>
-          <a href="/privacy">Privacy</a>
+          <a class="nav-wide" href="/#screenshots">
+            Screenshots
+          </a>
+          <a href="/changelog">What's new</a>
         </nav>
       </div>
     </header>
@@ -60,8 +63,8 @@ const year = new Date().getFullYear();
 
     <footer class="site-footer">
       <div class="container site-footer__inner">
-        <p>
-          © {year} {SITE.name}
+        <p class="site-footer__brand">
+          <img src={favicon.src} width="24" height="24" alt="" />© {year} {SITE.name}
         </p>
         <nav aria-label="Footer">
           <a href="/changelog">What's new</a>

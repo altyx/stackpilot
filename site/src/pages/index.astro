@@ -1,77 +1,176 @@
 ---
 import { Image } from 'astro:assets';
+import Icon from '../components/Icon.astro';
+import PhoneFrame from '../components/PhoneFrame.astro';
 import StoreButtons from '../components/StoreButtons.astro';
 import { SITE } from '../config';
 import Base from '../layouts/Base.astro';
+import appIcon from '../../../assets/ios-dark-1024.png';
 import overview from '../../../docs/screenshot/iphone/01-overview.png';
 import containers from '../../../docs/screenshot/iphone/02-containers.png';
 import container from '../../../docs/screenshot/iphone/03-container.png';
+import logs from '../../../docs/screenshot/iphone/04-logs.png';
+import stacks from '../../../docs/screenshot/iphone/05-stacks.png';
 import stack from '../../../docs/screenshot/iphone/06-stack.png';
 import images from '../../../docs/screenshot/iphone/07-images.png';
+import volumes from '../../../docs/screenshot/iphone/08-volumes.png';
 
-const screenshots = [
-  { src: containers, alt: 'Containers grouped by stack, with image update badges' },
-  { src: container, alt: 'Container detail, actions and live logs' },
-  { src: stack, alt: 'Stack detail with Git deployment and environment variables' },
-  { src: images, alt: 'Images: usage, untagged images and available updates' },
+// The second half of the tagline gets the gradient.
+const taglineBreak = SITE.tagline.indexOf(',') + 1;
+const taglineStart = SITE.tagline.slice(0, taglineBreak);
+const taglineEnd = SITE.tagline.slice(taglineBreak).trim();
+
+const pillars = [
+  { icon: 'zap', label: 'Straight to your Portainer' },
+  { icon: 'userX', label: 'No account to create' },
+  { icon: 'eyeOff', label: 'No tracking' },
+  { icon: 'code', label: 'Source on GitHub' },
+] as const;
+
+const spotlights = [
+  {
+    eyebrow: 'Containers',
+    title: 'Every container, one tap away',
+    text: 'Browse them grouped by stack, search and filter. Start, stop, restart, pause, kill, delete or update a container to the latest version of its image.',
+    points: ['Grouped by stack', 'Image update badges', 'Search and filters'],
+    shot: { src: containers, alt: 'Containers grouped by stack, with image update badges' },
+  },
+  {
+    eyebrow: 'Logs',
+    title: 'Logs that follow you',
+    text: 'Read the last lines or a time range, follow them live, show timestamps, switch to full screen, copy or share them.',
+    points: ['Live follow', 'Time ranges and timestamps', 'Copy and share'],
+    shot: { src: logs, alt: 'Full-screen logs with timestamps' },
+  },
+  {
+    eyebrow: 'Stacks',
+    title: 'Redeploy without a laptop',
+    text: 'Start or stop a whole stack, redeploy it from Git or with fresh images, edit its environment variables and read its Compose file.',
+    points: ['Redeploy from Git', 'Environment variables', 'Compose file'],
+    shot: { src: stack, alt: 'Stack detail with Git deployment and environment variables' },
+  },
 ];
 
 const features = [
   {
+    icon: 'activity',
     title: 'See what needs attention',
     text: 'Each environment opens on an overview: unhealthy or crashed containers, CPU and memory use, Docker disk usage and pending image updates.',
   },
   {
-    title: 'Containers',
-    text: 'Browse them grouped by stack, search and filter. Start, stop, restart, pause, kill, delete or update a container to the latest version of its image.',
-  },
-  {
-    title: 'Logs',
-    text: 'Read the last lines or a time range, follow them live, show timestamps, switch to full screen, copy or share them.',
-  },
-  {
-    title: 'Stacks',
-    text: 'Start or stop a whole stack, redeploy it from Git or with fresh images, edit its environment variables and read its Compose file.',
-  },
-  {
+    icon: 'disk',
     title: 'Images and volumes',
     text: 'See what is in use and how much space you can reclaim, then clean up unused images and orphaned volumes in one go.',
   },
   {
+    icon: 'bell',
     title: 'Alerts',
     text: 'Get a push notification when a container crashes, turns unhealthy or runs out of memory, through a small service you run next to Portainer.',
   },
+] as const;
+
+const gallery = [
+  { src: overview, alt: 'Environment overview: what needs attention, counts, resources' },
+  { src: containers, alt: 'Containers grouped by stack, with image update badges' },
+  { src: container, alt: 'Container detail, actions and live logs' },
+  { src: logs, alt: 'Full-screen logs with timestamps' },
+  { src: stacks, alt: 'Stacks managed by Portainer and external ones' },
+  { src: stack, alt: 'Stack detail with Git deployment and environment variables' },
+  { src: images, alt: 'Images: usage, untagged images and available updates' },
+  { src: volumes, alt: 'Volumes: usage, sizes and reclaimable space' },
+];
+
+const requirements = [
+  'A Portainer instance, Community or Business Edition, that your phone can reach.',
+  'Docker standalone or Swarm environments. Kubernetes is not supported.',
+  'iOS / iPadOS 16.4 or later, or Android 7.0 or later.',
 ];
 ---
 
 <Base>
   <section class="hero">
+    <div class="glow" aria-hidden="true"></div>
     <div class="container hero__inner">
       <div class="hero__text">
-        <h1>{SITE.tagline}</h1>
+        <p class="eyebrow">
+          <span class="eyebrow__dot" aria-hidden="true"></span>
+          For Portainer Community &amp; Business
+        </p>
+        <h1>
+          {taglineStart}
+          <span class="gradient-text">{taglineEnd}</span>
+        </h1>
         <p class="lead">
-          {SITE.name} is a mobile app for <a href="https://www.portainer.io/">Portainer</a>,
-          Community and Business editions. Check on your Docker hosts, read logs and act on
-          containers and stacks from anywhere, without opening a laptop.
+          {SITE.name} is a mobile app for <a href="https://www.portainer.io/">Portainer</a>. Check
+          on your Docker hosts, read logs and act on containers and stacks from anywhere, without
+          opening a laptop.
         </p>
         <StoreButtons />
+        <p class="hero__platforms">iPhone · iPad · Android</p>
       </div>
-      <Image
-        class="phone"
-        src={overview}
-        width={330}
-        densities={[1, 2]}
-        loading="eager"
-        alt="Environment overview in StackPilot"
-      />
+      <div class="hero__visual">
+        <PhoneFrame
+          class="phone--back"
+          src={containers}
+          width={250}
+          loading="eager"
+          alt="Containers grouped by stack in StackPilot"
+        />
+        <PhoneFrame
+          class="phone--front"
+          src={overview}
+          width={290}
+          loading="eager"
+          alt="Environment overview in StackPilot"
+        />
+      </div>
     </div>
   </section>
 
+  <section class="container" aria-label="Highlights">
+    <ul class="pillars">
+      {pillars.map((pillar) => (
+        <li>
+          <Icon name={pillar.icon} />
+          {pillar.label}
+        </li>
+      ))}
+    </ul>
+  </section>
+
   <section id="features" class="container section">
-    <h2>Everything you check on your laptop, on your phone</h2>
+    <header class="section__header reveal">
+      <p class="kicker">Features</p>
+      <h2>Everything you check on your laptop, on your phone</h2>
+    </header>
+
+    {spotlights.map((spotlight, index) => (
+      <article class:list={['spotlight', 'reveal', { 'spotlight--flip': index % 2 === 1 }]}>
+        <div class="spotlight__text">
+          <p class="kicker">{spotlight.eyebrow}</p>
+          <h3>{spotlight.title}</h3>
+          <p>{spotlight.text}</p>
+          <ul class="checks">
+            {spotlight.points.map((point) => (
+              <li>
+                <Icon name="check" size={18} />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="spotlight__visual">
+          <PhoneFrame src={spotlight.shot.src} width={260} alt={spotlight.shot.alt} />
+        </div>
+      </article>
+    ))}
+
     <ul class="features">
       {features.map((feature) => (
-        <li>
+        <li class="card reveal">
+          <span class="card__icon">
+            <Icon name={feature.icon} size={22} />
+          </span>
           <h3>{feature.title}</h3>
           <p>{feature.text}</p>
         </li>
@@ -79,40 +178,62 @@ const features = [
     </ul>
   </section>
 
-  <section class="section gallery" aria-label="Screenshots">
-    <ul class="container gallery__list">
-      {screenshots.map((shot) => (
+  <section id="screenshots" class="section gallery">
+    <header class="container section__header reveal">
+      <p class="kicker">Screenshots</p>
+      <h2>Take a closer look</h2>
+    </header>
+    <ul class="gallery__list" tabindex="0" aria-label="Screenshots, scroll sideways">
+      {gallery.map((shot) => (
         <li>
-          <Image class="phone" src={shot.src} width={240} densities={[1, 2]} alt={shot.alt} />
+          <PhoneFrame src={shot.src} width={220} alt={shot.alt} />
         </li>
       ))}
     </ul>
   </section>
 
-  <section class="container section private">
-    <h2>Private by design</h2>
-    <p>
-      {SITE.name} talks directly to your Portainer instance: no {SITE.name} server, no account, no
-      tracking. Your credentials stay in your device's secure keychain, and every action runs with
-      the permissions of your Portainer user, nothing more.
-    </p>
-    <p>
-      Reach Portainer on your local network, through a VPN such as Tailscale or WireGuard, or behind
-      a reverse proxy. Self-signed certificates work once their authority is installed on the
-      device: the app never turns off TLS verification.
-    </p>
-    <p>
-      <a href="/privacy">Read the privacy policy</a>
-    </p>
+  <section class="container section">
+    <div class="private reveal">
+      <div class="private__badge" aria-hidden="true">
+        <Icon name="shield" size={34} />
+      </div>
+      <div>
+        <p class="kicker">Privacy</p>
+        <h2>Private by design</h2>
+        <p>
+          {SITE.name} talks directly to your Portainer instance: no {SITE.name} server, no account,
+          no tracking. Your credentials stay in your device's secure keychain, and every action runs
+          with the permissions of your Portainer user, nothing more.
+        </p>
+        <p>
+          Reach Portainer on your local network, through a VPN such as Tailscale or WireGuard, or
+          behind a reverse proxy. Self-signed certificates work once their authority is installed on
+          the device: the app never turns off TLS verification.
+        </p>
+        <p>
+          <a class="link-arrow" href="/privacy">
+            Read the privacy policy
+            <Icon name="arrowRight" size={18} />
+          </a>
+        </p>
+      </div>
+    </div>
   </section>
 
-  <section class="container section requirements">
-    <h2>Requirements</h2>
-    <ul>
-      <li>A Portainer instance, Community or Business Edition, that your phone can reach.</li>
-      <li>Docker standalone or Swarm environments. Kubernetes is not supported.</li>
-      <li>iOS / iPadOS 16.4 or later, or Android 7.0 or later.</li>
-    </ul>
-    <StoreButtons />
+  <section class="container section">
+    <div class="cta reveal">
+      <div class="glow glow--cta" aria-hidden="true"></div>
+      <Image class="cta__icon" src={appIcon} width={96} densities={[1, 2]} alt="" />
+      <h2>Take Portainer with you</h2>
+      <ul class="checks checks--center" aria-label="Requirements">
+        {requirements.map((requirement) => (
+          <li>
+            <Icon name="check" size={18} />
+            {requirement}
+          </li>
+        ))}
+      </ul>
+      <StoreButtons />
+    </div>
   </section>
 </Base>
