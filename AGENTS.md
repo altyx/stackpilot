@@ -94,7 +94,7 @@ d'écrire du code touchant aux modules Expo.
 
 ## Site web (`site/`)
 
-- `stackpilot.app` est un site statique Astro dans `site/`, déployé par
+- `getstackpilot.app` est un site statique Astro dans `site/`, déployé par
   Netlify (`netlify.toml` à la racine, `base = "site"`). Il a son propre
   `package.json`, son `tsconfig`, son Prettier (avec le plugin Astro) et son
   workflow `site.yml` ; l'app l'exclut de son TypeScript, ESLint, Prettier et

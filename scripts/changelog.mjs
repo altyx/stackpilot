@@ -3,7 +3,7 @@
 // The changelog is bundled in the binary: a note added after the tag would
 // never reach users of the compiled version. It's also the single source of
 // published notes — GitHub Release, TestFlight, Google Play, the website — so
-// the app, the repo, the stores and stackpilot.app all tell the same story.
+// the app, the repo, the stores and getstackpilot.app all tell the same story.
 // The website never imports the app's code: it reads docs/changelog.json.
 //
 //   npm run changelog                        checks the changelog, regenerates docs/changelog.json

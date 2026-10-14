@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://stackpilot.app',
+  site: 'https://getstackpilot.app',
   vite: {
     // The site reads data from the app's repo — the generated legal texts and
     // the store screenshots — never its code. The dev server must be allowed
