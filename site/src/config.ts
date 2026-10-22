@@ -11,7 +11,7 @@ export const SITE = {
   description:
     'StackPilot is a mobile app for Portainer, on iPhone, iPad and Android. Check on your Docker hosts, read logs and act on containers and stacks from anywhere.',
   /** Store listings: null until the app is live, shown as "Coming soon". */
-  appStoreUrl: null as string | null,
+  appStoreUrl: 'https://apps.apple.com/fr/app/stackpilot/id6812265629',
   playStoreUrl: null as string | null,
   sourceCodeUrl: 'https://github.com/altyx/stackpilot',
   contactEmail: 'samir@altyxlab.fr',
