@@ -19,6 +19,11 @@ export interface Release {
 
 export const CHANGELOG: readonly Release[] = [
   {
+    version: '1.1.0',
+    date: 'October 29, 2026',
+    changes: ['New launch screen with the StackPilot logo'],
+  },
+  {
     version: '1.0.0',
     date: 'October 9, 2026',
     changes: [
