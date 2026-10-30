@@ -1,14 +1,5 @@
-import type { ImageStatus } from '../api/types';
 import { useStackImageStatus } from '../api/hooks';
 import { ImageStatusIcon } from './ImageStatusIcon';
-
-/** A stack holds several images: Portainer says outdated as soon as one is. */
-const STACK_LABELS: Record<ImageStatus, string> = {
-  updated: 'Images up to date',
-  outdated: 'Image update available',
-  processing: 'Checking images…',
-  unknown: 'Image status unknown',
-};
 
 /**
  * Image status of a stack, for its card or its detail screen. Same rules as
@@ -32,12 +23,10 @@ export function StackImageStatus({
 
   if (isPending && fetchStatus === 'idle') return null;
   if (isPending) {
-    return withLabel ? (
-      <ImageStatusIcon status="processing" withLabel labels={STACK_LABELS} />
-    ) : null;
+    return withLabel ? <ImageStatusIcon status="processing" withLabel subject="stacks" /> : null;
   }
 
   const status = isError ? 'unknown' : data;
   if (!withLabel && status !== 'outdated') return null;
-  return <ImageStatusIcon status={status} withLabel={withLabel} labels={STACK_LABELS} />;
+  return <ImageStatusIcon status={status} withLabel={withLabel} subject="stacks" />;
 }

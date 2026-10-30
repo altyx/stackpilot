@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from 'react';
 import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { LogLine } from '../lib/logs';
 import { createStyles } from '../theme';
 import { LogLineRow } from './LogLineRow';
@@ -31,6 +32,7 @@ export function LogFullscreen({
   onClose: () => void;
 }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const list = useRef<FlatList<LogLine>>(null);
   const stick = useStickToBottom();
@@ -61,7 +63,7 @@ export function LogFullscreen({
           onContentSizeChange={() =>
             stick.follow(() => list.current?.scrollToEnd({ animated: false }))
           }
-          ListEmptyComponent={<Text style={styles.empty}>No output in this range.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t('logs.empty')}</Text>}
         />
       </View>
     </Modal>

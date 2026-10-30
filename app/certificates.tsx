@@ -1,40 +1,35 @@
 import { Platform, ScrollView, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../src/components/Card';
 import { CertificateSolutionCard } from '../src/components/CertificateSolutionCard';
 import { NumberedStep } from '../src/components/NumberedStep';
-import {
-  CERTIFICATE_HELP_FOOTNOTE,
-  CERTIFICATE_HELP_INTRO,
-  CERTIFICATE_SOLUTIONS,
-  DEVICE_TRUST_STEPS,
-  DEVICE_TRUST_TITLE,
-} from '../src/help/certificates';
+import { certificateHelp } from '../src/help/certificates';
 import { createStyles } from '../src/theme';
 
 /** Reachable from the login screen too, without a session. */
 export default function CertificatesScreen() {
   const styles = useStyles();
-  // Only this device's steps: the other platform's settings paths are noise here.
-  const deviceSteps = DEVICE_TRUST_STEPS[Platform.OS === 'android' ? 'android' : 'ios'];
+  const { t } = useTranslation();
+  const help = certificateHelp(t, Platform.OS === 'android' ? 'android' : 'ios');
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.intro}>{CERTIFICATE_HELP_INTRO}</Text>
+      <Text style={styles.intro}>{help.intro}</Text>
 
-      {CERTIFICATE_SOLUTIONS.map((solution) => (
+      {help.solutions.map((solution) => (
         <CertificateSolutionCard key={solution.id} solution={solution} />
       ))}
 
       <Card style={styles.card}>
         <Text accessibilityRole="header" style={styles.sectionTitle}>
-          {DEVICE_TRUST_TITLE}
+          {help.deviceTrustTitle}
         </Text>
-        {deviceSteps.map((step, index) => (
+        {help.deviceTrustSteps.map((step, index) => (
           <NumberedStep key={step.text} n={index + 1} text={step.text} code={step.code} />
         ))}
       </Card>
 
-      <Text style={styles.footnote}>{CERTIFICATE_HELP_FOOTNOTE}</Text>
+      <Text style={styles.footnote}>{help.footnote}</Text>
     </ScrollView>
   );
 }

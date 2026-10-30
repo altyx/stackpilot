@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
   useContainers,
@@ -19,7 +21,6 @@ import { Segmented } from '../../../../src/components/Segmented';
 import { useLatched } from '../../../../src/components/useLatched';
 import { VolumeCard } from '../../../../src/components/VolumeCard';
 import { VolumePruneSheet } from '../../../../src/components/VolumePruneSheet';
-import { formatBytes, plural } from '../../../../src/lib/format';
 import {
   supportsAnonymousPrune,
   volumeConfirmPhrase,
@@ -28,12 +29,15 @@ import {
   volumesWithUsage,
 } from '../../../../src/lib/usage';
 import { createStyles, useTheme } from '../../../../src/theme';
+import { useFormat, type Formatters } from '../../../../src/i18n/format';
 
 type Filter = 'all' | 'used' | 'unused';
 
 export default function VolumesScreen() {
   const theme = useTheme();
   const styles = useStyles();
+  const { t } = useTranslation();
+  const f = useFormat();
   const id = useEndpointParam();
 
   const volumes = useVolumes(id);
@@ -66,7 +70,7 @@ export default function VolumesScreen() {
     [usages, filter],
   );
 
-  if (volumes.isPending || containers.isPending) return <Loader label="Loading volumes…" />;
+  if (volumes.isPending || containers.isPending) return <Loader label={t('volumes.loading')} />;
   const error = volumes.error ?? containers.error;
   if (error) {
     return (
@@ -88,8 +92,8 @@ export default function VolumesScreen() {
     remove.mutate(volume.Name, {
       onError: (e) =>
         Alert.alert(
-          'Delete failed',
-          e instanceof Error ? e.message : 'The volume could not be deleted.',
+          t('common.deleteFailed'),
+          e instanceof Error ? e.message : t('volumes.deleteNotApplied'),
         ),
     });
   }
@@ -98,11 +102,19 @@ export default function VolumesScreen() {
     const expected = volumePruneCandidates(usages, scope).length;
     prune.mutate(scope, {
       onSuccess: ({ deleted, spaceReclaimed }) =>
-        Alert.alert('Cleanup complete', describePrune(deleted.length, expected, spaceReclaimed)),
+        Alert.alert(
+          t('common.cleanupComplete'),
+          describePrune(
+            t,
+            deleted.length,
+            expected,
+            spaceReclaimed > 0 ? f.bytes(spaceReclaimed) : '',
+          ),
+        ),
       onError: (e) =>
         Alert.alert(
-          'Cleanup failed',
-          e instanceof Error ? e.message : 'The volumes could not be deleted.',
+          t('common.cleanupFailed'),
+          e instanceof Error ? e.message : t('volumes.pruneNotApplied'),
         ),
     });
   }
@@ -127,12 +139,17 @@ export default function VolumesScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.summary}>
-              {plural(usages.length, 'volume')} · {unused.length} unused
-              {reclaimable > 0 ? ` · ${formatBytes(reclaimable)} reclaimable` : ''}
+              {[
+                t('counts.volume', { count: usages.length }),
+                t('volumes.unusedCount', { count: unused.length }),
+                reclaimable > 0 ? t('volumes.reclaimable', { size: f.bytes(reclaimable) }) : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
             {unused.length > 0 ? (
               <Button
-                label="Clean up volumes"
+                label={t('volumes.cleanUp')}
                 variant="secondary"
                 onPress={() => setPruning(true)}
                 loading={prune.isPending}
@@ -143,15 +160,15 @@ export default function VolumesScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: 'All' },
-                { value: 'used', label: 'Used' },
-                { value: 'unused', label: 'Unused' },
+                { value: 'all', label: t('common.all') },
+                { value: 'used', label: t('common.used') },
+                { value: 'unused', label: t('common.unused') },
               ]}
             />
           </View>
         }
         ListEmptyComponent={
-          <EmptyState title="No volumes" subtitle="Nothing matches this filter." />
+          <EmptyState title={t('volumes.empty')} subtitle={t('common.noMatch')} />
         }
         renderItem={({ item }) => (
           <VolumeCard
@@ -171,10 +188,12 @@ export default function VolumesScreen() {
       />
       <ConfirmSheet
         visible={deleting !== null}
-        title="Delete volume?"
-        message={shownDeleting ? describeRemoval(shownDeleting, sizes) : undefined}
-        confirmLabel="Delete permanently"
-        confirmPhrase={shownDeleting ? volumeConfirmPhrase(shownDeleting) : undefined}
+        title={t('volumes.deleteTitle')}
+        message={shownDeleting ? describeRemoval(t, f, shownDeleting, sizes) : undefined}
+        confirmLabel={t('volumes.deletePermanently')}
+        confirmPhrase={
+          shownDeleting ? volumeConfirmPhrase(shownDeleting, t('volumes.confirmWord')) : undefined
+        }
         destructive
         onConfirm={() => {
           const volume = deleting;
@@ -187,24 +206,26 @@ export default function VolumesScreen() {
   );
 }
 
-function describeRemoval(volume: VolumeSummary, sizes: Map<string, number>): string {
+function describeRemoval(
+  t: TFunction,
+  f: Formatters,
+  volume: VolumeSummary,
+  sizes: Map<string, number>,
+): string {
   const size = sizes.get(volume.Name);
-  return (
-    `${volume.Name}${size !== undefined ? ` (${formatBytes(size)})` : ''} and all its ` +
-    'data will be permanently deleted. There is no way to recover it.'
-  );
+  const name = size !== undefined ? `${volume.Name} (${f.bytes(size)})` : volume.Name;
+  return t('volumes.removal', { name });
 }
 
 /**
  * Docker decides on its side what is unused: a gap with the preview means the
  * list was stale, worth saying rather than hiding.
  */
-function describePrune(deleted: number, expected: number, reclaimed: number): string {
-  if (deleted === 0) return 'No volume was deleted.';
-  const volumes = `${plural(deleted, 'volume')} deleted`;
-  const freed = reclaimed > 0 ? ` · ${formatBytes(reclaimed)} freed` : '';
-  const gap = deleted !== expected ? ` (${expected} expected)` : '';
-  return `${volumes}${freed}${gap}.`;
+function describePrune(t: TFunction, deleted: number, expected: number, freed: string): string {
+  if (deleted === 0) return t('volumes.noneDeleted');
+  const parts = [t('volumes.deleted', { count: deleted }), freed && t('volumes.freed', { freed })];
+  const gap = deleted !== expected ? ` ${t('volumes.expected', { count: expected })}` : '';
+  return `${parts.filter(Boolean).join(' · ')}${gap}.`;
 }
 
 const useStyles = createStyles((theme) => ({

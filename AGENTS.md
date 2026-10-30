@@ -18,11 +18,22 @@ d'écrire du code touchant aux modules Expo.
   fond `*Fill` prend `onFill`, pas `text`.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
-- L'UI, les messages d'erreur, les textes légaux, le changelog et les alertes du
-  `watcher/` sont en anglais. Ce qui vient de Portainer ou de Docker (noms,
-  statuts, messages d'erreur renvoyés par l'API) s'affiche tel quel, sans
-  traduction. Les comptes passent par `plural` (`src/lib/format.ts`) : en
-  anglais, 0 prend le pluriel.
+- L'UI existe en anglais, par défaut, et en français (réglage « Language »),
+  via i18next et react-i18next. Tout texte affiché vient des catalogues
+  `src/i18n/locales/{en,fr}.json` : l'anglais fait référence, les clés de
+  `t()` sont typées sur lui (`src/i18n/i18next.d.ts`) et un test vérifie que le
+  français a exactement les mêmes. Dans un composant, `useTranslation()` ;
+  hors React (erreurs de l'API, notifications), `i18n.t()` depuis `src/i18n`,
+  jamais pendant le rendu, que le React Compiler mémoïserait dans l'ancienne
+  langue. Une phrase qui dépend d'un nombre ou d'un nom s'interpole
+  (`{{name}}`) plutôt que de se concaténer ; `src/lib` renvoie des codes, pas
+  des phrases. Les comptes passent par les pluriels d'i18next (`count`,
+  suffixes `_one`/`_other`, plus `_many` en français), les dates, tailles et
+  pourcentages par `useFormat()` (`src/i18n/format.ts`). En français, l'espace
+  avant `? ! : ;` et `%` est insécable.
+- Les textes légaux, le changelog et les alertes du `watcher/` restent en
+  anglais. Ce qui vient de Portainer ou de Docker (noms, statuts, messages
+  d'erreur renvoyés par l'API) s'affiche tel quel, sans traduction.
 - `react-dom` est épinglé via `overrides` dans `package.json` pour aligner son peer
   `react` sur la version imposée par Expo — ne pas retirer sans revérifier `npm install`.
 - Les dossiers `ios/` et `android/` ne sont pas versionnés : ils sont regénérés

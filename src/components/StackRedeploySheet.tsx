@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { PortainerStack } from '../api/types';
+import { useTranslation } from 'react-i18next';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { SheetActions } from './SheetActions';
@@ -26,6 +27,7 @@ export function StackRedeploySheet({
   onClose: () => void;
 }) {
   const shown = useLatched(stack);
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('choose');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const close = (next: Outcome) => setOutcome((current) => current ?? next);
@@ -54,36 +56,50 @@ export function StackRedeploySheet({
       {step === 'choose' ? (
         <>
           <SheetHeader
-            title={`Redeploy ${shown.Name}`}
+            title={t('stack.redeployTitle', { name: shown.Name })}
             message={
               git
-                ? `Fetches the latest version of ${branchName(git.ReferenceName)}, then recreates the services that changed.`
-                : 'Recreates the services from the compose file stored in Portainer.'
+                ? t('stack.redeployGit', {
+                    branch: branchName(git.ReferenceName) || t('stack.trackedBranch'),
+                  })
+                : t('stack.redeployFile')
             }
           />
           <SheetActions>
             <Button
-              label={git ? 'Update from Git' : 'Redeploy'}
+              label={git ? t('stack.updateFromGit') : t('stack.redeploy')}
               variant="secondary"
               onPress={() => setStep('redeploy')}
             />
             <Button
-              label={git ? 'From Git, with the latest images' : 'Pull images and redeploy'}
+              label={git ? t('stack.gitWithImages') : t('stack.pullAndRedeploy')}
               variant="secondary"
               onPress={() => setStep('pull')}
             />
-            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
+            <Button
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={() => close('cancel')}
+            />
           </SheetActions>
         </>
       ) : (
         <>
           <SheetHeader
-            title={`Redeploy ${shown.Name}?`}
-            message={describeImpact(step === 'pull')}
+            title={t('stack.redeployConfirmTitle', { name: shown.Name })}
+            message={
+              step === 'pull'
+                ? `${t('stack.redeployImpact')} ${t('stack.redeployPullNote')}`
+                : t('stack.redeployImpact')
+            }
           />
           <SheetActions>
-            <Button label="Redeploy" onPress={() => close(step)} />
-            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label={t('stack.redeploy')} onPress={() => close(step)} />
+            <Button
+              label={t('common.back')}
+              variant="secondary"
+              onPress={() => setStep('choose')}
+            />
           </SheetActions>
         </>
       )}
@@ -92,13 +108,5 @@ export function StackRedeploySheet({
 }
 
 function branchName(reference: string): string {
-  return reference.replace(/^refs\/(heads|tags)\//, '') || 'the tracked branch';
-}
-
-function describeImpact(pullImages: boolean): string {
-  return (
-    'The affected containers will be recreated: the service is briefly interrupted, and ' +
-    'anything not in a volume is lost.' +
-    (pullImages ? ' Pulling images can take several minutes.' : '')
-  );
+  return reference.replace(/^refs\/(heads|tags)\//, '');
 }

@@ -1,6 +1,6 @@
 import type { ContainerStatsResponse } from '../api/types';
 import { makeContainer } from '../testing/fixtures';
-import { cpuPercent, formatPercent, memoryUsed, summarizeResources } from './resources';
+import { cpuPercent, memoryUsed, summarizeResources } from './resources';
 
 function stats(cpu: number, memory: number, cache = 0): ContainerStatsResponse {
   // Two samples, 1 s apart on a 4-core host: `cpu` is the share of one core used.
@@ -62,12 +62,5 @@ describe('summarizeResources', () => {
       { container: makeContainer(), stats: stats(300, 0) },
     ]);
     expect(summary.cpuPercent).toBe(100);
-  });
-});
-
-describe('formatPercent', () => {
-  it('keeps a decimal only for small values', () => {
-    expect(formatPercent(3.24)).toBe('3.2%');
-    expect(formatPercent(42.6)).toBe('43%');
   });
 });

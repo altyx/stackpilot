@@ -5,7 +5,8 @@ import {
   type PortainerStack,
   type StackAction,
 } from '../api/types';
-import { containerName, plural } from './format';
+import type { TFunction } from 'i18next';
+import { containerName } from './format';
 
 /** Label set by Docker Compose; it's the stack name on Portainer's side. */
 const COMPOSE_PROJECT = 'com.docker.compose.project';
@@ -87,12 +88,6 @@ export function countStacks(sections: StackSection[]): number {
 
 export type StackKind = 'compose' | 'swarm' | 'external';
 
-export const STACK_KIND_LABELS: Record<StackKind, string> = {
-  compose: 'Compose',
-  swarm: 'Swarm',
-  external: 'External',
-};
-
 /** A stack as the Stacks screens show it: Portainer's record and/or its containers. */
 export interface StackOverview {
   /** Compose project, Swarm namespace or Portainer stack name: the same string. */
@@ -158,14 +153,14 @@ export function describeStackResult(
   section: StackSection,
   action: StackAction,
   result: StackActionResult,
+  t: TFunction,
 ): { title: string; message: string } {
-  const verb = action === 'start' ? 'started' : 'stopped';
-  if (result.failures.length === 0) {
-    return { title: section.title, message: `${plural(result.succeeded, 'container')} ${verb}.` };
-  }
+  const failed = result.failures.length;
+  const summary =
+    failed === 0
+      ? t(`stacks.result.${action}`, { count: result.succeeded })
+      : t(`stacks.resultWithFailures.${action}`, { count: result.succeeded, failed });
+  if (failed === 0) return { title: section.title, message: summary };
   const detail = result.failures.map((f) => `• ${f.name}: ${f.message}`).join('\n');
-  return {
-    title: section.title,
-    message: `${plural(result.succeeded, 'container')} ${verb}, ${result.failures.length} failed.\n\n${detail}`,
-  };
+  return { title: section.title, message: `${summary}\n\n${detail}` };
 }

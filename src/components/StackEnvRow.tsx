@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { StackEnv } from '../api/types';
+import { useTranslation } from 'react-i18next';
 import { MASK, isSensitiveName } from '../lib/secrets';
 import { createStyles, useTheme } from '../theme';
 
@@ -9,6 +10,7 @@ import { createStyles, useTheme } from '../theme';
 export function StackEnvRow({ variable }: { variable: StackEnv }) {
   const theme = useTheme();
   const styles = useStyles();
+  const { t } = useTranslation();
   const sensitive = isSensitiveName(variable.name);
   const [revealed, setRevealed] = useState(false);
   const hidden = sensitive && !revealed;
@@ -23,7 +25,11 @@ export function StackEnvRow({ variable }: { variable: StackEnv }) {
       {sensitive ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={revealed ? `Hide ${variable.name}` : `Show ${variable.name}`}
+          accessibilityLabel={
+            revealed
+              ? t('common.hide', { name: variable.name })
+              : t('common.show', { name: variable.name })
+          }
           hitSlop={8}
           onPress={() => setRevealed((current) => !current)}
           style={({ pressed }) => pressed && styles.pressed}>

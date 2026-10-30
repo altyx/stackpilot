@@ -1,6 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
 import { Platform, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 import { IconButton } from './IconButton';
 
@@ -11,6 +12,7 @@ import { IconButton } from './IconButton';
  */
 export function CodeBlock({ code }: { code: string }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -25,7 +27,7 @@ export function CodeBlock({ code }: { code: string }) {
       </Text>
       <IconButton
         icon={copied ? 'checkmark' : 'copy-outline'}
-        accessibilityLabel={copied ? 'Copied' : 'Copy'}
+        accessibilityLabel={copied ? t('common.copied') : t('common.copy')}
         onPress={() => void copy()}
       />
     </View>

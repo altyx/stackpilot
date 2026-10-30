@@ -1,4 +1,5 @@
 import { useState, type ComponentProps } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { SecondaryAction } from '../lib/containerActions';
 import { ActionRow } from './ActionRow';
 import { BottomSheet } from './BottomSheet';
@@ -6,32 +7,11 @@ import { Button } from './Button';
 import { SheetActions } from './SheetActions';
 import { SheetHeader } from './SheetHeader';
 
-const ROWS: Record<
-  SecondaryAction,
-  Pick<ComponentProps<typeof ActionRow>, 'icon' | 'label' | 'hint' | 'tone'>
-> = {
-  pause: {
-    icon: 'pause-outline',
-    label: 'Pause',
-    hint: 'Freezes its processes without stopping them: it stops responding until resumed.',
-  },
-  unpause: {
-    icon: 'play-outline',
-    label: 'Resume',
-    hint: 'Restarts its processes where they were frozen.',
-  },
-  kill: {
-    icon: 'flash-outline',
-    label: 'Kill',
-    hint: 'Stops it at once, without letting the application shut down cleanly.',
-    tone: 'danger',
-  },
-  remove: {
-    icon: 'trash-outline',
-    label: 'Delete container',
-    hint: 'Its named volumes are kept.',
-    tone: 'danger',
-  },
+const ROWS: Record<SecondaryAction, Pick<ComponentProps<typeof ActionRow>, 'icon' | 'tone'>> = {
+  pause: { icon: 'pause-outline' },
+  unpause: { icon: 'play-outline' },
+  kill: { icon: 'flash-outline', tone: 'danger' },
+  remove: { icon: 'trash-outline', tone: 'danger' },
 };
 
 /**
@@ -53,6 +33,7 @@ export function ContainerActionsSheet({
   onClose: () => void;
 }) {
   const [outcome, setOutcome] = useState<SecondaryAction | 'cancel' | null>(null);
+  const { t } = useTranslation();
   const close = (next: SecondaryAction | 'cancel') => setOutcome((current) => current ?? next);
 
   return (
@@ -67,10 +48,16 @@ export function ContainerActionsSheet({
       }}>
       <SheetHeader title={name} />
       {actions.map((action) => (
-        <ActionRow key={action} {...ROWS[action]} onPress={() => close(action)} />
+        <ActionRow
+          key={action}
+          {...ROWS[action]}
+          label={t(`container.menu.${action}.label`)}
+          hint={t(`container.menu.${action}.hint`)}
+          onPress={() => close(action)}
+        />
       ))}
       <SheetActions>
-        <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
+        <Button label={t('common.cancel')} variant="secondary" onPress={() => close('cancel')} />
       </SheetActions>
     </BottomSheet>
   );

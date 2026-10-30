@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { StackAction } from '../api/types';
-import { plural } from '../lib/format';
+import { useTranslation } from 'react-i18next';
 import type { StackSection } from '../lib/stacks';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
@@ -28,6 +28,7 @@ export function StackActionSheet({
   onClose: () => void;
 }) {
   const shown = useLatched(section);
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('choose');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const close = (next: Outcome) => setOutcome((current) => current ?? next);
@@ -58,39 +59,46 @@ export function StackActionSheet({
         <>
           <SheetHeader
             title={shown.title}
-            message={`${shown.running}/${total} running · ${plural(total, 'container')}`}
+            message={`${t('common.runningRatio', { running: shown.running, total })} · ${t('counts.container', { count: total })}`}
           />
           <SheetActions>
-            <Button label="Start stack" onPress={() => setStep('start')} />
-            <Button label="Stop stack" variant="danger" onPress={() => setStep('stop')} />
-            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
+            <Button label={t('stacks.startStack')} onPress={() => setStep('start')} />
+            <Button
+              label={t('stacks.stopStack')}
+              variant="danger"
+              onPress={() => setStep('stop')}
+            />
+            <Button
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={() => close('cancel')}
+            />
           </SheetActions>
         </>
       ) : (
         <>
           <SheetHeader
-            title={step === 'start' ? 'Start stack?' : 'Stop stack?'}
-            message={describeImpact(shown, step)}
+            title={t(`stacks.confirmTitles.${step}`)}
+            message={t(`stacks.impacts.${step}`, {
+              count: shown.members.length,
+              title: shown.title,
+            })}
           />
           <StackMemberList section={shown} />
           <SheetActions>
             <Button
-              label={step === 'start' ? 'Start' : 'Stop'}
+              label={t(`stacks.actions.${step}`)}
               variant={step === 'stop' ? 'danger' : 'primary'}
               onPress={() => close(step)}
             />
-            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
+            <Button
+              label={t('common.back')}
+              variant="secondary"
+              onPress={() => setStep('choose')}
+            />
           </SheetActions>
         </>
       )}
     </BottomSheet>
   );
-}
-
-function describeImpact(section: StackSection, action: StackAction): string {
-  const total = section.members.length;
-  const verb = action === 'start' ? 'started' : 'stopped';
-  return total > 1
-    ? `All ${total} containers of the ${section.title} stack will be ${verb}, including those hidden by a filter.`
-    : `The container of the ${section.title} stack will be ${verb}.`;
 }
