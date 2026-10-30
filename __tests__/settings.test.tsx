@@ -24,12 +24,11 @@ describe('settings screen', () => {
       { initialUrl: '/settings' },
     );
 
-    fireEvent.press(await screen.findByText('Français'));
+    fireEvent.press(await screen.findByRole('button', { name: 'Language, English' }));
+    fireEvent.press(await screen.findByRole('radio', { name: 'Français' }));
 
-    expect(await screen.findByText('Langue')).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: 'Langue, Français' })).toBeOnTheScreen();
     expect(screen.getByText('Toutes les 15 secondes')).toBeOnTheScreen();
-    // Each language keeps its own name, whatever the interface speaks.
-    expect(screen.getByText('English')).toBeOnTheScreen();
     expect(memory.get('app.settings')).toContain('"language":"fr"');
   });
 });

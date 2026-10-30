@@ -5,6 +5,7 @@ import { BuildInfo } from '../../src/components/BuildInfo';
 import { Card } from '../../src/components/Card';
 import { SettingsChoiceRow } from '../../src/components/SettingsChoiceRow';
 import { SettingsNavRow } from '../../src/components/SettingsNavRow';
+import { SettingsSelect } from '../../src/components/SettingsSelect';
 import { Section } from '../../src/components/Section';
 import { LANGUAGES, useStrings, type Strings } from '../../src/i18n';
 import { SOURCE_CODE_URL } from '../../src/legal/publisher';
@@ -38,15 +39,13 @@ export default function SettingsScreen() {
 
       <Section title={t.settings.language}>
         <Card style={styles.card}>
-          {LANGUAGES.map((option, index) => (
-            <SettingsChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={settings.language === option.value}
-              first={index === 0}
-              onPress={() => update({ language: option.value })}
-            />
-          ))}
+          <SettingsSelect
+            title={t.settings.language}
+            icon="language-outline"
+            options={LANGUAGES}
+            value={settings.language}
+            onChange={(language) => update({ language })}
+          />
         </Card>
       </Section>
 
