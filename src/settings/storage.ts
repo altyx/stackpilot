@@ -9,9 +9,19 @@ const SETTINGS_KEY = 'app.settings';
 export interface Settings {
   /** Container refresh interval in milliseconds; `null` = manual. */
   refreshIntervalMs: number | null;
+  /** Color scheme; `system` follows the device's. */
+  appearance: Appearance;
 }
 
-export const DEFAULT_SETTINGS: Settings = { refreshIntervalMs: 15_000 };
+export type Appearance = 'system' | 'light' | 'dark';
+
+export const DEFAULT_SETTINGS: Settings = { refreshIntervalMs: 15_000, appearance: 'system' };
+
+export const APPEARANCES: readonly { value: Appearance; label: string }[] = [
+  { value: 'system', label: 'Same as device' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 /** The only intervals offered, and therefore the only ones accepted on re-read. */
 export const REFRESH_INTERVALS: readonly { value: number | null; label: string }[] = [
@@ -34,9 +44,14 @@ export async function loadSettings(): Promise<Settings> {
   try {
     const parsed = JSON.parse(raw) as Partial<Settings>;
     // A value written by a past version, or since removed, must not leave
-    // the app with an interval no screen offers.
-    const known = REFRESH_INTERVALS.some((option) => option.value === parsed.refreshIntervalMs);
-    return known ? { refreshIntervalMs: parsed.refreshIntervalMs ?? null } : DEFAULT_SETTINGS;
+    // the app with a choice no screen offers. Each one falls back on its
+    // own: settings saved before a preference existed keep the others.
+    const interval = REFRESH_INTERVALS.find((option) => option.value === parsed.refreshIntervalMs);
+    const appearance = APPEARANCES.find((option) => option.value === parsed.appearance);
+    return {
+      refreshIntervalMs: interval ? interval.value : DEFAULT_SETTINGS.refreshIntervalMs,
+      appearance: appearance ? appearance.value : DEFAULT_SETTINGS.appearance,
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }

@@ -1,8 +1,9 @@
-import { StyleSheet, Text } from 'react-native';
-import { theme } from '../theme';
+import { Text } from 'react-native';
+import { createStyles } from '../theme';
 import { Centered } from './Centered';
 
 export function EmptyState({ title, subtitle }: { title: string; subtitle?: string }) {
+  const styles = useStyles();
   return (
     <Centered>
       <Text style={styles.emptyTitle}>{title}</Text>
@@ -11,7 +12,7 @@ export function EmptyState({ title, subtitle }: { title: string; subtitle?: stri
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   emptyTitle: { color: theme.colors.text, fontSize: 17, fontWeight: '600', textAlign: 'center' },
   muted: { color: theme.colors.textMuted, fontSize: 14, textAlign: 'center' },
-});
+}));

@@ -1,10 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import type { StackEnv } from '../api/types';
 import { isSensitiveName } from '../lib/secrets';
 import { emptyDraft, fromDrafts, toDrafts, validateEnv, type EnvDraft } from '../lib/stackEnv';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { Button } from './Button';
 import { IconButton } from './IconButton';
 
@@ -24,6 +24,8 @@ export function StackEnvEditor({
   onCancel: () => void;
   onSave: (env: StackEnv[]) => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const [drafts, setDrafts] = useState<EnvDraft[]>(() => toDrafts(initial));
   const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
@@ -129,7 +131,7 @@ export function StackEnvEditor({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   editor: { gap: theme.spacing(3) },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
   fields: { flex: 1, gap: theme.spacing(1.5) },
@@ -157,4 +159,4 @@ const styles = StyleSheet.create({
   },
   actions: { flexDirection: 'row', gap: theme.spacing(2) },
   action: { flex: 1 },
-});
+}));

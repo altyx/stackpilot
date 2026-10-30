@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { theme } from '../theme';
+import { View } from 'react-native';
+import { createStyles } from '../theme';
 
 export function SheetActions({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.actions}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   actions: { gap: theme.spacing(2) },
-});
+}));

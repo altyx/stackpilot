@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, View } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 /** Past these shares the bar turns warning, then danger: room is running out. */
 const WARNING_RATIO = 0.75;
@@ -7,6 +7,8 @@ const DANGER_RATIO = 0.9;
 
 /** Labelled gauge for a share of a capacity (CPU, memory). */
 export function Meter({ label, value, ratio }: { label: string; value: string; ratio: number }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const clamped = Math.min(Math.max(ratio, 0), 1);
   const color =
     clamped >= DANGER_RATIO
@@ -35,7 +37,7 @@ export function Meter({ label, value, ratio }: { label: string; value: string; r
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   meter: { gap: theme.spacing(1.5) },
   header: { flexDirection: 'row', justifyContent: 'space-between', gap: theme.spacing(2) },
   label: { color: theme.colors.text, fontSize: 13, fontWeight: '600' },
@@ -47,4 +49,4 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fill: { height: '100%', borderRadius: theme.radius.sm },
-});
+}));

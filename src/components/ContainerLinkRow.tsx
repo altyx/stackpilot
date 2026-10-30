@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import type { ContainerSummary } from '../api/types';
 import { containerName } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { StatusDot } from './StatusDot';
 
 /**
@@ -21,6 +21,8 @@ export function ContainerLinkRow({
   detail: string;
   tone?: 'muted' | 'warning';
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const router = useRouter();
   return (
     <Pressable
@@ -41,7 +43,7 @@ export function ContainerLinkRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -53,4 +55,4 @@ const styles = StyleSheet.create({
   name: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
   detail: { color: theme.colors.textMuted, fontSize: 12 },
   warning: { color: theme.colors.warning },
-});
+}));

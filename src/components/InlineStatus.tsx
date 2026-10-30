@@ -1,5 +1,5 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 /**
  * Loading or failure inside one overview card. Each card fetches on its own:
@@ -14,6 +14,8 @@ export function InlineStatus({
   error?: unknown;
   onRetry?: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   if (error) {
     return (
       <View style={styles.row}>
@@ -36,7 +38,7 @@ export function InlineStatus({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2), flexWrap: 'wrap' },
   loading: { color: theme.colors.textMuted, fontSize: 13 },
   error: { color: theme.colors.warning, fontSize: 13, lineHeight: 18, flexShrink: 1 },
@@ -46,4 +48,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     paddingVertical: theme.spacing(1),
   },
-});
+}));

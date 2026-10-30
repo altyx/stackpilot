@@ -1,13 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { containerName } from '../lib/format';
 import type { StackSection } from '../lib/stacks';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { StatusDot } from './StatusDot';
 
 /** Beyond this, the container list is summarized to keep the sheet compact. */
 const MAX_LISTED = 6;
 
 export function StackMemberList({ section }: { section: StackSection }) {
+  const styles = useStyles();
   const listed = section.members.slice(0, MAX_LISTED);
   const hidden = section.members.length - listed.length;
   return (
@@ -25,7 +26,7 @@ export function StackMemberList({ section }: { section: StackSection }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   members: {
     backgroundColor: theme.colors.bg,
     borderRadius: theme.radius.md,
@@ -36,4 +37,4 @@ const styles = StyleSheet.create({
   member: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   memberName: { color: theme.colors.text, fontSize: 14, flex: 1 },
   more: { color: theme.colors.textMuted, fontSize: 13 },
-});
+}));

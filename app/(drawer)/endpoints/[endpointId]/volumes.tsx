@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
   useContainers,
@@ -27,11 +27,13 @@ import {
   volumeSizes,
   volumesWithUsage,
 } from '../../../../src/lib/usage';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 type Filter = 'all' | 'used' | 'unused';
 
 export default function VolumesScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const id = useEndpointParam();
 
   const volumes = useVolumes(id);
@@ -205,8 +207,8 @@ function describePrune(deleted: number, expected: number, reclaimed: number): st
   return `${volumes}${freed}${gap}.`;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   list: { padding: theme.spacing(4), gap: theme.spacing(3) },
   header: { gap: theme.spacing(2) },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-});
+}));

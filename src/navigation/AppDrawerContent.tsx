@@ -5,12 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEndpoints } from '../api/hooks';
 import { useAuth } from '../auth/AuthContext';
 import { BuildInfo } from '../components/BuildInfo';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { useCurrentEndpoint } from './CurrentEndpoint';
 import { DrawerLink, type IconName } from './DrawerLink';
 
 /** Side drawer: the app's main navigation. */
 export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
+  const styles = useStyles();
   const { session, signOut } = useAuth();
   const { endpointId } = useCurrentEndpoint();
   const { data: endpoints } = useEndpoints();
@@ -79,7 +80,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   container: { flex: 1, backgroundColor: theme.colors.surface },
   brand: {
     paddingHorizontal: theme.spacing(5),
@@ -114,4 +115,4 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.border,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-});
+}));

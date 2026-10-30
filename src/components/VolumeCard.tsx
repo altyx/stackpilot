@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { VolumeSummary } from '../api/types';
 import { formatBytes, formatDate } from '../lib/format';
 import { isAnonymousVolume, type Usage } from '../lib/usage';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
@@ -18,6 +18,7 @@ export function VolumeCard({
   /** Offered on unused volumes only: Docker refuses to delete the others. */
   onDelete?: () => void;
 }) {
+  const styles = useStyles();
   const { item: volume, usedBy } = usage;
   const meta = [
     volume.Driver,
@@ -60,7 +61,7 @@ export function VolumeCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(3) },
   content: { flex: 1, gap: theme.spacing(1) },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
@@ -68,4 +69,4 @@ const styles = StyleSheet.create({
   meta: { color: theme.colors.textMuted, fontSize: 12 },
   usedBy: { color: theme.colors.text, fontSize: 12 },
   mountpoint: { color: theme.colors.textMuted, fontSize: 11 },
-});
+}));

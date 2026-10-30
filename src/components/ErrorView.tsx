@@ -1,11 +1,12 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import { PortainerError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Button } from './Button';
 import { Centered } from './Centered';
 
 export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  const styles = useStyles();
   const { signOut } = useAuth();
   const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
   const detail =
@@ -29,8 +30,8 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   errorTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '600', textAlign: 'center' },
   errorDetail: { color: theme.colors.textMuted, fontSize: 12, textAlign: 'center' },
   retry: { marginTop: theme.spacing(2), alignSelf: 'stretch' },
-});
+}));

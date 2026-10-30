@@ -1,5 +1,5 @@
-import { StyleSheet, View } from 'react-native';
-import { theme } from '../theme';
+import { View } from 'react-native';
+import { createStyles } from '../theme';
 
 /**
  * The gap between cards comes from a separator, not a margin on the card:
@@ -7,9 +7,10 @@ import { theme } from '../theme';
  * `Pressable` function style is lost there, margin included.
  */
 export function ContainerRowSeparator() {
+  const styles = useStyles();
   return <View style={styles.rowSeparator} />;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   rowSeparator: { height: theme.spacing(2) },
-});
+}));

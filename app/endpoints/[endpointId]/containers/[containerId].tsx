@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   useContainer,
@@ -28,7 +28,7 @@ import {
 import { formatDate, inspectName, shortId, stateLabel } from '../../../../src/lib/format';
 import { imageUpdateBlocker } from '../../../../src/lib/recreate';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 const ACTION_LABELS: Record<ContainerAction, string> = {
   start: 'Start',
@@ -40,6 +40,8 @@ const ACTION_LABELS: Record<ContainerAction, string> = {
 };
 
 export default function ContainerDetailScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const { containerId } = useLocalSearchParams<{ containerId: string }>();
   // Opened from an alert at launch, the container has only the home redirect
   // under it: remembering its environment returns to its siblings on back.
@@ -344,7 +346,7 @@ function describeRemoval(name: string, running: boolean): string {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   content: { padding: theme.spacing(4), gap: theme.spacing(3), paddingBottom: theme.spacing(10) },
   card: { gap: theme.spacing(3) },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
@@ -356,4 +358,4 @@ const styles = StyleSheet.create({
   updateBlocker: { color: theme.colors.textMuted, fontSize: 12 },
   updateProgress: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
   sectionTitle: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
-});
+}));

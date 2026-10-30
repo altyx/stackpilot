@@ -1,9 +1,10 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import { STACK_KIND_LABELS, type StackKind } from '../lib/stacks';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 /** "Compose" / "Swarm" for stacks Portainer manages, "External" otherwise. */
 export function StackKindBadge({ kind }: { kind: StackKind }) {
+  const styles = useStyles();
   return (
     <Text style={[styles.badge, kind === 'external' ? styles.external : styles.managed]}>
       {STACK_KIND_LABELS[kind]}
@@ -11,7 +12,7 @@ export function StackKindBadge({ kind }: { kind: StackKind }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   badge: {
     fontSize: 11,
     fontWeight: '700',
@@ -22,4 +23,4 @@ const styles = StyleSheet.create({
   },
   managed: { backgroundColor: theme.colors.accentDim, color: theme.colors.text },
   external: { backgroundColor: theme.colors.surfaceAlt, color: theme.colors.textMuted },
-});
+}));

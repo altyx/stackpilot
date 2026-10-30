@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { Release } from '../changelog';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 
 export function ReleaseCard({ release, installed }: { release: Release; installed: boolean }) {
+  const styles = useStyles();
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
@@ -23,7 +24,7 @@ export function ReleaseCard({ release, installed }: { release: Release; installe
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(2) },
   header: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   version: { color: theme.colors.text, fontSize: 16, fontWeight: '700', flex: 1 },
@@ -41,4 +42,4 @@ const styles = StyleSheet.create({
   change: { flexDirection: 'row', gap: theme.spacing(2), alignItems: 'flex-start' },
   bullet: { color: theme.colors.accent, fontSize: 14, lineHeight: 20 },
   changeText: { color: theme.colors.text, fontSize: 14, lineHeight: 20, flex: 1 },
-});
+}));

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import type { VolumePruneScope, VolumeSummary } from '../api/types';
 import { formatBytes } from '../lib/format';
 import { volumePruneCandidates, type Usage } from '../lib/usage';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { SheetActions } from './SheetActions';
@@ -43,6 +43,7 @@ export function VolumePruneSheet({
   onConfirm: (scope: VolumePruneScope) => void;
   onClose: () => void;
 }) {
+  const styles = useStyles();
   const [step, setStep] = useState<Step>('choose');
   const [typed, setTyped] = useState('');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -140,6 +141,6 @@ export function VolumePruneSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   note: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
-});
+}));

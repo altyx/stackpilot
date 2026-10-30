@@ -3,10 +3,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { StackEnv } from '../api/types';
 import { MASK, isSensitiveName } from '../lib/secrets';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 /** One stack variable; a credential-looking one stays hidden until tapped. */
 export function StackEnvRow({ variable }: { variable: StackEnv }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const sensitive = isSensitiveName(variable.name);
   const [revealed, setRevealed] = useState(false);
   const hidden = sensitive && !revealed;
@@ -36,7 +38,7 @@ export function StackEnvRow({ variable }: { variable: StackEnv }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -48,4 +50,4 @@ const styles = StyleSheet.create({
   name: { color: theme.colors.textMuted, fontSize: 13, flexShrink: 1 },
   value: { color: theme.colors.text, fontSize: 13, flex: 1, textAlign: 'right' },
   pressed: { opacity: 0.75 },
-});
+}));

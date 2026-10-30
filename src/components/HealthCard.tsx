@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { plural } from '../lib/format';
 import { PROBLEM_LABELS, type ContainerProblem } from '../lib/overview';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { ContainerLinkRow } from './ContainerLinkRow';
 
@@ -17,6 +17,8 @@ export function HealthCard({
   endpointId: number;
   problems: ContainerProblem[];
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const ok = problems.length === 0;
   const listed = problems.slice(0, MAX_LISTED);
   const hidden = problems.length - listed.length;
@@ -53,7 +55,7 @@ export function HealthCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(2) },
   cardAlert: { borderColor: theme.colors.warning },
   header: { flexDirection: 'row', gap: theme.spacing(3), alignItems: 'flex-start' },
@@ -61,4 +63,4 @@ const styles = StyleSheet.create({
   title: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
   subtitle: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 18 },
   more: { color: theme.colors.textMuted, fontSize: 13 },
-});
+}));

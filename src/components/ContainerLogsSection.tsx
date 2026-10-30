@@ -1,10 +1,10 @@
 import * as Clipboard from 'expo-clipboard';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, Share, Text, View } from 'react-native';
 import { useContainerLogs } from '../api/hooks';
 import { plural } from '../lib/format';
 import { DEFAULT_LOG_RANGE, formatLogText, type LogRange } from '../lib/logs';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Button } from './Button';
 import { Card } from './Card';
 import { LogControls } from './LogControls';
@@ -28,6 +28,7 @@ export function ContainerLogsSection({
   containerId: string;
   containerName: string;
 }) {
+  const styles = useStyles();
   const [visible, setVisible] = useState(false);
   const [range, setRange] = useState<LogRange>(DEFAULT_LOG_RANGE);
   const [follow, setFollow] = useState(false);
@@ -150,7 +151,7 @@ export function ContainerLogsSection({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(3) },
   header: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   title: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
@@ -163,4 +164,4 @@ const styles = StyleSheet.create({
   boxContent: { padding: theme.spacing(3) },
   muted: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
   error: { color: theme.colors.danger, fontSize: 13 },
-});
+}));

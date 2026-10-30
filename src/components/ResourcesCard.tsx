@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useContainerStats, useDockerInfo } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
 import { formatBytes, plural } from '../lib/format';
 import { formatPercent, summarizeResources } from '../lib/resources';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
 import { Meter } from './Meter';
@@ -19,6 +19,7 @@ export function ResourcesCard({
   /** Stopped containers use nothing: only running ones are sampled. */
   running: ContainerSummary[];
 }) {
+  const styles = useStyles();
   const info = useDockerInfo(endpointId);
   const stats = useContainerStats(endpointId, running);
 
@@ -87,7 +88,7 @@ export function ResourcesCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(4) },
   muted: { color: theme.colors.textMuted, fontSize: 13 },
   top: { gap: theme.spacing(2) },
@@ -103,4 +104,4 @@ const styles = StyleSheet.create({
   },
   topMemory: { minWidth: theme.spacing(16) },
   footnote: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 16 },
-});
+}));

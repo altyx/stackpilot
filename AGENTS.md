@@ -11,6 +11,11 @@ d'écrire du code touchant aux modules Expo.
 ## Conventions
 
 - Toutes les couleurs et espacements viennent de `src/theme.ts` — pas de valeur en dur.
+  L'app a un thème clair et un sombre (réglage « Appearance », par défaut celui
+  de l'appareil) : les styles se déclarent avec `createStyles((theme) => …)`
+  et se lisent par le hook qu'il renvoie, une couleur ponctuelle par
+  `useTheme()`. Jamais de `theme` lu au niveau du module. Le texte posé sur un
+  fond `*Fill` prend `onFill`, pas `text`.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
 - L'UI, les messages d'erreur, les textes légaux, le changelog et les alertes du

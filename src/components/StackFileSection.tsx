@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, Text, View } from 'react-native';
 import { useStackFile } from '../api/hooks';
 import { maskSensitiveLines } from '../lib/secrets';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Button } from './Button';
 import { Card } from './Card';
 
@@ -12,6 +12,7 @@ import { Card } from './Card';
  * list: the file usually repeats them.
  */
 export function StackFileSection({ stackId }: { stackId: number }) {
+  const styles = useStyles();
   const [visible, setVisible] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const file = useStackFile(visible ? stackId : null);
@@ -66,7 +67,7 @@ export function StackFileSection({ stackId }: { stackId: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(3) },
   header: {
     flexDirection: 'row',
@@ -89,4 +90,4 @@ const styles = StyleSheet.create({
   },
   muted: { color: theme.colors.textMuted, fontSize: 13 },
   error: { color: theme.colors.danger, fontSize: 13 },
-});
+}));

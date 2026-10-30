@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 /**
  * Key count of the overview, opening the screen that details it. Every tile
@@ -23,6 +23,7 @@ export function StatTile({
   alert?: boolean;
   href: Href;
 }) {
+  const styles = useStyles();
   const router = useRouter();
   return (
     <Pressable
@@ -41,7 +42,7 @@ export function StatTile({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   tile: {
     flexBasis: '47%',
     flexGrow: 1,
@@ -63,4 +64,4 @@ const styles = StyleSheet.create({
   },
   caption: { color: theme.colors.textMuted, fontSize: 12 },
   captionAlert: { color: theme.colors.warning, fontWeight: '500' },
-});
+}));

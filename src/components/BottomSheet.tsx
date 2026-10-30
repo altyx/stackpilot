@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 const OPEN_MS = 260;
 const CLOSE_MS = 200;
@@ -45,6 +45,8 @@ export interface BottomSheetProps {
  * therefore happens within the same sheet, as in `StackActionSheet`.
  */
 export function BottomSheet({ visible, onRequestClose, onClosed, children }: BottomSheetProps) {
+  const theme = useTheme();
+  const styles = useStyles();
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
@@ -165,7 +167,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   root: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { backgroundColor: theme.colors.backdrop },
   sheet: {
@@ -189,4 +191,4 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: theme.colors.border,
   },
-});
+}));

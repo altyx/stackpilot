@@ -1,12 +1,13 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import type { Endpoint } from '../api/types';
 import { isKubernetes, isOnline } from '../lib/endpoints';
 import { plural } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 
 export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; current: boolean }) {
+  const styles = useStyles();
   const snapshot = endpoint.Snapshots?.[0];
   const kubernetes = isKubernetes(endpoint);
   const online = isOnline(endpoint);
@@ -45,7 +46,7 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(1.5) },
   // Marks the environment the drawer entries point to.
   cardCurrent: { borderColor: theme.colors.accent },
@@ -66,4 +67,4 @@ const styles = StyleSheet.create({
   unsupported: { color: theme.colors.warning, fontSize: 12 },
   disabled: { opacity: 0.55 },
   pressed: { opacity: 0.75 },
-});
+}));

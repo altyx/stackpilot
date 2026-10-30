@@ -3,13 +3,14 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { useAuth } from '../auth/AuthContext';
 import { Loader } from '../components/Loader';
 import { usePushNavigation } from '../notifications/usePushNavigation';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 // Screens readable without a session: login, and the legal texts and
 // certificate help it links to.
 const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy', 'certificates']);
 
 export function RootNavigator() {
+  const theme = useTheme();
   const { session, isRestoring } = useAuth();
   const segments = useSegments();
   const router = useRouter();

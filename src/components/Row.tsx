@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 export function Row({ label, value }: { label: string; value: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
@@ -12,7 +13,7 @@ export function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -23,4 +24,4 @@ const styles = StyleSheet.create({
   },
   rowLabel: { color: theme.colors.textMuted, fontSize: 13 },
   rowValue: { color: theme.colors.text, fontSize: 13, flexShrink: 1, textAlign: 'right' },
-});
+}));

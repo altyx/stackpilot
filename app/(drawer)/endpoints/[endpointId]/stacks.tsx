@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, RefreshControl, Text, TextInput, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStacks } from '../../../../src/api/hooks';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
@@ -9,9 +9,11 @@ import { Loader } from '../../../../src/components/Loader';
 import { StackCard } from '../../../../src/components/StackCard';
 import { plural } from '../../../../src/lib/format';
 import { groupByStack, mergeStacks } from '../../../../src/lib/stacks';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 export default function StacksScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const id = useEndpointParam();
   const containers = useContainers(id);
   const stacks = useStacks(id);
@@ -90,7 +92,7 @@ export default function StacksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   list: { padding: theme.spacing(4), paddingBottom: theme.spacing(8) },
   header: { gap: theme.spacing(2), marginBottom: theme.spacing(2) },
   search: {
@@ -105,4 +107,4 @@ const styles = StyleSheet.create({
   },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
   warning: { color: theme.colors.warning, fontSize: 12 },
-});
+}));

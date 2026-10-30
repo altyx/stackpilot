@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 export function SettingsChoiceRow({
   label,
@@ -13,6 +13,8 @@ export function SettingsChoiceRow({
   first: boolean;
   onPress: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -27,7 +29,7 @@ export function SettingsChoiceRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -41,4 +43,4 @@ const styles = StyleSheet.create({
   choiceLabel: { flex: 1, fontWeight: '500' },
   choiceLabelSelected: { color: theme.colors.accent, fontWeight: '600' },
   pressed: { opacity: 0.75 },
-});
+}));

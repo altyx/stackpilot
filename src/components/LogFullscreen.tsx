@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from 'react';
 import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { LogLine } from '../lib/logs';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { LogLineRow } from './LogLineRow';
 import { useStickToBottom } from './useStickToBottom';
 
@@ -30,6 +30,7 @@ export function LogFullscreen({
   rangePicker: ReactNode;
   onClose: () => void;
 }) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const list = useRef<FlatList<LogLine>>(null);
   const stick = useStickToBottom();
@@ -67,7 +68,7 @@ export function LogFullscreen({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   root: { flex: 1, backgroundColor: theme.colors.bg },
   header: {
     gap: theme.spacing(3),
@@ -80,4 +81,4 @@ const styles = StyleSheet.create({
   title: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
   content: { padding: theme.spacing(4) },
   empty: { color: theme.colors.textMuted, fontSize: 13 },
-});
+}));

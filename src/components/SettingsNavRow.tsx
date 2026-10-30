@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -25,6 +25,8 @@ export function SettingsNavRow({
   first?: boolean;
   onPress: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole={external ? 'link' : 'button'}
@@ -44,7 +46,7 @@ export function SettingsNavRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -58,4 +60,4 @@ const styles = StyleSheet.create({
   rowLabel: { color: theme.colors.text, fontSize: 15, fontWeight: '600' },
   rowHint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
   pressed: { opacity: 0.75 },
-});
+}));

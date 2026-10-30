@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { theme } from '../theme';
+import { darkTheme as theme } from '../theme';
 import { Meter } from './Meter';
 
 describe('Meter', () => {

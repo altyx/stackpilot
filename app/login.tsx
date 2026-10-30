@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { PortainerError } from '../src/api/client';
 import { loginWithApiKey, loginWithPassword } from '../src/api/portainer';
@@ -9,9 +9,10 @@ import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { LoginField } from '../src/components/LoginField';
 import { LoginModeTab } from '../src/components/LoginModeTab';
-import { theme } from '../src/theme';
+import { createStyles } from '../src/theme';
 
 export default function LoginScreen() {
+  const styles = useStyles();
   const { signIn, lastLogin, sessionExpired } = useAuth();
   const router = useRouter();
 
@@ -173,7 +174,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   flex: { flex: 1, backgroundColor: theme.colors.bg },
   content: { padding: theme.spacing(5), gap: theme.spacing(3), paddingBottom: theme.spacing(12) },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
@@ -210,4 +211,4 @@ const styles = StyleSheet.create({
   legal: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
   legalLink: { color: theme.colors.accent, fontWeight: '600' },
   hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 18 },
-});
+}));

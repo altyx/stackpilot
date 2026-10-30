@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Slot, Stack } from 'expo-router';
 import { AuthProvider } from '../auth/AuthContext';
+import { ThemeProvider } from '../components/ThemeProvider';
 import { CurrentEndpointProvider } from '../navigation/CurrentEndpoint';
 import { SettingsProvider } from '../settings/SettingsContext';
 import { memory } from './secureStoreMock';
@@ -18,9 +19,11 @@ export function createTestLayout(queryClient: QueryClient, { withHeader = false 
     return (
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>
-          <AuthProvider>
-            <CurrentEndpointProvider>{withHeader ? <Stack /> : <Slot />}</CurrentEndpointProvider>
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <CurrentEndpointProvider>{withHeader ? <Stack /> : <Slot />}</CurrentEndpointProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </SettingsProvider>
       </QueryClientProvider>
     );

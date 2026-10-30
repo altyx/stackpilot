@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
@@ -27,11 +27,13 @@ import {
   pruneCandidates,
   reclaimableBytes,
 } from '../../../../src/lib/usage';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 type Filter = 'all' | 'used' | 'unused' | 'outdated';
 
 export default function ImagesScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const id = useEndpointParam();
 
   const images = useImages(id);
@@ -224,8 +226,8 @@ function describePrune(
   return `${plural(count, 'image')} deleted · ${formatBytes(reclaimed)} freed.`;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   list: { padding: theme.spacing(4), gap: theme.spacing(3) },
   header: { gap: theme.spacing(2) },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-});
+}));

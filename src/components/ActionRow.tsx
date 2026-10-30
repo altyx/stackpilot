@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Pressable, Text, View } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -22,6 +22,8 @@ export function ActionRow({
   tone?: 'default' | 'danger';
   onPress: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const color = tone === 'danger' ? theme.colors.danger : theme.colors.text;
   return (
     <Pressable
@@ -40,7 +42,7 @@ export function ActionRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -60,4 +62,4 @@ const styles = StyleSheet.create({
   text: { flex: 1, gap: theme.spacing(0.5) },
   label: { fontSize: 15, fontWeight: '600' },
   hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
-});
+}));

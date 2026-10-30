@@ -1,5 +1,5 @@
-import { StyleSheet, Switch, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Switch, Text, View } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 export function ToggleRow({
   label,
@@ -12,6 +12,8 @@ export function ToggleRow({
   value: boolean;
   onChange: (next: boolean) => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <View style={styles.text}>
@@ -28,9 +30,9 @@ export function ToggleRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(3) },
   text: { flex: 1, gap: theme.spacing(0.5) },
   label: { color: theme.colors.text, fontSize: 14, fontWeight: '600' },
   hint: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
-});
+}));

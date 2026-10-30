@@ -16,16 +16,32 @@ describe('loadSettings', () => {
     await expect(loadSettings()).resolves.toEqual(DEFAULT_SETTINGS);
   });
 
-  it('restores a known interval, including manual refresh', async () => {
-    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 60_000 }));
-    await expect(loadSettings()).resolves.toEqual({ refreshIntervalMs: 60_000 });
-    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: null }));
-    await expect(loadSettings()).resolves.toEqual({ refreshIntervalMs: null });
+  it('restores known choices, including manual refresh', async () => {
+    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 60_000, appearance: 'light' }));
+    await expect(loadSettings()).resolves.toEqual({
+      refreshIntervalMs: 60_000,
+      appearance: 'light',
+    });
+    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: null, appearance: 'dark' }));
+    await expect(loadSettings()).resolves.toEqual({ refreshIntervalMs: null, appearance: 'dark' });
   });
 
-  it('falls back to the defaults for an interval no screen offers', async () => {
-    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 5_000 }));
-    await expect(loadSettings()).resolves.toEqual(DEFAULT_SETTINGS);
+  it('falls back to the default of each choice no screen offers', async () => {
+    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 5_000, appearance: 'dark' }));
+    await expect(loadSettings()).resolves.toEqual({ ...DEFAULT_SETTINGS, appearance: 'dark' });
+    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 30_000, appearance: 'sepia' }));
+    await expect(loadSettings()).resolves.toEqual({
+      ...DEFAULT_SETTINGS,
+      refreshIntervalMs: 30_000,
+    });
+  });
+
+  it('keeps the interval saved before the appearance existed', async () => {
+    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: null }));
+    await expect(loadSettings()).resolves.toEqual({
+      refreshIntervalMs: null,
+      appearance: 'system',
+    });
   });
 
   it('falls back to the defaults when the store is unreadable', async () => {
@@ -38,8 +54,8 @@ describe('loadSettings', () => {
 
 describe('saveSettings', () => {
   it('writes JSON, restricted to this device', async () => {
-    await saveSettings({ refreshIntervalMs: null });
-    expect(memory.get('app.settings')).toBe('{"refreshIntervalMs":null}');
+    await saveSettings({ refreshIntervalMs: null, appearance: 'light' });
+    expect(memory.get('app.settings')).toBe('{"refreshIntervalMs":null,"appearance":"light"}');
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith('app.settings', expect.any(String), {
       keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     });

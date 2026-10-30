@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import type { ContainerSummary } from '../api/types';
 import { containerName } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { ContainerImageStatus } from './ContainerImageStatus';
 import { StatusDot } from './StatusDot';
@@ -14,6 +14,7 @@ export function ContainerRow({
   endpointId: number;
   container: ContainerSummary;
 }) {
+  const styles = useStyles();
   return (
     <Link href={`/endpoints/${endpointId}/containers/${container.Id}`} asChild>
       <Pressable style={({ pressed }) => pressed && styles.pressed}>
@@ -37,11 +38,11 @@ export function ContainerRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(1) },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   name: { color: theme.colors.text, fontSize: 15, fontWeight: '600', flex: 1 },
   image: { color: theme.colors.textMuted, fontSize: 12 },
   status: { color: theme.colors.textMuted, fontSize: 12 },
   pressed: { opacity: 0.75 },
-});
+}));

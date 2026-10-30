@@ -1,13 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { ImageSummary } from '../api/types';
 import { formatBytes } from '../lib/format';
 import { imageLabel } from '../lib/usage';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 /** Beyond this, the image list is summarized to keep the sheet compact. */
 const MAX_LISTED = 6;
 
 export function ImagePruneList({ images }: { images: ImageSummary[] }) {
+  const styles = useStyles();
   const listed = images.slice(0, MAX_LISTED);
   const hidden = images.length - listed.length;
   return (
@@ -25,7 +26,7 @@ export function ImagePruneList({ images }: { images: ImageSummary[] }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   images: {
     backgroundColor: theme.colors.bg,
     borderRadius: theme.radius.md,
@@ -37,4 +38,4 @@ const styles = StyleSheet.create({
   name: { color: theme.colors.text, fontSize: 14, flex: 1 },
   size: { color: theme.colors.textMuted, fontSize: 13 },
   more: { color: theme.colors.textMuted, fontSize: 13 },
-});
+}));
