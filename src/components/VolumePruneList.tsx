@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import type { VolumeSummary } from '../api/types';
-import { formatBytes } from '../lib/format';
+import { useStrings } from '../i18n';
 import { createStyles } from '../theme';
 
 /** Beyond this, the list is summarized to keep the sheet compact. */
@@ -14,6 +14,7 @@ export function VolumePruneList({
   sizes: Map<string, number>;
 }) {
   const styles = useStyles();
+  const t = useStrings();
   const listed = volumes.slice(0, MAX_LISTED);
   const hidden = volumes.length - listed.length;
   return (
@@ -25,11 +26,11 @@ export function VolumePruneList({
             <Text style={styles.name} numberOfLines={1} ellipsizeMode="middle">
               {volume.Name}
             </Text>
-            {size !== undefined ? <Text style={styles.size}>{formatBytes(size)}</Text> : null}
+            {size !== undefined ? <Text style={styles.size}>{t.bytes(size)}</Text> : null}
           </View>
         );
       })}
-      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
+      {hidden > 0 ? <Text style={styles.more}>{t.common.andMore(hidden)}</Text> : null}
     </View>
   );
 }

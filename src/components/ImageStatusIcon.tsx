@@ -1,14 +1,8 @@
 import { ActivityIndicator, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ImageStatus } from '../api/types';
+import { useStrings } from '../i18n';
 import { createStyles, useTheme } from '../theme';
-
-export const IMAGE_STATUS_LABELS: Record<ImageStatus, string> = {
-  updated: 'Image up to date',
-  outdated: 'Image update available',
-  processing: 'Checking image…',
-  unknown: 'Image status unknown',
-};
 
 const ICONS: Record<Exclude<ImageStatus, 'processing'>, { name: IconName; color: StatusColor }> = {
   updated: { name: 'checkmark-circle', color: 'success' },
@@ -26,7 +20,7 @@ type IconName = React.ComponentProps<typeof Ionicons>['name'];
 export function ImageStatusIcon({
   status,
   withLabel = false,
-  labels = IMAGE_STATUS_LABELS,
+  labels,
 }: {
   status: ImageStatus;
   /** Spells the status out next to the icon, for the detail screen. */
@@ -36,7 +30,8 @@ export function ImageStatusIcon({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const label = labels[status];
+  const t = useStrings();
+  const label = (labels ?? t.container.imageStatus)[status];
   const icon =
     status === 'processing' ? (
       <ActivityIndicator color={theme.colors.textMuted} size="small" />

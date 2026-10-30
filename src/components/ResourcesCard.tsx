@@ -1,8 +1,8 @@
 import { Text, View } from 'react-native';
 import { useContainerStats, useDockerInfo } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
-import { formatBytes, plural } from '../lib/format';
-import { formatPercent, summarizeResources } from '../lib/resources';
+import { useStrings } from '../i18n';
+import { summarizeResources } from '../lib/resources';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
@@ -20,13 +20,14 @@ export function ResourcesCard({
   running: ContainerSummary[];
 }) {
   const styles = useStyles();
+  const t = useStrings();
   const info = useDockerInfo(endpointId);
   const stats = useContainerStats(endpointId, running);
 
   if (running.length === 0) {
     return (
       <Card>
-        <Text style={styles.muted}>No running containers: nothing to measure.</Text>
+        <Text style={styles.muted}>{t.overview.nothingToMeasure}</Text>
       </Card>
     );
   }
@@ -35,7 +36,7 @@ export function ResourcesCard({
     return (
       <Card>
         <InlineStatus
-          loading="Measuring usage…"
+          loading={t.overview.measuringUsage}
           error={error}
           onRetry={() => {
             void info.refetch();
@@ -53,36 +54,34 @@ export function ResourcesCard({
   return (
     <Card style={styles.card}>
       <Meter
-        label="CPU"
-        value={`${formatPercent(summary.cpuPercent)} of ${plural(info.data.NCPU, 'core')}`}
+        label={t.overview.cpu}
+        value={t.overview.cpuValue(t.percent(summary.cpuPercent), info.data.NCPU)}
         ratio={summary.cpuPercent / 100}
       />
       <Meter
-        label="Memory"
-        value={`${formatBytes(summary.memoryUsed)} / ${formatBytes(summary.memoryTotal)}`}
+        label={t.overview.memory}
+        value={`${t.bytes(summary.memoryUsed)} / ${t.bytes(summary.memoryTotal)}`}
         ratio={summary.memoryTotal > 0 ? summary.memoryUsed / summary.memoryTotal : 0}
       />
 
       <View style={styles.top}>
-        <Text style={styles.topTitle}>Top consumers</Text>
+        <Text style={styles.topTitle}>{t.overview.topConsumers}</Text>
         {top.map((usage) => (
           <View key={usage.id} style={styles.topRow}>
             <Text style={styles.topName} numberOfLines={1}>
               {usage.name}
             </Text>
-            <Text style={styles.topValue}>
-              {usage.cpu === null ? '—' : formatPercent(usage.cpu)}
-            </Text>
+            <Text style={styles.topValue}>{usage.cpu === null ? '—' : t.percent(usage.cpu)}</Text>
             <Text style={[styles.topValue, styles.topMemory]}>
-              {usage.memory === null ? '—' : formatBytes(usage.memory)}
+              {usage.memory === null ? '—' : t.bytes(usage.memory)}
             </Text>
           </View>
         ))}
       </View>
 
       <Text style={styles.footnote}>
-        A snapshot of the running containers. 100% for a container means one full core.
-        {missing > 0 ? ` ${plural(missing, 'container')} did not respond.` : ''}
+        {t.overview.resourcesFootnote}
+        {missing > 0 ? ` ${t.overview.noResponse(missing)}` : ''}
       </Text>
     </Card>
   );

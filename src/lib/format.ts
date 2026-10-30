@@ -14,46 +14,54 @@ export function shortId(id: string): string {
   return id.slice(0, 12);
 }
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** How a language writes dates, sizes and shares: see `src/i18n`. */
+export interface LocaleFormat {
+  /** Abbreviated month names, January first. */
+  months: readonly string[];
+  /** Joins the day ("16 Sep 2026") and the time ("14:05"). */
+  dateTime: (day: string, time: string) => string;
+  decimal: string;
+  /** Byte units in base 1000, from the byte up. */
+  byteUnits: readonly string[];
+  percent: (value: string) => string;
+}
 
 /**
  * "16 Sep 2026, 14:05", in local time. The month is spelled out because a
  * numeric date reads differently on either side of the Atlantic, and the
- * string is built by hand because engines disagree on English abbreviations
- * ("Sep" or "Sept") and on the 24-hour clock.
+ * string is built by hand because engines disagree on abbreviations ("Sep"
+ * or "Sept") and on the 24-hour clock.
  */
-export function formatDate(value: string | number): string {
+export function formatDate(value: string | number, format: LocaleFormat): string {
   const date = typeof value === 'number' ? new Date(value * 1000) : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   const pad = (n: number) => String(n).padStart(2, '0');
-  const day = `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
-  return `${day}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-const STATE_LABELS: Record<string, string> = {
-  created: 'Created',
-  running: 'Running',
-  paused: 'Paused',
-  restarting: 'Restarting',
-  removing: 'Removing',
-  exited: 'Stopped',
-  dead: 'Dead',
-};
-
-export function stateLabel(state: string): string {
-  return STATE_LABELS[state] ?? state;
+  const day = `${date.getDate()} ${format.months[date.getMonth()]} ${date.getFullYear()}`;
+  return format.dateTime(day, `${pad(date.getHours())}:${pad(date.getMinutes())}`);
 }
 
 /** Docker sizes in base 1000, as `docker system df` displays them. */
-export function formatBytes(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
-  const units = ['B', 'kB', 'MB', 'GB', 'TB'];
+export function formatBytes(bytes: number, format: LocaleFormat): string {
+  const units = format.byteUnits;
+  if (!Number.isFinite(bytes) || bytes <= 0) return `0 ${units[0]}`;
   const exponent = Math.min(Math.floor(Math.log10(bytes) / 3), units.length - 1);
   const value = bytes / 1000 ** exponent;
-  return `${value.toFixed(value >= 100 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
+  const digits = value.toFixed(value >= 100 || exponent === 0 ? 0 : 1);
+  return `${digits.replace('.', format.decimal)} ${units[exponent]}`;
+}
+
+/** "12%" with one decimal below 10, where the decimal still tells something. */
+export function formatPercent(value: number, format: LocaleFormat): string {
+  const rounded = value < 10 ? value.toFixed(1) : String(Math.round(value));
+  return format.percent(rounded.replace('.', format.decimal));
 }
 
 /** "1 image", "0 images", "3 images": English counts every number but one as plural. */
 export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
+/** "0 image", "1 image", "3 images": French keeps 0 and 1 singular. */
+export function pluralFr(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count} ${count < 2 ? singular : pluralForm}`;
 }

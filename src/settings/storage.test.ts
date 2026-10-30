@@ -17,13 +17,12 @@ describe('loadSettings', () => {
   });
 
   it('restores known choices, including manual refresh', async () => {
-    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: 60_000, appearance: 'light' }));
-    await expect(loadSettings()).resolves.toEqual({
-      refreshIntervalMs: 60_000,
-      appearance: 'light',
-    });
-    memory.set('app.settings', JSON.stringify({ refreshIntervalMs: null, appearance: 'dark' }));
-    await expect(loadSettings()).resolves.toEqual({ refreshIntervalMs: null, appearance: 'dark' });
+    const choices = { refreshIntervalMs: 60_000, appearance: 'light', language: 'fr' } as const;
+    memory.set('app.settings', JSON.stringify(choices));
+    await expect(loadSettings()).resolves.toEqual(choices);
+    const manual = { refreshIntervalMs: null, appearance: 'dark', language: 'en' } as const;
+    memory.set('app.settings', JSON.stringify(manual));
+    await expect(loadSettings()).resolves.toEqual(manual);
   });
 
   it('falls back to the default of each choice no screen offers', async () => {
@@ -34,13 +33,16 @@ describe('loadSettings', () => {
       ...DEFAULT_SETTINGS,
       refreshIntervalMs: 30_000,
     });
+    memory.set('app.settings', JSON.stringify({ language: 'de' }));
+    await expect(loadSettings()).resolves.toEqual(DEFAULT_SETTINGS);
   });
 
-  it('keeps the interval saved before the appearance existed', async () => {
+  it('keeps the interval saved before the appearance and language existed', async () => {
     memory.set('app.settings', JSON.stringify({ refreshIntervalMs: null }));
     await expect(loadSettings()).resolves.toEqual({
       refreshIntervalMs: null,
       appearance: 'system',
+      language: 'en',
     });
   });
 
@@ -54,8 +56,10 @@ describe('loadSettings', () => {
 
 describe('saveSettings', () => {
   it('writes JSON, restricted to this device', async () => {
-    await saveSettings({ refreshIntervalMs: null, appearance: 'light' });
-    expect(memory.get('app.settings')).toBe('{"refreshIntervalMs":null,"appearance":"light"}');
+    await saveSettings({ refreshIntervalMs: null, appearance: 'light', language: 'fr' });
+    expect(memory.get('app.settings')).toBe(
+      '{"refreshIntervalMs":null,"appearance":"light","language":"fr"}',
+    );
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith('app.settings', expect.any(String), {
       keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
     });

@@ -1,3 +1,4 @@
+import { strings } from '../i18n';
 import { normalizeBaseUrl, request, requestAnonymous, requestText, PortainerError } from './client';
 import { parseLogLines, stripFrameHeaders, type LogLine } from '../lib/logs';
 import type {
@@ -44,7 +45,7 @@ export async function loginWithPassword(
     path: '/auth',
     body: { username, password },
   });
-  if (!jwt) throw new PortainerError('Portainer replied without a session token.');
+  if (!jwt) throw new PortainerError(strings().errors.noSessionToken);
   return { baseUrl, mode: 'jwt', token: jwt, username };
 }
 
@@ -73,7 +74,7 @@ export function getEndpoint(session: Session, endpointId: number): Promise<Endpo
  */
 function assertEndpointId(endpointId: number): void {
   if (!Number.isInteger(endpointId)) {
-    throw new PortainerError(`Invalid environment id (${String(endpointId)}).`);
+    throw new PortainerError(strings().errors.invalidEndpoint(String(endpointId)));
   }
 }
 
@@ -159,11 +160,7 @@ export async function removeImage(
     // The generic 409 message ("already in that state") misleads here: for
     // an image, a conflict means a container still depends on it.
     if (error instanceof PortainerError && error.status === 409) {
-      throw new PortainerError(
-        'Image in use: a container, maybe a stopped one, still depends on it. Delete it first.',
-        409,
-        error.detail,
-      );
+      throw new PortainerError(strings().errors.imageInUse, 409, error.detail);
     }
     throw error;
   }
@@ -218,11 +215,7 @@ export async function removeVolume(
     });
   } catch (error) {
     if (error instanceof PortainerError && error.status === 409) {
-      throw new PortainerError(
-        'Volume in use: a container, maybe a stopped one, still uses it. Delete it first.',
-        409,
-        error.detail,
-      );
+      throw new PortainerError(strings().errors.volumeInUse, 409, error.detail);
     }
     throw error;
   }
@@ -356,7 +349,7 @@ export async function redeployStack(
 
   const content = await fetchStackFile(session, stack.Id);
   if (!content) {
-    throw new PortainerError('The stack file is empty: Portainer would refuse the redeploy.');
+    throw new PortainerError(strings().errors.emptyStackFile);
   }
   await request<void>(session, {
     method: 'PUT',

@@ -7,7 +7,7 @@ describe('imageUpdateBlocker', () => {
   });
 
   it('names why Portainer itself, Swarm tasks and --rm containers are excluded', () => {
-    expect(imageUpdateBlocker(makeContainerInspect({ IsPortainer: true }))).toMatch(/Portainer/);
+    expect(imageUpdateBlocker(makeContainerInspect({ IsPortainer: true }))).toBe('portainer');
     expect(
       imageUpdateBlocker(
         makeContainerInspect({
@@ -19,9 +19,9 @@ describe('imageUpdateBlocker', () => {
           },
         }),
       ),
-    ).toMatch(/Swarm/);
-    expect(imageUpdateBlocker(makeContainerInspect({ HostConfig: { AutoRemove: true } }))).toMatch(
-      /--rm/,
+    ).toBe('swarm');
+    expect(imageUpdateBlocker(makeContainerInspect({ HostConfig: { AutoRemove: true } }))).toBe(
+      'autoRemove',
     );
   });
 
@@ -29,6 +29,6 @@ describe('imageUpdateBlocker', () => {
     const digest = makeContainerInspect({
       Config: { Image: 'sha256:0123456789ab', Env: null, Cmd: null, Labels: {} },
     });
-    expect(imageUpdateBlocker(digest)).toMatch(/tag/);
+    expect(imageUpdateBlocker(digest)).toBe('untagged');
   });
 });

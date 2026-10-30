@@ -1,13 +1,14 @@
 import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import type { Endpoint } from '../api/types';
+import { useStrings } from '../i18n';
 import { isKubernetes, isOnline } from '../lib/endpoints';
-import { plural } from '../lib/format';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 
 export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; current: boolean }) {
   const styles = useStyles();
+  const t = useStrings();
   const snapshot = endpoint.Snapshots?.[0];
   const kubernetes = isKubernetes(endpoint);
   const online = isOnline(endpoint);
@@ -19,19 +20,23 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
           {endpoint.Name}
         </Text>
         <Text style={[styles.badge, online ? styles.badgeUp : styles.badgeDown]}>
-          {online ? 'Online' : 'Offline'}
+          {online ? t.endpoints.online : t.endpoints.offline}
         </Text>
       </View>
       <Text style={styles.url} numberOfLines={1}>
-        {endpoint.URL || 'local socket'}
+        {endpoint.URL || t.endpoints.localSocket}
       </Text>
       {kubernetes ? (
-        <Text style={styles.unsupported}>Kubernetes environment — not supported by the app.</Text>
+        <Text style={styles.unsupported}>{t.endpoints.kubernetes}</Text>
       ) : (
         <Text style={styles.stats}>
           {snapshot
-            ? `${snapshot.RunningContainerCount ?? 0} running · ${snapshot.StoppedContainerCount ?? 0} stopped · ${plural(snapshot.ImageCount ?? 0, 'image')}`
-            : 'No snapshot available'}
+            ? t.endpoints.snapshot(
+                snapshot.RunningContainerCount ?? 0,
+                snapshot.StoppedContainerCount ?? 0,
+                snapshot.ImageCount ?? 0,
+              )
+            : t.endpoints.noSnapshot}
         </Text>
       )}
     </Card>

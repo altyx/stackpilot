@@ -1,4 +1,5 @@
 import { Text, TextInput, View } from 'react-native';
+import { useStrings } from '../i18n';
 import { createStyles } from '../theme';
 
 /**
@@ -17,10 +18,12 @@ export function TypedConfirmation({
   onChange: (next: string) => void;
 }) {
   const styles = useStyles();
+  const t = useStrings();
   return (
     <View style={styles.block}>
       <Text style={styles.label}>
-        To confirm, type <Text style={styles.phrase}>{phrase}</Text>
+        {t.common.typeToConfirm}
+        <Text style={styles.phrase}>{phrase}</Text>
       </Text>
       <TextInput
         value={value}
@@ -28,7 +31,7 @@ export function TypedConfirmation({
         autoCapitalize="none"
         autoCorrect={false}
         spellCheck={false}
-        accessibilityLabel={`Type ${phrase} to confirm`}
+        accessibilityLabel={t.common.typeToConfirmLabel(phrase)}
         style={styles.input}
       />
     </View>

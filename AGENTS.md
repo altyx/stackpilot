@@ -18,11 +18,20 @@ d'écrire du code touchant aux modules Expo.
   fond `*Fill` prend `onFill`, pas `text`.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
-- L'UI, les messages d'erreur, les textes légaux, le changelog et les alertes du
-  `watcher/` sont en anglais. Ce qui vient de Portainer ou de Docker (noms,
-  statuts, messages d'erreur renvoyés par l'API) s'affiche tel quel, sans
-  traduction. Les comptes passent par `plural` (`src/lib/format.ts`) : en
-  anglais, 0 prend le pluriel.
+- L'UI existe en anglais, par défaut, et en français (réglage « Language »).
+  Tout texte affiché vient des catalogues `src/i18n` : `en.ts` fait référence
+  et définit le type `Strings`, que `fr.ts` remplit en entier. Dans un
+  composant, `useStrings()` ; hors React (erreurs de l'API, notifications),
+  `strings()`, jamais pendant le rendu, que le React Compiler mémoïserait
+  dans l'ancienne langue. Une phrase qui dépend d'un nombre ou d'un nom est une
+  fonction du catalogue, pas une concaténation dans l'écran ; `src/lib`
+  renvoie des codes, pas des phrases. Les comptes passent par `plural` (en
+  anglais, 0 prend le pluriel) ou `pluralFr` (0 et 1 au singulier), les dates,
+  tailles et pourcentages par `t.date`, `t.bytes` et `t.percent`. En français,
+  l'espace avant `? ! : ;` et `%` est insécable.
+- Les textes légaux, le changelog et les alertes du `watcher/` restent en
+  anglais. Ce qui vient de Portainer ou de Docker (noms, statuts, messages
+  d'erreur renvoyés par l'API) s'affiche tel quel, sans traduction.
 - `react-dom` est épinglé via `overrides` dans `package.json` pour aligner son peer
   `react` sur la version imposée par Expo — ne pas retirer sans revérifier `npm install`.
 - Les dossiers `ios/` et `android/` ne sont pas versionnés : ils sont regénérés

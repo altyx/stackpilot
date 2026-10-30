@@ -30,10 +30,9 @@ import { StackImageStatus } from '../../../../src/components/StackImageStatus';
 import { StackKindBadge } from '../../../../src/components/StackKindBadge';
 import { StackRedeploySheet } from '../../../../src/components/StackRedeploySheet';
 import { useLatched } from '../../../../src/components/useLatched';
-import { formatDate } from '../../../../src/lib/format';
-import { diffEnv, type EnvDiff } from '../../../../src/lib/stackEnv';
+import { useStrings, type Strings } from '../../../../src/i18n';
+import { diffEnv } from '../../../../src/lib/stackEnv';
 import {
-  STACK_KIND_LABELS,
   describeStackResult,
   groupByStack,
   mergeStacks,
@@ -45,6 +44,7 @@ import { createStyles, useTheme } from '../../../../src/theme';
 export default function StackDetailScreen() {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   const { stackName } = useLocalSearchParams<{ stackName: string }>();
   const id = useEndpointParam();
   const containers = useContainers(id);
@@ -66,17 +66,14 @@ export default function StackDetailScreen() {
   );
 
   if (containers.isPending || (stacks.isPending && !stacks.error)) {
-    return <Loader label="Loading stack…" />;
+    return <Loader label={t.stack.loading} />;
   }
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
   if (!overview) {
     return (
       <>
         <Stack.Screen options={{ title: stackName }} />
-        <EmptyState
-          title="Stack not found"
-          subtitle="It may have been deleted, or its containers are gone."
-        />
+        <EmptyState title={t.stack.notFound} subtitle={t.stack.notFoundHint} />
       </>
     );
   }
@@ -88,13 +85,13 @@ export default function StackDetailScreen() {
       { containers: target.members, action },
       {
         onSuccess: (result) => {
-          const report = describeStackResult(target, action, result);
+          const report = describeStackResult(target, action, result, t);
           Alert.alert(report.title, report.message);
         },
         onError: (e) =>
           Alert.alert(
-            'Action failed',
-            e instanceof Error ? e.message : 'The action could not be applied.',
+            t.common.actionFailed,
+            e instanceof Error ? e.message : t.common.actionNotApplied,
           ),
       },
     );
@@ -106,13 +103,13 @@ export default function StackDetailScreen() {
       {
         onSuccess: () => {
           setEditingEnv(false);
-          Alert.alert('Stack redeployed', `${target.Name} was redeployed.`);
+          Alert.alert(t.stack.redeployed, t.stack.redeployedMessage(target.Name));
         },
         // Edits stay in the form on failure: nothing typed is lost.
         onError: (e) =>
           Alert.alert(
-            'Redeploy failed',
-            e instanceof Error ? e.message : 'The stack could not be redeployed.',
+            t.stack.redeployFailed,
+            e instanceof Error ? e.message : t.stack.redeployNotApplied,
           ),
       },
     );
@@ -141,20 +138,16 @@ export default function StackDetailScreen() {
       <Card style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.count}>
-            {total === 0 ? 'No containers' : `${running}/${total} running`}
+            {total === 0 ? t.common.noContainers : t.common.runningRatio(running, total)}
           </Text>
           <StackKindBadge kind={overview.kind} />
         </View>
         {stack ? <StackImageStatus endpointId={id} stackId={stack.Id} withLabel /> : null}
-        {stack ? null : (
-          <Text style={styles.note}>
-            Stack deployed outside Portainer: only its containers are known.
-          </Text>
-        )}
+        {stack ? null : <Text style={styles.note}>{t.stack.externalNote}</Text>}
         <View style={styles.actions}>
           {section ? (
             <Button
-              label="Start / stop"
+              label={t.stack.startStop}
               variant="secondary"
               onPress={() => setSheetOpen(true)}
               loading={stackAction.isPending}
@@ -165,7 +158,7 @@ export default function StackDetailScreen() {
           {/* Only Portainer can redeploy: an external stack has no file it knows. */}
           {stack ? (
             <Button
-              label="Redeploy"
+              label={t.stack.redeploy}
               onPress={() => setRedeploying(true)}
               loading={redeploy.isPending}
               disabled={stackAction.isPending}
@@ -173,51 +166,52 @@ export default function StackDetailScreen() {
             />
           ) : null}
         </View>
-        {redeploy.isPending ? (
-          <Text style={styles.note}>Redeploying… Pulling images can take several minutes.</Text>
-        ) : null}
+        {redeploy.isPending ? <Text style={styles.note}>{t.stack.redeploying}</Text> : null}
       </Card>
 
       {stack ? (
         <Card>
-          <Row label="Type" value={STACK_KIND_LABELS[overview.kind]} />
+          <Row label={t.stack.type} value={t.stacks.kinds[overview.kind]} />
           <Row
-            label="Portainer status"
-            value={stack.Status === StackStatus.Active ? 'Active' : 'Inactive'}
+            label={t.stack.portainerStatus}
+            value={stack.Status === StackStatus.Active ? t.stack.active : t.stack.inactive}
           />
-          <Row label="Created" value={stack.CreationDate ? formatDate(stack.CreationDate) : '—'} />
-          <Row label="By" value={stack.CreatedBy || '—'} />
+          <Row
+            label={t.stack.created}
+            value={stack.CreationDate ? t.date(stack.CreationDate) : '—'}
+          />
+          <Row label={t.stack.by} value={stack.CreatedBy || '—'} />
           {stack.UpdateDate ? (
             <>
-              <Row label="Updated" value={formatDate(stack.UpdateDate)} />
-              <Row label="By" value={stack.UpdatedBy || '—'} />
+              <Row label={t.stack.updated} value={t.date(stack.UpdateDate)} />
+              <Row label={t.stack.by} value={stack.UpdatedBy || '—'} />
             </>
           ) : null}
-          <Row label="File" value={stack.EntryPoint || '—'} />
+          <Row label={t.stack.file} value={stack.EntryPoint || '—'} />
           {stack.GitConfig ? (
             <>
-              <Row label="Git repository" value={stack.GitConfig.URL} />
-              <Row label="Reference" value={stack.GitConfig.ReferenceName} />
+              <Row label={t.stack.gitRepository} value={stack.GitConfig.URL} />
+              <Row label={t.stack.reference} value={stack.GitConfig.ReferenceName} />
               <Row
-                label="Auto update"
-                value={describeAutoUpdate(stack.AutoUpdate?.Interval, stack.AutoUpdate?.Webhook)}
+                label={t.stack.autoUpdate}
+                value={describeAutoUpdate(t, stack.AutoUpdate?.Interval, stack.AutoUpdate?.Webhook)}
               />
             </>
           ) : null}
-          {stack.Webhook ? <Row label="Webhook" value="Yes" /> : null}
+          {stack.Webhook ? <Row label={t.stack.webhook} value={t.stack.yes} /> : null}
         </Card>
       ) : null}
 
       {stack ? (
         <Card style={styles.card}>
           <View style={styles.envHeader}>
-            <Text style={styles.sectionTitle}>Environment variables</Text>
+            <Text style={styles.sectionTitle}>{t.stack.envTitle}</Text>
             {!editingEnv ? (
               <Text
                 accessibilityRole="button"
                 onPress={() => setEditingEnv(true)}
                 style={styles.link}>
-                Edit
+                {t.common.edit}
               </Text>
             ) : null}
           </View>
@@ -231,14 +225,14 @@ export default function StackDetailScreen() {
           ) : stack.Env && stack.Env.length > 0 ? (
             stack.Env.map((variable) => <StackEnvRow key={variable.name} variable={variable} />)
           ) : (
-            <Text style={styles.note}>No variables defined in Portainer.</Text>
+            <Text style={styles.note}>{t.stack.noVariables}</Text>
           )}
         </Card>
       ) : null}
 
       {section ? (
         <View style={styles.members}>
-          <Text style={styles.sectionTitle}>Containers</Text>
+          <Text style={styles.sectionTitle}>{t.stack.containers}</Text>
           {section.members.map((container, index) => (
             <View key={container.Id}>
               {index > 0 ? <ContainerRowSeparator /> : null}
@@ -257,13 +251,13 @@ export default function StackDetailScreen() {
       />
       <ConfirmSheet
         visible={pendingEnv !== null}
-        title="Save and redeploy?"
+        title={t.stack.saveTitle}
         message={
           stack && shownPendingEnv
-            ? describeEnvChange(diffEnv(stack.Env, shownPendingEnv))
+            ? t.stack.envChange(diffEnv(stack.Env, shownPendingEnv))
             : undefined
         }
-        confirmLabel="Save and redeploy"
+        confirmLabel={t.stack.saveConfirm}
         onConfirm={() => {
           const env = pendingEnv;
           setPendingEnv(null);
@@ -280,21 +274,10 @@ export default function StackDetailScreen() {
   );
 }
 
-/** Names, not values: a changed password shouldn't be echoed back on screen. */
-function describeEnvChange(diff: EnvDiff): string {
-  const parts = [
-    diff.added.length ? `Added: ${diff.added.join(', ')}.` : '',
-    diff.changed.length ? `Changed: ${diff.changed.join(', ')}.` : '',
-    diff.removed.length ? `Removed: ${diff.removed.join(', ')}.` : '',
-  ].filter(Boolean);
-  const summary = parts.length ? parts.join(' ') : 'No variable changed.';
-  return `${summary} The stack will be redeployed to apply them: the affected containers will be recreated.`;
-}
-
-function describeAutoUpdate(interval?: string, webhook?: string): string {
-  if (interval) return `Every ${interval}`;
-  if (webhook) return 'By webhook';
-  return 'No';
+function describeAutoUpdate(t: Strings, interval?: string, webhook?: string): string {
+  if (interval) return t.stack.autoUpdateEvery(interval);
+  if (webhook) return t.stack.autoUpdateByWebhook;
+  return t.stack.no;
 }
 
 const useStyles = createStyles((theme) => ({

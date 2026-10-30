@@ -195,7 +195,7 @@ describe('volume cleanup helpers', () => {
   });
 
   it('asks for the name, or a word when the name is unreadable', () => {
-    expect(volumeConfirmPhrase(named)).toBe('pgdata');
-    expect(volumeConfirmPhrase(anonymous)).toBe('delete');
+    expect(volumeConfirmPhrase(named, 'delete')).toBe('pgdata');
+    expect(volumeConfirmPhrase(anonymous, 'delete')).toBe('delete');
   });
 });

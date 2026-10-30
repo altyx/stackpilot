@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useAuth } from '../auth/AuthContext';
 import { Loader } from '../components/Loader';
+import { useStrings } from '../i18n';
 import { usePushNavigation } from '../notifications/usePushNavigation';
 import { useTheme } from '../theme';
 
@@ -11,6 +12,7 @@ const PUBLIC_SCREENS: ReadonlySet<string> = new Set(['login', 'terms', 'privacy'
 
 export function RootNavigator() {
   const theme = useTheme();
+  const t = useStrings();
   const { session, isRestoring } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -24,7 +26,7 @@ export function RootNavigator() {
     else if (session && onLoginScreen) router.replace('/');
   }, [session, isRestoring, segments, router]);
 
-  if (isRestoring) return <Loader label="Restoring session…" />;
+  if (isRestoring) return <Loader label={t.nav.restoringSession} />;
 
   return (
     <Stack
@@ -41,9 +43,9 @@ export function RootNavigator() {
       {/* The legal texts serve the login screen as well as the settings. */}
       <Stack.Screen name="terms" options={{ title: '' }} />
       <Stack.Screen name="privacy" options={{ title: '' }} />
-      <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
-      <Stack.Screen name="changelog" options={{ title: "What's new" }} />
-      <Stack.Screen name="certificates" options={{ title: 'HTTPS certificate' }} />
+      <Stack.Screen name="notifications" options={{ title: t.nav.notifications }} />
+      <Stack.Screen name="changelog" options={{ title: t.nav.changelog }} />
+      <Stack.Screen name="certificates" options={{ title: t.nav.certificates }} />
       {/* The drawer screens carry their own headers, with the button that opens it. */}
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen

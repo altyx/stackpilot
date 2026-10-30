@@ -1,14 +1,16 @@
 import { Text } from 'react-native';
 import { PortainerError } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { useStrings } from '../i18n';
 import { createStyles } from '../theme';
 import { Button } from './Button';
 import { Centered } from './Centered';
 
 export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   const styles = useStyles();
+  const t = useStrings();
   const { signOut } = useAuth();
-  const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
+  const message = error instanceof Error ? error.message : t.common.unexpectedError;
   const detail =
     error && typeof error === 'object' && 'detail' in error
       ? String((error as { detail?: string }).detail ?? '')
@@ -22,9 +24,9 @@ export function ErrorView({ error, onRetry }: { error: unknown; onRetry?: () => 
       <Text style={styles.errorTitle}>{message}</Text>
       {detail ? <Text style={styles.errorDetail}>{detail}</Text> : null}
       {unauthorized ? (
-        <Button label="Sign in again" onPress={() => void signOut()} style={styles.retry} />
+        <Button label={t.common.signInAgain} onPress={() => void signOut()} style={styles.retry} />
       ) : onRetry ? (
-        <Button label="Retry" onPress={onRetry} variant="secondary" style={styles.retry} />
+        <Button label={t.common.retry} onPress={onRetry} variant="secondary" style={styles.retry} />
       ) : null}
     </Centered>
   );

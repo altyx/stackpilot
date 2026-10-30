@@ -1,4 +1,5 @@
 import { ScrollView, Text } from 'react-native';
+import { useStrings } from '../i18n';
 import { LOG_RANGES, type LogRange } from '../lib/logs';
 import { createStyles } from '../theme';
 
@@ -11,6 +12,7 @@ export function LogRangePicker({
   onChange: (next: LogRange) => void;
 }) {
   const styles = useStyles();
+  const t = useStrings();
   return (
     <ScrollView
       horizontal
@@ -25,7 +27,7 @@ export function LogRangePicker({
             accessibilityState={{ selected }}
             onPress={() => onChange(range)}
             style={[styles.chip, selected && styles.chipSelected]}>
-            {range.label}
+            {t.logs.ranges[range.key]}
           </Text>
         );
       })}

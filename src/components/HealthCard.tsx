@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
-import { plural } from '../lib/format';
-import { PROBLEM_LABELS, type ContainerProblem } from '../lib/overview';
+import { useStrings } from '../i18n';
+import type { ContainerProblem } from '../lib/overview';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { ContainerLinkRow } from './ContainerLinkRow';
@@ -19,6 +19,7 @@ export function HealthCard({
 }) {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   const ok = problems.length === 0;
   const listed = problems.slice(0, MAX_LISTED);
   const hidden = problems.length - listed.length;
@@ -32,12 +33,10 @@ export function HealthCard({
         />
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.title}>
-            {ok ? 'All good' : `${plural(problems.length, 'container')} to check`}
+            {ok ? t.overview.allGood : t.overview.toCheck(problems.length)}
           </Text>
           <Text style={styles.subtitle}>
-            {ok
-              ? 'No container is unhealthy, stuck restarting or exited abnormally.'
-              : 'Tap a container to see its logs and act on it.'}
+            {ok ? t.overview.allGoodHint : t.overview.toCheckHint}
           </Text>
         </View>
       </View>
@@ -46,11 +45,11 @@ export function HealthCard({
           key={container.Id}
           endpointId={endpointId}
           container={container}
-          detail={PROBLEM_LABELS[kind]}
+          detail={t.overview.problems[kind]}
           tone="warning"
         />
       ))}
-      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
+      {hidden > 0 ? <Text style={styles.more}>{t.common.andMore(hidden)}</Text> : null}
     </Card>
   );
 }

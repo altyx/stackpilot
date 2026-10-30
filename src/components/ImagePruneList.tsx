@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import type { ImageSummary } from '../api/types';
-import { formatBytes } from '../lib/format';
+import { useStrings } from '../i18n';
 import { imageLabel } from '../lib/usage';
 import { createStyles } from '../theme';
 
@@ -9,6 +9,7 @@ const MAX_LISTED = 6;
 
 export function ImagePruneList({ images }: { images: ImageSummary[] }) {
   const styles = useStyles();
+  const t = useStrings();
   const listed = images.slice(0, MAX_LISTED);
   const hidden = images.length - listed.length;
   return (
@@ -18,10 +19,10 @@ export function ImagePruneList({ images }: { images: ImageSummary[] }) {
           <Text style={styles.name} numberOfLines={1}>
             {imageLabel(image)}
           </Text>
-          <Text style={styles.size}>{formatBytes(image.Size)}</Text>
+          <Text style={styles.size}>{t.bytes(image.Size)}</Text>
         </View>
       ))}
-      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
+      {hidden > 0 ? <Text style={styles.more}>{t.common.andMore(hidden)}</Text> : null}
     </View>
   );
 }

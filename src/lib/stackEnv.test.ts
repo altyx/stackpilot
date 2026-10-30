@@ -24,7 +24,7 @@ describe('validateEnv', () => {
       { key: 'blank', name: '', value: '' },
     ]);
     expect([...errors.keys()]).toEqual(['missing', 'invalid', 'dup']);
-    expect(errors.get('dup')).toBe('PORT is already defined above.');
+    expect(errors.get('dup')).toEqual({ kind: 'duplicate', name: 'PORT' });
   });
 });
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Text } from 'react-native';
 import type { VolumePruneScope, VolumeSummary } from '../api/types';
-import { formatBytes } from '../lib/format';
+import { useStrings } from '../i18n';
 import { volumePruneCandidates, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { BottomSheet } from './BottomSheet';
@@ -13,13 +13,6 @@ import { VolumePruneList } from './VolumePruneList';
 
 type Step = 'choose' | VolumePruneScope;
 type Outcome = VolumePruneScope | 'cancel';
-
-const CONFIRM_PHRASE = 'delete';
-
-const SCOPE_LABELS: Record<VolumePruneScope, string> = {
-  anonymous: 'Anonymous volumes',
-  all: 'All unused volumes',
-};
 
 /**
  * Choosing then confirming a volume cleanup, like the image one, with more
@@ -44,6 +37,8 @@ export function VolumePruneSheet({
   onClose: () => void;
 }) {
   const styles = useStyles();
+  const t = useStrings();
+  const confirmWord = t.volumes.confirmWord;
   const [step, setStep] = useState<Step>('choose');
   const [typed, setTyped] = useState('');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -65,9 +60,13 @@ export function VolumePruneSheet({
     volumes.reduce((sum, volume) => sum + (sizes.get(volume.Name) ?? 0), 0);
 
   function describeOption(scope: VolumePruneScope, volumes: VolumeSummary[]): string {
-    if (volumes.length === 0) return `${SCOPE_LABELS[scope]} · none`;
     const size = total(volumes);
-    return `${SCOPE_LABELS[scope]} · ${volumes.length}${size > 0 ? ` · ${formatBytes(size)}` : ''}`;
+    return t.common.pruneOption(
+      t.volumes.scopes[scope],
+      volumes.length,
+      size > 0 ? t.bytes(size) : null,
+      t.volumes.none,
+    );
   }
 
   const candidates = step === 'anonymous' ? anonymous : all;
@@ -84,10 +83,7 @@ export function VolumePruneSheet({
       }}>
       {step === 'choose' ? (
         <>
-          <SheetHeader
-            title="Clean up volumes"
-            message="Only volumes that no container uses, even a stopped one, are deleted. Their data is lost for good."
-          />
+          <SheetHeader title={t.volumes.cleanUp} message={t.volumes.pruneMessage} />
           <SheetActions>
             {anonymousScopeAvailable ? (
               <Button
@@ -103,37 +99,26 @@ export function VolumePruneSheet({
               disabled={all.length === 0}
               onPress={() => setStep('all')}
             />
-            <Button label="Cancel" variant="secondary" onPress={() => close('cancel')} />
+            <Button label={t.common.cancel} variant="secondary" onPress={() => close('cancel')} />
           </SheetActions>
-          {!anonymousScopeAvailable ? (
-            <Text style={styles.note}>
-              This Docker engine, older than version 23, cannot limit the cleanup to anonymous
-              volumes: only the full cleanup is offered.
-            </Text>
-          ) : null}
+          {!anonymousScopeAvailable ? <Text style={styles.note}>{t.volumes.oldEngine}</Text> : null}
         </>
       ) : (
         <>
           <SheetHeader
-            title={
-              candidates.length > 1 ? `Delete ${candidates.length} volumes?` : 'Delete volume?'
-            }
-            message={
-              step === 'anonymous'
-                ? 'Unused anonymous volumes and their data will be permanently deleted.'
-                : 'All unused volumes, named ones included, will be deleted along with their data. There is no way to recover it.'
-            }
+            title={t.volumes.pruneTitle(candidates.length)}
+            message={t.volumes.pruneImpact[step]}
           />
           <VolumePruneList volumes={candidates} sizes={sizes} />
-          <TypedConfirmation phrase={CONFIRM_PHRASE} value={typed} onChange={setTyped} />
+          <TypedConfirmation phrase={confirmWord} value={typed} onChange={setTyped} />
           <SheetActions>
             <Button
-              label="Delete permanently"
+              label={t.volumes.deletePermanently}
               variant="danger"
-              disabled={!matchesPhrase(typed, CONFIRM_PHRASE)}
+              disabled={!matchesPhrase(typed, confirmWord)}
               onPress={() => close(step)}
             />
-            <Button label="Back" variant="secondary" onPress={() => setStep('choose')} />
+            <Button label={t.common.back} variant="secondary" onPress={() => setStep('choose')} />
           </SheetActions>
         </>
       )}

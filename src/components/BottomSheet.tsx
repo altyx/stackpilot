@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useStrings } from '../i18n';
 import { createStyles, useTheme } from '../theme';
 
 const OPEN_MS = 260;
@@ -47,6 +48,7 @@ export interface BottomSheetProps {
 export function BottomSheet({ visible, onRequestClose, onClosed, children }: BottomSheetProps) {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
@@ -147,7 +149,7 @@ export function BottomSheet({ visible, onRequestClose, onClosed, children }: Bot
         <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, { opacity: progress }]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel={t.common.close}
             style={StyleSheet.absoluteFill}
             onPress={() => callbacks.current.onRequestClose()}
           />

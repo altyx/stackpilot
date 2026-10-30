@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 import type { VolumeSummary } from '../api/types';
-import { formatBytes, formatDate } from '../lib/format';
+import { useStrings } from '../i18n';
 import { isAnonymousVolume, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { Card } from './Card';
@@ -19,12 +19,13 @@ export function VolumeCard({
   onDelete?: () => void;
 }) {
   const styles = useStyles();
+  const t = useStrings();
   const { item: volume, usedBy } = usage;
   const meta = [
     volume.Driver,
-    size !== undefined ? formatBytes(size) : null,
-    volume.CreatedAt ? formatDate(volume.CreatedAt) : null,
-    isAnonymousVolume(volume) ? 'anonymous' : null,
+    size !== undefined ? t.bytes(size) : null,
+    volume.CreatedAt ? t.date(volume.CreatedAt) : null,
+    isAnonymousVolume(volume) ? t.volumes.anonymous : null,
   ].filter(Boolean);
   return (
     <Card style={styles.card}>
@@ -33,7 +34,7 @@ export function VolumeCard({
           <Text style={styles.name} numberOfLines={2}>
             {volume.Name}
           </Text>
-          <UsageBadge usedBy={usedBy} />
+          <UsageBadge usedBy={usedBy} kind="volume" />
         </View>
 
         <Text style={styles.meta}>{meta.join(' · ')}</Text>
@@ -53,7 +54,7 @@ export function VolumeCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={`Delete ${volume.Name}`}
+          accessibilityLabel={t.common.deleteNamed(volume.Name)}
           onPress={onDelete}
         />
       ) : null}

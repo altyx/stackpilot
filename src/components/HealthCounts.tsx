@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useStrings } from '../i18n';
 import type { ContainerCounts } from '../lib/overview';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
@@ -10,19 +11,20 @@ import { Card } from './Card';
 export function HealthCounts({ counts }: { counts: ContainerCounts }) {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   const columns = [
-    { label: 'Healthy', value: counts.healthy, color: theme.colors.success },
+    { label: t.overview.healthy, value: counts.healthy, color: theme.colors.success },
     {
-      label: 'Unhealthy',
+      label: t.overview.unhealthy,
       value: counts.unhealthy,
       color: counts.unhealthy > 0 ? theme.colors.danger : theme.colors.textMuted,
     },
-    { label: 'No healthcheck', value: counts.unchecked, color: theme.colors.textMuted },
+    { label: t.overview.noHealthcheck, value: counts.unchecked, color: theme.colors.textMuted },
   ];
   return (
     <Card style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>
-        Container health
+        {t.overview.healthTitle}
       </Text>
       <View style={styles.columns}>
         {columns.map((column, index) => (
@@ -39,7 +41,7 @@ export function HealthCounts({ counts }: { counts: ContainerCounts }) {
         ))}
       </View>
       {counts.starting > 0 ? (
-        <Text style={styles.footnote}>{counts.starting} starting, not checked yet.</Text>
+        <Text style={styles.footnote}>{t.overview.starting(counts.starting)}</Text>
       ) : null}
     </Card>
   );

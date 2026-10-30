@@ -1,13 +1,15 @@
 import { Text } from 'react-native';
-import { STACK_KIND_LABELS, type StackKind } from '../lib/stacks';
+import { useStrings } from '../i18n';
+import type { StackKind } from '../lib/stacks';
 import { createStyles } from '../theme';
 
 /** "Compose" / "Swarm" for stacks Portainer manages, "External" otherwise. */
 export function StackKindBadge({ kind }: { kind: StackKind }) {
   const styles = useStyles();
+  const t = useStrings();
   return (
     <Text style={[styles.badge, kind === 'external' ? styles.external : styles.managed]}>
-      {STACK_KIND_LABELS[kind]}
+      {t.stacks.kinds[kind]}
     </Text>
   );
 }

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, SectionList, Text, TextInput, View } from 'react-native';
+import { useStrings } from '../../../../src/i18n';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
@@ -11,7 +12,7 @@ import { Loader } from '../../../../src/components/Loader';
 import { Segmented } from '../../../../src/components/Segmented';
 import { StackActionSheet } from '../../../../src/components/StackActionSheet';
 import { StackHeader } from '../../../../src/components/StackHeader';
-import { containerName, plural } from '../../../../src/lib/format';
+import { containerName } from '../../../../src/lib/format';
 import {
   countStacks,
   describeStackResult,
@@ -25,6 +26,7 @@ type Filter = 'all' | 'running' | 'stopped';
 export default function ContainersScreen() {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   const id = useEndpointParam();
   const { data, error, isPending, refetch, isRefetching } = useContainers(id);
   const [search, setSearch] = useState('');
@@ -63,20 +65,20 @@ export default function ContainersScreen() {
       { containers: section.members, action },
       {
         onSuccess: (result) => {
-          const report = describeStackResult(section, action, result);
+          const report = describeStackResult(section, action, result, t);
           Alert.alert(report.title, report.message);
         },
         onError: (e) =>
           Alert.alert(
-            'Action failed',
-            e instanceof Error ? e.message : 'The action could not be applied.',
+            t.common.actionFailed,
+            e instanceof Error ? e.message : t.common.actionNotApplied,
           ),
         onSettled: () => setPendingStack(null),
       },
     );
   }
 
-  if (isPending) return <Loader label="Loading containers…" />;
+  if (isPending) return <Loader label={t.containers.loading} />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   const shown = sections.reduce((sum, section) => sum + section.data.length, 0);
@@ -102,7 +104,7 @@ export default function ContainersScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Filter by name or image"
+              placeholder={t.containers.filterPlaceholder}
               placeholderTextColor={theme.colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -112,15 +114,12 @@ export default function ContainersScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: 'All' },
-                { value: 'running', label: 'Running' },
-                { value: 'stopped', label: 'Stopped' },
+                { value: 'all', label: t.common.all },
+                { value: 'running', label: t.common.running },
+                { value: 'stopped', label: t.common.stopped },
               ]}
             />
-            <Text style={styles.summary}>
-              {plural(shown, 'container')}
-              {stackCount > 0 ? ` · ${plural(stackCount, 'stack')}` : ''}
-            </Text>
+            <Text style={styles.summary}>{t.containers.summary(shown, stackCount)}</Text>
           </View>
         }
         renderSectionHeader={({ section }) => (
@@ -133,8 +132,8 @@ export default function ContainersScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            title="No containers"
-            subtitle={search || filter !== 'all' ? 'Nothing matches this filter.' : undefined}
+            title={t.common.noContainers}
+            subtitle={search || filter !== 'all' ? t.common.noMatch : undefined}
           />
         }
         renderItem={({ item }) => <ContainerRow endpointId={id} container={item} />}

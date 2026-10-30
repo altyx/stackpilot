@@ -1,4 +1,5 @@
 import { ActivityIndicator, Text, View } from 'react-native';
+import { useStrings } from '../i18n';
 import { createStyles, useTheme } from '../theme';
 
 /**
@@ -16,15 +17,16 @@ export function InlineStatus({
 }) {
   const theme = useTheme();
   const styles = useStyles();
+  const t = useStrings();
   if (error) {
     return (
       <View style={styles.row}>
         <Text style={styles.error}>
-          {error instanceof Error ? error.message : 'Data unavailable.'}
+          {error instanceof Error ? error.message : t.overview.dataUnavailable}
         </Text>
         {onRetry ? (
           <Text accessibilityRole="button" onPress={onRetry} style={styles.retry}>
-            Retry
+            {t.common.retry}
           </Text>
         ) : null}
       </View>

@@ -73,9 +73,3 @@ export function summarizeResources(
     ),
   };
 }
-
-/** "12%" with one decimal below 10, where the decimal still tells something. */
-export function formatPercent(value: number): string {
-  const rounded = value < 10 ? value.toFixed(1) : String(Math.round(value));
-  return `${rounded}%`;
-}

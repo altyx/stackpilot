@@ -1,5 +1,7 @@
 import { StackType } from '../api/types';
 import { makeContainer, makeStack } from '../testing/fixtures';
+import { en } from '../i18n/en';
+import { fr } from '../i18n/fr';
 import { countStacks, describeStackResult, groupByStack, mergeStacks, stackOf } from './stacks';
 
 const compose = (project: string) => ({ 'com.docker.compose.project': project });
@@ -104,17 +106,28 @@ describe('describeStackResult', () => {
   const [blog] = groupByStack([makeContainer({ Labels: compose('blog') })]);
 
   it('counts the successes', () => {
-    expect(describeStackResult(blog, 'start', { succeeded: 2, failures: [] })).toEqual({
+    expect(describeStackResult(blog, 'start', { succeeded: 2, failures: [] }, en)).toEqual({
       title: 'blog',
       message: '2 containers started.',
     });
   });
 
   it('details each failure', () => {
-    const { message } = describeStackResult(blog, 'stop', {
-      succeeded: 1,
-      failures: [{ name: 'db', message: 'refused' }],
-    });
+    const { message } = describeStackResult(
+      blog,
+      'stop',
+      { succeeded: 1, failures: [{ name: 'db', message: 'refused' }] },
+      en,
+    );
     expect(message).toBe('1 container stopped, 1 failed.\n\n• db: refused');
+  });
+
+  it('agrees the French participle with the count', () => {
+    expect(describeStackResult(blog, 'start', { succeeded: 2, failures: [] }, fr).message).toBe(
+      '2 conteneurs démarrés.',
+    );
+    expect(describeStackResult(blog, 'stop', { succeeded: 0, failures: [] }, fr).message).toBe(
+      '0 conteneur arrêté.',
+    );
   });
 });

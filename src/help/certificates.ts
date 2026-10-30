@@ -2,7 +2,8 @@
  * Help shown when an HTTPS instance can't be reached: how to present the
  * device with a certificate it trusts.
  *
- * Kept as data, like the legal texts: the screen only lays it out. The
+ * Kept as data, like the legal texts: the screen only lays it out, in the
+ * language of the catalog that carries it (`src/i18n`). The
  * Android device steps rely on `plugins/withUserCertificates.js`; without
  * it, the app would ignore a CA the user installed, whatever this text says.
  */
@@ -23,117 +24,231 @@ export interface CertificateSolution {
   note?: string;
 }
 
-export const CERTIFICATE_HELP_INTRO =
-  "iOS and Android reject self-signed certificates, like the one Portainer generates by default on port 9443. The app can't override this: the fix is to present the device with a certificate it trusts. Here are three ways to get there, from the simplest to the most hands-on.";
+// Commands and config are the same in every language.
+const TAILSCALE_SERVE = 'tailscale serve --bg https+insecure://localhost:9443';
+const TAILSCALE_URL = 'https://server.your-tailnet.ts.net';
+const PROXY_URL = 'https://portainer.example.com';
+const MKCERT_CREATE = 'mkcert portainer.lan 192.168.1.10';
+const MKCERT_CAROOT = 'mkcert -CAROOT';
+const CADDYFILE = [
+  'portainer.example.com {',
+  '  reverse_proxy https://portainer:9443 {',
+  '    transport http {',
+  '      tls_insecure_skip_verify',
+  '    }',
+  '  }',
+  '}',
+].join('\n');
+const PORTAINER_WITH_CERT = [
+  'docker run -d -p 9443:9443 --name portainer \\',
+  '  -v /var/run/docker.sock:/var/run/docker.sock \\',
+  '  -v portainer_data:/data -v "$PWD/certs:/certs" \\',
+  '  portainer/portainer-ce \\',
+  '  --sslcert /certs/portainer.lan+1.pem \\',
+  '  --sslkey /certs/portainer.lan+1-key.pem',
+].join('\n');
 
-export const CERTIFICATE_SOLUTIONS: readonly CertificateSolution[] = [
-  {
-    id: 'tailscale',
-    title: 'Tailscale',
-    bestFor: 'Best for reaching your server from anywhere, without opening a port.',
-    summary:
-      "Tailscale provides a valid Let's Encrypt certificate for your server's address on your Tailscale network.",
-    steps: [
-      { text: 'Install Tailscale on the server and on this phone, on the same network.' },
-      {
-        text: 'In the Tailscale admin console, enable MagicDNS and HTTPS certificates (DNS tab).',
-      },
-      {
-        text: 'On the server, serve Portainer over HTTPS:',
-        code: 'tailscale serve --bg https+insecure://localhost:9443',
-      },
-      {
-        text: "Sign in with the machine's address on your Tailscale network:",
-        code: 'https://server.your-tailnet.ts.net',
-      },
-    ],
-    note: '"https+insecure" only covers the local hop between Tailscale and Portainer, on the server itself: this phone still gets a valid certificate.',
-  },
-  {
-    id: 'reverse-proxy',
-    title: "Reverse proxy and Let's Encrypt",
-    bestFor: 'Best if you already own a domain name.',
-    summary:
-      "A reverse proxy obtains a Let's Encrypt certificate and presents it in place of Portainer's.",
-    steps: [
-      {
-        text: 'Point a name, for example portainer.example.com, at your reverse proxy.',
-      },
-      {
-        text: 'Put Portainer behind the proxy. With Caddy, on the same Docker network as the portainer container:',
-        code: [
-          'portainer.example.com {',
-          '  reverse_proxy https://portainer:9443 {',
-          '    transport http {',
-          '      tls_insecure_skip_verify',
-          '    }',
-          '  }',
-          '}',
-        ].join('\n'),
-      },
-      {
-        text: "For a name only reachable on your local network, use Let's Encrypt's DNS challenge: Caddy, Traefik and Nginx Proxy Manager support it with most DNS providers.",
-      },
-      { text: "Sign in with the proxy's address:", code: 'https://portainer.example.com' },
-    ],
-  },
-  {
-    id: 'own-ca',
-    title: 'Your own authority with mkcert',
-    bestFor: 'Best for a local network, without a domain name.',
-    summary:
-      "You create your own certificate authority, sign Portainer's certificate with it, then install that authority on this phone.",
-    steps: [
-      {
-        text: 'On a computer, install mkcert, then create a certificate for the addresses you type in the app (name, IP, or both):',
-        code: 'mkcert portainer.lan 192.168.1.10',
-      },
-      {
-        text: 'Start Portainer with this certificate, placed in a certs folder mounted on /certs:',
-        code: [
-          'docker run -d -p 9443:9443 --name portainer \\',
-          '  -v /var/run/docker.sock:/var/run/docker.sock \\',
-          '  -v portainer_data:/data -v "$PWD/certs:/certs" \\',
-          '  portainer/portainer-ce \\',
-          '  --sslcert /certs/portainer.lan+1.pem \\',
-          '  --sslkey /certs/portainer.lan+1-key.pem',
-        ].join('\n'),
-      },
-      {
-        text: "Get the authority: it's the rootCA.pem file in the folder this command prints.",
-        code: 'mkcert -CAROOT',
-      },
-      {
-        text: 'Send rootCA.pem to this phone (AirDrop, email, file), then install it as shown below.',
-      },
-    ],
-    note: 'Never share rootCA-key.pem: anyone holding this key can create certificates this phone will accept, for any website.',
-  },
-];
+export interface CertificateHelp {
+  intro: string;
+  solutions: readonly CertificateSolution[];
+  deviceTrustTitle: string;
+  /** Installing a user CA differs enough between the platforms to need its own steps. */
+  deviceTrustSteps: Record<'ios' | 'android', readonly HelpStep[]>;
+  footnote: string;
+}
 
-export const DEVICE_TRUST_TITLE = 'Install the authority on this phone';
-
-/** Installing a user CA differs enough between the platforms to need its own steps. */
-export const DEVICE_TRUST_STEPS: Record<'ios' | 'android', readonly HelpStep[]> = {
-  ios: [
-    { text: 'Open rootCA.pem on the iPhone: iOS offers to download a profile.' },
-    { text: 'Settings › General › VPN & Device Management: install the profile.' },
+export const CERTIFICATE_HELP_EN: CertificateHelp = {
+  intro:
+    "iOS and Android reject self-signed certificates, like the one Portainer generates by default on port 9443. The app can't override this: the fix is to present the device with a certificate it trusts. Here are three ways to get there, from the simplest to the most hands-on.",
+  solutions: [
     {
-      text: 'Settings › General › About › Certificate Trust Settings: turn on full trust for this certificate. Without this step, iOS installs the profile but still refuses the connection.',
+      id: 'tailscale',
+      title: 'Tailscale',
+      bestFor: 'Best for reaching your server from anywhere, without opening a port.',
+      summary:
+        "Tailscale provides a valid Let's Encrypt certificate for your server's address on your Tailscale network.",
+      steps: [
+        { text: 'Install Tailscale on the server and on this phone, on the same network.' },
+        {
+          text: 'In the Tailscale admin console, enable MagicDNS and HTTPS certificates (DNS tab).',
+        },
+        {
+          text: 'On the server, serve Portainer over HTTPS:',
+          code: TAILSCALE_SERVE,
+        },
+        {
+          text: "Sign in with the machine's address on your Tailscale network:",
+          code: TAILSCALE_URL,
+        },
+      ],
+      note: '"https+insecure" only covers the local hop between Tailscale and Portainer, on the server itself: this phone still gets a valid certificate.',
+    },
+    {
+      id: 'reverse-proxy',
+      title: "Reverse proxy and Let's Encrypt",
+      bestFor: 'Best if you already own a domain name.',
+      summary:
+        "A reverse proxy obtains a Let's Encrypt certificate and presents it in place of Portainer's.",
+      steps: [
+        {
+          text: 'Point a name, for example portainer.example.com, at your reverse proxy.',
+        },
+        {
+          text: 'Put Portainer behind the proxy. With Caddy, on the same Docker network as the portainer container:',
+          code: CADDYFILE,
+        },
+        {
+          text: "For a name only reachable on your local network, use Let's Encrypt's DNS challenge: Caddy, Traefik and Nginx Proxy Manager support it with most DNS providers.",
+        },
+        { text: "Sign in with the proxy's address:", code: PROXY_URL },
+      ],
+    },
+    {
+      id: 'own-ca',
+      title: 'Your own authority with mkcert',
+      bestFor: 'Best for a local network, without a domain name.',
+      summary:
+        "You create your own certificate authority, sign Portainer's certificate with it, then install that authority on this phone.",
+      steps: [
+        {
+          text: 'On a computer, install mkcert, then create a certificate for the addresses you type in the app (name, IP, or both):',
+          code: MKCERT_CREATE,
+        },
+        {
+          text: 'Start Portainer with this certificate, placed in a certs folder mounted on /certs:',
+          code: PORTAINER_WITH_CERT,
+        },
+        {
+          text: "Get the authority: it's the rootCA.pem file in the folder this command prints.",
+          code: MKCERT_CAROOT,
+        },
+        {
+          text: 'Send rootCA.pem to this phone (AirDrop, email, file), then install it as shown below.',
+        },
+      ],
+      note: 'Never share rootCA-key.pem: anyone holding this key can create certificates this phone will accept, for any website.',
     },
   ],
-  android: [
-    {
-      text: "Copy rootCA.pem to the phone. Rename it to rootCA.crt if the system doesn't offer to install it.",
-    },
-    {
-      text: 'Settings › Security › Encryption & credentials › Install a certificate › CA certificate. The path varies by manufacturer: search the settings for "certificate".',
-    },
-    {
-      text: 'Many apps ignore authorities installed this way. StackPilot does not: it accepts them just like the system ones.',
-    },
-  ],
+  deviceTrustTitle: 'Install the authority on this phone',
+  deviceTrustSteps: {
+    ios: [
+      { text: 'Open rootCA.pem on the iPhone: iOS offers to download a profile.' },
+      { text: 'Settings › General › VPN & Device Management: install the profile.' },
+      {
+        text: 'Settings › General › About › Certificate Trust Settings: turn on full trust for this certificate. Without this step, iOS installs the profile but still refuses the connection.',
+      },
+    ],
+    android: [
+      {
+        text: "Copy rootCA.pem to the phone. Rename it to rootCA.crt if the system doesn't offer to install it.",
+      },
+      {
+        text: 'Settings › Security › Encryption & credentials › Install a certificate › CA certificate. The path varies by manufacturer: search the settings for "certificate".',
+      },
+      {
+        text: 'Many apps ignore authorities installed this way. StackPilot does not: it accepts them just like the system ones.',
+      },
+    ],
+  },
+  footnote:
+    "Why not just accept Portainer's default certificate? The app would have to bypass the system's verification, which it doesn't do: the solutions above genuinely protect the connection, with no exception to manage.",
 };
 
-export const CERTIFICATE_HELP_FOOTNOTE =
-  "Why not just accept Portainer's default certificate? The app would have to bypass the system's verification, which it doesn't do: the solutions above genuinely protect the connection, with no exception to manage.";
+export const CERTIFICATE_HELP_FR: CertificateHelp = {
+  intro:
+    'iOS et Android rejettent les certificats auto-signés, comme celui que Portainer génère par défaut sur le port 9443. L’app ne peut pas passer outre : la solution est de présenter à l’appareil un certificat auquel il fait confiance. Voici trois façons d’y arriver, de la plus simple à la plus technique.',
+  solutions: [
+    {
+      id: 'tailscale',
+      title: 'Tailscale',
+      bestFor: 'Idéal pour joindre votre serveur de partout, sans ouvrir de port.',
+      summary:
+        'Tailscale fournit un certificat Let’s Encrypt valide pour l’adresse de votre serveur sur votre réseau Tailscale.',
+      steps: [
+        { text: 'Installez Tailscale sur le serveur et sur ce téléphone, sur le même réseau.' },
+        {
+          text: 'Dans la console d’administration Tailscale, activez MagicDNS et les certificats HTTPS (onglet DNS).',
+        },
+        {
+          text: 'Sur le serveur, servez Portainer en HTTPS :',
+          code: TAILSCALE_SERVE,
+        },
+        {
+          text: 'Connectez-vous avec l’adresse de la machine sur votre réseau Tailscale :',
+          code: TAILSCALE_URL,
+        },
+      ],
+      note: '« https+insecure » ne concerne que le saut local entre Tailscale et Portainer, sur le serveur lui-même : ce téléphone reçoit bien un certificat valide.',
+    },
+    {
+      id: 'reverse-proxy',
+      title: 'Reverse proxy et Let’s Encrypt',
+      bestFor: 'Idéal si vous avez déjà un nom de domaine.',
+      summary:
+        'Un reverse proxy obtient un certificat Let’s Encrypt et le présente à la place de celui de Portainer.',
+      steps: [
+        {
+          text: 'Faites pointer un nom, par exemple portainer.example.com, vers votre reverse proxy.',
+        },
+        {
+          text: 'Placez Portainer derrière le proxy. Avec Caddy, sur le même réseau Docker que le conteneur portainer :',
+          code: CADDYFILE,
+        },
+        {
+          text: 'Pour un nom joignable seulement sur votre réseau local, utilisez le challenge DNS de Let’s Encrypt : Caddy, Traefik et Nginx Proxy Manager le prennent en charge avec la plupart des fournisseurs DNS.',
+        },
+        { text: 'Connectez-vous avec l’adresse du proxy :', code: PROXY_URL },
+      ],
+    },
+    {
+      id: 'own-ca',
+      title: 'Votre propre autorité avec mkcert',
+      bestFor: 'Idéal pour un réseau local, sans nom de domaine.',
+      summary:
+        'Vous créez votre propre autorité de certification, signez avec elle le certificat de Portainer, puis installez cette autorité sur ce téléphone.',
+      steps: [
+        {
+          text: 'Sur un ordinateur, installez mkcert, puis créez un certificat pour les adresses que vous tapez dans l’app (nom, IP, ou les deux) :',
+          code: MKCERT_CREATE,
+        },
+        {
+          text: 'Lancez Portainer avec ce certificat, placé dans un dossier certs monté sur /certs :',
+          code: PORTAINER_WITH_CERT,
+        },
+        {
+          text: 'Récupérez l’autorité : c’est le fichier rootCA.pem du dossier qu’affiche cette commande.',
+          code: MKCERT_CAROOT,
+        },
+        {
+          text: 'Envoyez rootCA.pem sur ce téléphone (AirDrop, e-mail, fichier), puis installez-le comme indiqué plus bas.',
+        },
+      ],
+      note: 'Ne partagez jamais rootCA-key.pem : qui détient cette clé peut créer des certificats que ce téléphone acceptera, pour n’importe quel site.',
+    },
+  ],
+  deviceTrustTitle: 'Installer l’autorité sur ce téléphone',
+  // The settings paths are the French ones: someone reading the app in
+  // French most likely runs the phone in French too.
+  deviceTrustSteps: {
+    ios: [
+      { text: 'Ouvrez rootCA.pem sur l’iPhone : iOS propose de télécharger un profil.' },
+      { text: 'Réglages › Général › VPN et gestion de l’appareil : installez le profil.' },
+      {
+        text: 'Réglages › Général › Informations › Réglages des certificats : activez la confiance totale pour ce certificat. Sans cette étape, iOS installe le profil mais refuse toujours la connexion.',
+      },
+    ],
+    android: [
+      {
+        text: 'Copiez rootCA.pem sur le téléphone. Renommez-le en rootCA.crt si le système ne propose pas de l’installer.',
+      },
+      {
+        text: 'Paramètres › Sécurité › Chiffrement et identifiants › Installer un certificat › Certificat CA. Le chemin varie selon le fabricant : cherchez « certificat » dans les paramètres.',
+      },
+      {
+        text: 'Beaucoup d’apps ignorent les autorités installées ainsi. StackPilot non : il les accepte comme celles du système.',
+      },
+    ],
+  },
+  footnote:
+    'Pourquoi ne pas simplement accepter le certificat par défaut de Portainer ? L’app devrait contourner la vérification du système, ce qu’elle ne fait pas : les solutions ci-dessus protègent réellement la connexion, sans exception à gérer.',
+};
