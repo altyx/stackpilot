@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, View } from 'react-native';
+import { createStyles } from '../theme';
 
 export function SheetHeader({ title, message }: { title: string; message?: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.header}>
       <Text accessibilityRole="header" style={styles.title}>
@@ -12,8 +13,8 @@ export function SheetHeader({ title, message }: { title: string; message?: strin
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   header: { gap: theme.spacing(1.5) },
   title: { color: theme.colors.text, fontSize: 18, fontWeight: '700' },
   message: { color: theme.colors.textMuted, fontSize: 14, lineHeight: 20 },
-});
+}));

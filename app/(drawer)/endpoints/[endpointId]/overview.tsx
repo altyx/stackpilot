@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   queryKeys,
@@ -26,9 +26,11 @@ import {
 import { groupByStack, mergeStacks } from '../../../../src/lib/stacks';
 import { imagesWithUsage, volumesWithUsage } from '../../../../src/lib/usage';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 export default function OverviewScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const id = useEndpointParam();
   const queryClient = useQueryClient();
   const containers = useContainers(id);
@@ -139,7 +141,7 @@ function describeUnused(count: number): string {
   return count === 0 ? 'all in use' : `${count} unused`;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   content: { padding: theme.spacing(4), gap: theme.spacing(6), paddingBottom: theme.spacing(10) },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing(3) },
-});
+}));

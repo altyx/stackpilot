@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, TextInput, View } from 'react-native';
+import { createStyles } from '../theme';
 
 /**
  * Last guard before deleting data: the user types a phrase. A tap can slip,
@@ -16,6 +16,7 @@ export function TypedConfirmation({
   value: string;
   onChange: (next: string) => void;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.block}>
       <Text style={styles.label}>
@@ -38,7 +39,7 @@ export function matchesPhrase(value: string, phrase: string): boolean {
   return value.trim().toLowerCase() === phrase.trim().toLowerCase();
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   block: { gap: theme.spacing(2) },
   label: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 18 },
   phrase: { color: theme.colors.text, fontWeight: '600' },
@@ -52,4 +53,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing(3),
     paddingVertical: theme.spacing(2.5),
   },
-});
+}));

@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { ImageSummary } from '../api/types';
 import { formatBytes, formatDate } from '../lib/format';
 import { imageLabel, isDangling, shortImageId, type Usage } from '../lib/usage';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
@@ -18,6 +18,7 @@ export function ImageCard({
   /** Offered on unused images only: Docker refuses to delete the others. */
   onDelete?: () => void;
 }) {
+  const styles = useStyles();
   const { item: image, usedBy } = usage;
   return (
     <Card style={styles.card}>
@@ -60,7 +61,7 @@ export function ImageCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(3) },
   content: { flex: 1, gap: theme.spacing(1) },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.spacing(2) },
@@ -69,4 +70,4 @@ const styles = StyleSheet.create({
   dangling: { color: theme.colors.warning, fontSize: 12 },
   update: { color: theme.colors.accent, fontSize: 12, fontWeight: '500' },
   usedBy: { color: theme.colors.text, fontSize: 12 },
-});
+}));

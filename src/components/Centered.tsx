@@ -1,11 +1,12 @@
-import { StyleSheet, View } from 'react-native';
-import { theme } from '../theme';
+import { View } from 'react-native';
+import { createStyles } from '../theme';
 
 export function Centered({ children }: { children: React.ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.centered}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   centered: {
     flex: 1,
     alignItems: 'center',
@@ -13,4 +14,4 @@ const styles = StyleSheet.create({
     padding: theme.spacing(6),
     gap: theme.spacing(3),
   },
-});
+}));

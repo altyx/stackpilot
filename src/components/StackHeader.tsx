@@ -1,7 +1,7 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { StackSection } from '../lib/stacks';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 export function StackHeader({
   section,
@@ -14,6 +14,8 @@ export function StackHeader({
   disabled: boolean;
   onPressActions: (section: StackSection) => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const { title, members, running } = section;
   return (
     <View style={styles.sectionHeader}>
@@ -41,7 +43,7 @@ export function StackHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   // Opaque background required: the header stays pinned above the cards.
   sectionHeader: {
     backgroundColor: theme.colors.bg,
@@ -63,4 +65,4 @@ const styles = StyleSheet.create({
   sectionCountFull: { color: theme.colors.success },
   sectionAction: { width: 28, alignItems: 'flex-end' },
   pressed: { opacity: 0.75 },
-});
+}));

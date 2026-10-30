@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, View } from 'react-native';
+import { createStyles } from '../theme';
 
 export interface SegmentedOption<T extends string> {
   value: T;
@@ -15,6 +15,7 @@ export function Segmented<T extends string>({
   value: T;
   onChange: (next: T) => void;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.segmented}>
       {options.map((option) => {
@@ -34,7 +35,7 @@ export function Segmented<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   segmented: { flexDirection: 'row', gap: theme.spacing(2) },
   segment: {
     flex: 1,
@@ -47,5 +48,5 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surfaceAlt,
     overflow: 'hidden',
   },
-  segmentActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.text },
-});
+  segmentActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.onFill },
+}));

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { ContainerCounts } from '../lib/overview';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 
 /**
@@ -8,6 +8,8 @@ import { Card } from './Card';
  * three figures read better in columns than squeezed into a caption.
  */
 export function HealthCounts({ counts }: { counts: ContainerCounts }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const columns = [
     { label: 'Healthy', value: counts.healthy, color: theme.colors.success },
     {
@@ -43,7 +45,7 @@ export function HealthCounts({ counts }: { counts: ContainerCounts }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(3) },
   title: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '500' },
   columns: { flexDirection: 'row' },
@@ -56,4 +58,4 @@ const styles = StyleSheet.create({
   value: { fontSize: 22, fontWeight: '500', fontVariant: ['tabular-nums'] },
   label: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 16 },
   footnote: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 16 },
-});
+}));

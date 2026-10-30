@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
+import { Alert, ScrollView, Text } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { NumberedStep } from '../src/components/NumberedStep';
 import { registerForPush, type PushRegistration } from '../src/notifications/push';
-import { theme } from '../src/theme';
+import { createStyles } from '../src/theme';
 
 export default function NotificationsScreen() {
+  const styles = useStyles();
   const [registration, setRegistration] = useState<PushRegistration | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -83,7 +84,7 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   content: { padding: theme.spacing(4), gap: theme.spacing(3), paddingBottom: theme.spacing(10) },
   intro: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 19 },
   card: { gap: theme.spacing(3) },
@@ -98,4 +99,4 @@ const styles = StyleSheet.create({
     padding: theme.spacing(3),
   },
   footnote: { color: theme.colors.textMuted, fontSize: 11, lineHeight: 16 },
-});
+}));

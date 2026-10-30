@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, View } from 'react-native';
+import { createStyles } from '../theme';
 
 export function Section({ title, children }: { title: string; children: ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.section}>
       <Text accessibilityRole="header" style={styles.sectionTitle}>
@@ -13,7 +14,7 @@ export function Section({ title, children }: { title: string; children: ReactNod
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   section: { gap: theme.spacing(2) },
   sectionTitle: {
     color: theme.colors.textMuted,
@@ -23,4 +24,4 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     paddingHorizontal: theme.spacing(1),
   },
-});
+}));

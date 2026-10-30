@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import {
   useContainers,
@@ -40,9 +40,11 @@ import {
   type StackSection,
 } from '../../../../src/lib/stacks';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 export default function StackDetailScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const { stackName } = useLocalSearchParams<{ stackName: string }>();
   const id = useEndpointParam();
   const containers = useContainers(id);
@@ -295,7 +297,7 @@ function describeAutoUpdate(interval?: string, webhook?: string): string {
   return 'No';
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   content: { padding: theme.spacing(4), gap: theme.spacing(3), paddingBottom: theme.spacing(10) },
   card: { gap: theme.spacing(3) },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
@@ -307,4 +309,4 @@ const styles = StyleSheet.create({
   action: { flex: 1 },
   envHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   link: { color: theme.colors.accent, fontSize: 13, fontWeight: '600' },
-});
+}));

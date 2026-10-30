@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 export type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -19,6 +19,8 @@ export function DrawerLink({
   /** Absent when the destination doesn't exist yet: the entry is disabled. */
   onPress?: () => void;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const disabled = !onPress;
   const color =
     tone === 'danger' ? theme.colors.danger : active ? theme.colors.accent : theme.colors.text;
@@ -42,7 +44,7 @@ export function DrawerLink({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   // 48 pt minimum: the recommended touch target on both Android and iOS.
   link: {
     flexDirection: 'row',
@@ -56,4 +58,4 @@ const styles = StyleSheet.create({
   linkLabel: { fontSize: 15, fontWeight: '600', flexShrink: 1 },
   pressed: { opacity: 0.75 },
   disabled: { opacity: 0.4 },
-});
+}));

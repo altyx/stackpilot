@@ -1,5 +1,5 @@
-import { StyleSheet, View } from 'react-native';
-import { theme } from '../theme';
+import { View } from 'react-native';
+import { createStyles } from '../theme';
 import { IconButton } from './IconButton';
 
 /** Same controls inline and full screen, so nothing is relearned when expanding. */
@@ -27,6 +27,7 @@ export function LogControls({
   /** Nothing to copy or share yet. */
   disabled: boolean;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <IconButton
@@ -63,7 +64,7 @@ export function LogControls({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   spacer: { flex: 1 },
-});
+}));

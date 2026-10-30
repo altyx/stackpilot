@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import { formatDate } from '../lib/format';
 import type { StackOverview } from '../lib/stacks';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { StackImageStatus } from './StackImageStatus';
 import { StackKindBadge } from './StackKindBadge';
@@ -14,6 +14,7 @@ export function StackCard({
   endpointId: number;
   overview: StackOverview;
 }) {
+  const styles = useStyles();
   const { name, kind, stack, running, total } = overview;
   return (
     <Link href={`/endpoints/${endpointId}/stacks/${encodeURIComponent(name)}`} asChild>
@@ -28,7 +29,7 @@ export function StackCard({
             <StackKindBadge kind={kind} />
           </View>
 
-          <Text style={[styles.count, countStyle(running, total)]}>
+          <Text style={[styles.count, countStyle(styles, running, total)]}>
             {describeCount(running, total)}
           </Text>
 
@@ -59,7 +60,7 @@ export function describeCount(running: number, total: number): string {
   return `${running}/${total} running`;
 }
 
-function countStyle(running: number, total: number) {
+function countStyle(styles: ReturnType<typeof useStyles>, running: number, total: number) {
   if (total === 0) return styles.countNone;
   if (running === total) return styles.countFull;
   return running === 0 ? styles.countNone : styles.countPartial;
@@ -72,7 +73,7 @@ function describeOrigin(creationDate: number, createdBy: string): string {
   return parts.join(' ') || 'Managed by Portainer';
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(1) },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(2) },
   name: { color: theme.colors.text, fontSize: 15, fontWeight: '600', flex: 1 },
@@ -82,4 +83,4 @@ const styles = StyleSheet.create({
   countNone: { color: theme.colors.textMuted },
   meta: { color: theme.colors.textMuted, fontSize: 12 },
   pressed: { opacity: 0.75 },
-});
+}));

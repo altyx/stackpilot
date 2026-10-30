@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import { Platform, StyleSheet, Text } from 'react-native';
+import { Platform, Text } from 'react-native';
 import { formatLogTime, type LogLine } from '../lib/logs';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 /** One log line, its time dimmed in front when shown. Memoised: lists re-render on every poll. */
 export const LogLineRow = memo(function LogLineRow({
@@ -11,6 +11,7 @@ export const LogLineRow = memo(function LogLineRow({
   line: LogLine;
   showTimestamp: boolean;
 }) {
+  const styles = useStyles();
   const time = showTimestamp ? formatLogTime(line.timestamp) : '';
   return (
     <Text selectable style={styles.line}>
@@ -20,7 +21,7 @@ export const LogLineRow = memo(function LogLineRow({
   );
 });
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   line: {
     color: theme.colors.text,
     fontFamily: Platform.select({ ios: 'Menlo', default: 'monospace' }),
@@ -28,4 +29,4 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   time: { color: theme.colors.textMuted },
-});
+}));

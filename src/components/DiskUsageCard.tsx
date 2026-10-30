@@ -1,12 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useDiskUsage } from '../api/hooks';
 import { summarizeDiskUsage } from '../lib/disk';
 import { formatBytes } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
 
 export function DiskUsageCard({ endpointId }: { endpointId: number }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const { data, error, refetch } = useDiskUsage(endpointId);
 
   if (error || !data) {
@@ -61,7 +63,7 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(3) },
   header: { flexDirection: 'row', alignItems: 'baseline', gap: theme.spacing(2) },
   total: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
@@ -80,4 +82,4 @@ const styles = StyleSheet.create({
   legendLabel: { color: theme.colors.text, fontSize: 13, flex: 1 },
   legendValue: { color: theme.colors.textMuted, fontSize: 13, fontVariant: ['tabular-nums'] },
   reclaimable: { color: theme.colors.textMuted, fontSize: 12, lineHeight: 17 },
-});
+}));

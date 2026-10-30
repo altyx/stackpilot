@@ -1,14 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
-import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '../src/auth/AuthContext';
 import { CurrentEndpointProvider } from '../src/navigation/CurrentEndpoint';
+import { ThemeProvider } from '../src/components/ThemeProvider';
 import { RootNavigator } from '../src/navigation/RootNavigator';
 import { SettingsProvider } from '../src/settings/SettingsContext';
-import { theme } from '../src/theme';
 
 // Without this handler, an alert received while the app is open stays invisible.
 Notifications.setNotificationHandler({
@@ -39,12 +38,13 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
-            <AuthProvider>
-              <CurrentEndpointProvider>
-                <StatusBar style="light" />
-                <RootNavigator />
-              </CurrentEndpointProvider>
-            </AuthProvider>
+            <ThemeProvider>
+              <AuthProvider>
+                <CurrentEndpointProvider>
+                  <RootNavigator />
+                </CurrentEndpointProvider>
+              </AuthProvider>
+            </ThemeProvider>
           </SettingsProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
@@ -52,6 +52,7 @@ export default function RootLayout() {
   );
 }
 
+// Transparent: the root view behind it carries the theme's background.
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: theme.colors.bg },
+  root: { flex: 1 },
 });

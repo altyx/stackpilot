@@ -1,10 +1,11 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import type { CertificateSolution } from '../help/certificates';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { Card } from './Card';
 import { NumberedStep } from './NumberedStep';
 
 export function CertificateSolutionCard({ solution }: { solution: CertificateSolution }) {
+  const styles = useStyles();
   return (
     <Card style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>
@@ -20,7 +21,7 @@ export function CertificateSolutionCard({ solution }: { solution: CertificateSol
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   card: { gap: theme.spacing(3) },
   title: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
   bestFor: {
@@ -31,4 +32,4 @@ const styles = StyleSheet.create({
   },
   summary: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 19 },
   note: { color: theme.colors.warning, fontSize: 12, lineHeight: 17 },
-});
+}));

@@ -1,12 +1,13 @@
 import { Drawer, DrawerToggleButton } from 'expo-router/drawer';
 import { AppDrawerContent } from '../../src/navigation/AppDrawerContent';
-import { theme } from '../../src/theme';
+import { useTheme } from '../../src/theme';
 
 /**
  * Main screens, grouped under the side drawer. Detail screens stay in the
  * root stack: they stack on top of the drawer, with a back button.
  */
 export default function DrawerLayout() {
+  const theme = useTheme();
   return (
     <Drawer
       // Android back returns to the previous screen rather than the drawer's first one.

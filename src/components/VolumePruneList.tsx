@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import type { VolumeSummary } from '../api/types';
 import { formatBytes } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 
 /** Beyond this, the list is summarized to keep the sheet compact. */
 const MAX_LISTED = 6;
@@ -13,6 +13,7 @@ export function VolumePruneList({
   volumes: VolumeSummary[];
   sizes: Map<string, number>;
 }) {
+  const styles = useStyles();
   const listed = volumes.slice(0, MAX_LISTED);
   const hidden = volumes.length - listed.length;
   return (
@@ -33,7 +34,7 @@ export function VolumePruneList({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   volumes: {
     backgroundColor: theme.colors.bg,
     borderRadius: theme.radius.md,
@@ -45,4 +46,4 @@ const styles = StyleSheet.create({
   name: { color: theme.colors.text, fontSize: 14, flex: 1 },
   size: { color: theme.colors.textMuted, fontSize: 13 },
   more: { color: theme.colors.textMuted, fontSize: 13 },
-});
+}));

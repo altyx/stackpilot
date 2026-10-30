@@ -1,7 +1,7 @@
 import { useState, type ComponentProps } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 /**
  * Labeled field. A `secret` field is masked by default, with a button to
@@ -15,6 +15,8 @@ export function LoginField({
   ComponentProps<typeof TextInput>,
   'secureTextEntry'
 >) {
+  const theme = useTheme();
+  const styles = useStyles();
   const [revealed, setRevealed] = useState(false);
   return (
     <View style={styles.field}>
@@ -48,7 +50,7 @@ export function LoginField({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   field: { gap: theme.spacing(1.5) },
   fieldLabel: { color: theme.colors.textMuted, fontSize: 13, fontWeight: '600' },
   inputFrame: {
@@ -67,4 +69,4 @@ const styles = StyleSheet.create({
   },
   reveal: { justifyContent: 'center', paddingHorizontal: theme.spacing(3) },
   revealPressed: { opacity: 0.6 },
-});
+}));

@@ -1,13 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Alert,
-  RefreshControl,
-  SectionList,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, RefreshControl, SectionList, Text, TextInput, View } from 'react-native';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
@@ -26,11 +18,13 @@ import {
   groupByStack,
   type StackSection,
 } from '../../../../src/lib/stacks';
-import { theme } from '../../../../src/theme';
+import { createStyles, useTheme } from '../../../../src/theme';
 
 type Filter = 'all' | 'running' | 'stopped';
 
 export default function ContainersScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const id = useEndpointParam();
   const { data, error, isPending, refetch, isRefetching } = useContainers(id);
   const [search, setSearch] = useState('');
@@ -155,7 +149,7 @@ export default function ContainersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   list: { padding: theme.spacing(4), paddingBottom: theme.spacing(8) },
   header: { gap: theme.spacing(2), marginBottom: theme.spacing(2) },
   search: {
@@ -169,4 +163,4 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing(2.5),
   },
   summary: { color: theme.colors.textMuted, fontSize: 12 },
-});
+}));

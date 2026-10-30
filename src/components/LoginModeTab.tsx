@@ -1,5 +1,5 @@
-import { StyleSheet, Text } from 'react-native';
-import { theme } from '../theme';
+import { Text } from 'react-native';
+import { createStyles } from '../theme';
 
 export function LoginModeTab({
   label,
@@ -10,6 +10,7 @@ export function LoginModeTab({
   active: boolean;
   onPress: () => void;
 }) {
+  const styles = useStyles();
   return (
     <Text
       accessibilityRole="button"
@@ -21,7 +22,7 @@ export function LoginModeTab({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   modeTab: {
     flex: 1,
     textAlign: 'center',
@@ -32,5 +33,5 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.sm,
     overflow: 'hidden',
   },
-  modeTabActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.text },
-});
+  modeTabActive: { backgroundColor: theme.colors.accentFill, color: theme.colors.onFill },
+}));

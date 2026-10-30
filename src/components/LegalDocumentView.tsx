@@ -1,10 +1,11 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import type { LegalDocument } from '../legal/document';
-import { theme } from '../theme';
+import { createStyles } from '../theme';
 import { LegalDocumentBlock } from './LegalDocumentBlock';
 
 /** Displays a legal text: title, last-updated date, then numbered sections. */
 export function LegalDocumentView({ document }: { document: LegalDocument }) {
+  const styles = useStyles();
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -32,7 +33,7 @@ export function LegalDocumentView({ document }: { document: LegalDocument }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   content: { padding: theme.spacing(5), gap: theme.spacing(5), paddingBottom: theme.spacing(12) },
   header: { gap: theme.spacing(1) },
   title: { color: theme.colors.text, fontSize: 24, fontWeight: '700' },
@@ -40,4 +41,4 @@ const styles = StyleSheet.create({
   section: { gap: theme.spacing(2) },
   sectionTitle: { color: theme.colors.text, fontSize: 16, fontWeight: '600' },
   paragraph: { color: theme.colors.text, fontSize: 14, lineHeight: 21 },
-});
+}));

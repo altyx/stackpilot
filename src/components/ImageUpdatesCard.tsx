@@ -1,10 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useImageUpdates } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
 import { plural } from '../lib/format';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
 
@@ -19,6 +19,8 @@ export function ImageUpdatesCard({
   endpointId: number;
   containers: ContainerSummary[];
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const updates = useImageUpdates(endpointId, containers);
   const router = useRouter();
 
@@ -69,10 +71,10 @@ export function ImageUpdatesCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   row: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(3) },
   text: { flex: 1, gap: theme.spacing(0.5) },
   title: { color: theme.colors.text, fontSize: 14, fontWeight: '600', flexShrink: 1 },
   muted: { color: theme.colors.textMuted, fontSize: 13, lineHeight: 19 },
   pressed: { opacity: 0.75 },
-});
+}));

@@ -1,7 +1,7 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ImageStatus } from '../api/types';
-import { theme } from '../theme';
+import { createStyles, useTheme } from '../theme';
 
 export const IMAGE_STATUS_LABELS: Record<ImageStatus, string> = {
   updated: 'Image up to date',
@@ -10,12 +10,13 @@ export const IMAGE_STATUS_LABELS: Record<ImageStatus, string> = {
   unknown: 'Image status unknown',
 };
 
-const ICONS: Record<Exclude<ImageStatus, 'processing'>, { name: IconName; color: string }> = {
-  updated: { name: 'checkmark-circle', color: theme.colors.success },
-  outdated: { name: 'arrow-up-circle', color: theme.colors.warning },
-  unknown: { name: 'help-circle-outline', color: theme.colors.textMuted },
+const ICONS: Record<Exclude<ImageStatus, 'processing'>, { name: IconName; color: StatusColor }> = {
+  updated: { name: 'checkmark-circle', color: 'success' },
+  outdated: { name: 'arrow-up-circle', color: 'warning' },
+  unknown: { name: 'help-circle-outline', color: 'textMuted' },
 };
 
+type StatusColor = 'success' | 'warning' | 'textMuted';
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /**
@@ -33,12 +34,14 @@ export function ImageStatusIcon({
   /** Wording for something other than a single container's image. */
   labels?: Record<ImageStatus, string>;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const label = labels[status];
   const icon =
     status === 'processing' ? (
       <ActivityIndicator color={theme.colors.textMuted} size="small" />
     ) : (
-      <Ionicons name={ICONS[status].name} size={18} color={ICONS[status].color} />
+      <Ionicons name={ICONS[status].name} size={18} color={theme.colors[ICONS[status].color]} />
     );
 
   if (!withLabel) {
@@ -57,8 +60,8 @@ export function ImageStatusIcon({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   labelled: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing(1.5) },
   label: { color: theme.colors.textMuted, fontSize: 13 },
-  labelOutdated: { color: theme.colors.warning },
-});
+  labelOutdated: { color: 'warning' },
+}));

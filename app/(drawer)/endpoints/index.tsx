@@ -1,4 +1,4 @@
-import { FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
+import { FlatList, RefreshControl, Text } from 'react-native';
 import { useEndpoints } from '../../../src/api/hooks';
 import { useAuth } from '../../../src/auth/AuthContext';
 import { EmptyState } from '../../../src/components/EmptyState';
@@ -6,9 +6,11 @@ import { EndpointCard } from '../../../src/components/EndpointCard';
 import { ErrorView } from '../../../src/components/ErrorView';
 import { Loader } from '../../../src/components/Loader';
 import { useCurrentEndpoint } from '../../../src/navigation/CurrentEndpoint';
-import { theme } from '../../../src/theme';
+import { createStyles, useTheme } from '../../../src/theme';
 
 export default function EndpointsScreen() {
+  const theme = useTheme();
+  const styles = useStyles();
   const { data, error, isPending, refetch, isRefetching } = useEndpoints();
   const { session } = useAuth();
   const { endpointId } = useCurrentEndpoint();
@@ -40,7 +42,7 @@ export default function EndpointsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   list: { padding: theme.spacing(4), gap: theme.spacing(3) },
   instance: { color: theme.colors.textMuted, fontSize: 12, marginBottom: theme.spacing(1) },
-});
+}));

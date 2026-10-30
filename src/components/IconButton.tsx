@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import { theme } from '../theme';
+import { Pressable } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -32,6 +32,8 @@ export function IconButton({
   active?: boolean;
   disabled?: boolean;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   const danger = variant === 'danger';
   return (
     <Pressable
@@ -56,7 +58,7 @@ export function IconButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   button: {
     width: SIZE,
     height: SIZE,
@@ -73,4 +75,4 @@ const styles = StyleSheet.create({
   active: { backgroundColor: theme.colors.accentSubtle, borderColor: theme.colors.accentDim },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.45 },
-});
+}));

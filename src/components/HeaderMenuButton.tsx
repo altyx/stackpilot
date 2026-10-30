@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Pressable, StyleSheet } from 'react-native';
-import { theme } from '../theme';
+import { Pressable } from 'react-native';
+import { createStyles, useTheme } from '../theme';
 
 /** "More actions" button for a screen header: present, but never in the way. */
 export function HeaderMenuButton({
@@ -12,6 +12,8 @@ export function HeaderMenuButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const theme = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,7 +29,7 @@ export function HeaderMenuButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   button: { paddingHorizontal: theme.spacing(1) },
   dimmed: { opacity: 0.45 },
-});
+}));

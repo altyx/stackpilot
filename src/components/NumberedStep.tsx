@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Text, View } from 'react-native';
+import { createStyles } from '../theme';
 import { CodeBlock } from './CodeBlock';
 
 /** Step of a setup guide, with the command it asks to type if any. */
 export function NumberedStep({ n, text, code }: { n: number; text: string; code?: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.step}>
       <Text style={styles.stepNumber}>{n}</Text>
@@ -15,7 +16,7 @@ export function NumberedStep({ n, text, code }: { n: number; text: string; code?
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   step: { flexDirection: 'row', gap: theme.spacing(3), alignItems: 'flex-start' },
   stepNumber: {
     color: theme.colors.accent,
@@ -25,4 +26,4 @@ const styles = StyleSheet.create({
   },
   stepBody: { flex: 1, gap: theme.spacing(2) },
   stepText: { color: theme.colors.text, fontSize: 13, lineHeight: 19 },
-});
+}));

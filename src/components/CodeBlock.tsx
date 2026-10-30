@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import { theme } from '../theme';
+import { Platform, Text, View } from 'react-native';
+import { createStyles } from '../theme';
 import { IconButton } from './IconButton';
 
 /**
@@ -10,6 +10,7 @@ import { IconButton } from './IconButton';
  * an alert to dismiss.
  */
 export function CodeBlock({ code }: { code: string }) {
+  const styles = useStyles();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -31,7 +32,7 @@ export function CodeBlock({ code }: { code: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = createStyles((theme) => ({
   block: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -51,4 +52,4 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     paddingVertical: theme.spacing(1.5),
   },
-});
+}));
