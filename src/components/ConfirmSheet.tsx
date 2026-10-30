@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { SheetActions } from './SheetActions';
@@ -31,7 +31,7 @@ export function ConfirmSheet({
   onCancel,
   children,
 }: ConfirmSheetProps) {
-  const t = useStrings();
+  const { t } = useTranslation();
   // Remembers why the sheet is closing: the callback only fires once the animation ends.
   const [outcome, setOutcome] = useState<'confirm' | 'cancel' | null>(null);
   const close = (next: 'confirm' | 'cancel') => setOutcome((current) => current ?? next);
@@ -67,7 +67,7 @@ export function ConfirmSheet({
           disabled={!confirmed}
           onPress={() => close('confirm')}
         />
-        <Button label={t.common.cancel} variant="secondary" onPress={() => close('cancel')} />
+        <Button label={t('common.cancel')} variant="secondary" onPress={() => close('cancel')} />
       </SheetActions>
     </BottomSheet>
   );

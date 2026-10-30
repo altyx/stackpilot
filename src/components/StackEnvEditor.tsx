@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import type { StackEnv } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { isSensitiveName } from '../lib/secrets';
 import { emptyDraft, fromDrafts, toDrafts, validateEnv, type EnvDraft } from '../lib/stackEnv';
 import { createStyles, useTheme } from '../theme';
@@ -27,7 +27,7 @@ export function StackEnvEditor({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [drafts, setDrafts] = useState<EnvDraft[]>(() => toDrafts(initial));
   const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
@@ -63,9 +63,9 @@ export function StackEnvEditor({
               <TextInput
                 value={draft.name}
                 onChangeText={(name) => update(draft.key, { name })}
-                placeholder={t.stack.namePlaceholder}
+                placeholder={t('stack.namePlaceholder')}
                 placeholderTextColor={theme.colors.textMuted}
-                accessibilityLabel={t.stack.nameLabel}
+                accessibilityLabel={t('stack.nameLabel')}
                 autoCapitalize="characters"
                 autoCorrect={false}
                 spellCheck={false}
@@ -75,9 +75,13 @@ export function StackEnvEditor({
                 <TextInput
                   value={draft.value}
                   onChangeText={(value) => update(draft.key, { value })}
-                  placeholder={t.stack.valuePlaceholder}
+                  placeholder={t('stack.valuePlaceholder')}
                   placeholderTextColor={theme.colors.textMuted}
-                  accessibilityLabel={t.stack.valueOf(draft.name)}
+                  accessibilityLabel={
+                    draft.name
+                      ? t('stack.valueOf', { name: draft.name })
+                      : t('stack.valueOfUnnamed')
+                  }
                   autoCapitalize="none"
                   autoCorrect={false}
                   spellCheck={false}
@@ -90,7 +94,9 @@ export function StackEnvEditor({
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={
-                      masked ? t.common.show(draft.name) : t.common.hide(draft.name)
+                      masked
+                        ? t('common.show', { name: draft.name })
+                        : t('common.hide', { name: draft.name })
                     }
                     hitSlop={8}
                     onPress={() => toggleReveal(draft.key)}>
@@ -102,12 +108,22 @@ export function StackEnvEditor({
                   </Pressable>
                 ) : null}
               </View>
-              {error ? <Text style={styles.error}>{t.stack.envError(error)}</Text> : null}
+              {error ? (
+                <Text style={styles.error}>
+                  {t(`stack.envErrors.${error.kind}`, {
+                    name: error.kind === 'duplicate' ? error.name : '',
+                  })}
+                </Text>
+              ) : null}
             </View>
             <IconButton
               icon="remove-circle-outline"
               variant="danger"
-              accessibilityLabel={t.stack.removeVariable(draft.name)}
+              accessibilityLabel={
+                draft.name
+                  ? t('stack.removeVariable', { name: draft.name })
+                  : t('stack.removeUnnamed')
+              }
               onPress={() => setDrafts((current) => current.filter((d) => d.key !== draft.key))}
             />
           </View>
@@ -118,18 +134,18 @@ export function StackEnvEditor({
         accessibilityRole="button"
         onPress={() => setDrafts((current) => [...current, emptyDraft()])}
         style={styles.add}>
-        {t.stack.addVariable}
+        {t('stack.addVariable')}
       </Text>
 
       <View style={styles.actions}>
         <Button
-          label={t.common.cancel}
+          label={t('common.cancel')}
           variant="secondary"
           onPress={onCancel}
           style={styles.action}
         />
         <Button
-          label={t.common.save}
+          label={t('common.save')}
           onPress={save}
           loading={busy}
           disabled={submitted && errors.size > 0}

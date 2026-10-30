@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View } from 'react-native';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { ContainerProblem } from '../lib/overview';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
@@ -19,7 +19,7 @@ export function HealthCard({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const ok = problems.length === 0;
   const listed = problems.slice(0, MAX_LISTED);
   const hidden = problems.length - listed.length;
@@ -33,10 +33,10 @@ export function HealthCard({
         />
         <View style={styles.headerText}>
           <Text accessibilityRole="header" style={styles.title}>
-            {ok ? t.overview.allGood : t.overview.toCheck(problems.length)}
+            {ok ? t('overview.allGood') : t('overview.toCheck', { count: problems.length })}
           </Text>
           <Text style={styles.subtitle}>
-            {ok ? t.overview.allGoodHint : t.overview.toCheckHint}
+            {ok ? t('overview.allGoodHint') : t('overview.toCheckHint')}
           </Text>
         </View>
       </View>
@@ -45,11 +45,13 @@ export function HealthCard({
           key={container.Id}
           endpointId={endpointId}
           container={container}
-          detail={t.overview.problems[kind]}
+          detail={t(`overview.problems.${kind}`)}
           tone="warning"
         />
       ))}
-      {hidden > 0 ? <Text style={styles.more}>{t.common.andMore(hidden)}</Text> : null}
+      {hidden > 0 ? (
+        <Text style={styles.more}>{t('common.andMore', { count: hidden })}</Text>
+      ) : null}
     </Card>
   );
 }

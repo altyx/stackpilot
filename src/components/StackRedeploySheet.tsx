@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { PortainerStack } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { SheetActions } from './SheetActions';
@@ -27,7 +27,7 @@ export function StackRedeploySheet({
   onClose: () => void;
 }) {
   const shown = useLatched(stack);
-  const t = useStrings();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('choose');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const close = (next: Outcome) => setOutcome((current) => current ?? next);
@@ -56,36 +56,50 @@ export function StackRedeploySheet({
       {step === 'choose' ? (
         <>
           <SheetHeader
-            title={t.stack.redeployTitle(shown.Name)}
+            title={t('stack.redeployTitle', { name: shown.Name })}
             message={
               git
-                ? t.stack.redeployGit(branchName(git.ReferenceName) || t.stack.trackedBranch)
-                : t.stack.redeployFile
+                ? t('stack.redeployGit', {
+                    branch: branchName(git.ReferenceName) || t('stack.trackedBranch'),
+                  })
+                : t('stack.redeployFile')
             }
           />
           <SheetActions>
             <Button
-              label={git ? t.stack.updateFromGit : t.stack.redeploy}
+              label={git ? t('stack.updateFromGit') : t('stack.redeploy')}
               variant="secondary"
               onPress={() => setStep('redeploy')}
             />
             <Button
-              label={git ? t.stack.gitWithImages : t.stack.pullAndRedeploy}
+              label={git ? t('stack.gitWithImages') : t('stack.pullAndRedeploy')}
               variant="secondary"
               onPress={() => setStep('pull')}
             />
-            <Button label={t.common.cancel} variant="secondary" onPress={() => close('cancel')} />
+            <Button
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={() => close('cancel')}
+            />
           </SheetActions>
         </>
       ) : (
         <>
           <SheetHeader
-            title={t.stack.redeployConfirmTitle(shown.Name)}
-            message={t.stack.redeployImpact(step === 'pull')}
+            title={t('stack.redeployConfirmTitle', { name: shown.Name })}
+            message={
+              step === 'pull'
+                ? `${t('stack.redeployImpact')} ${t('stack.redeployPullNote')}`
+                : t('stack.redeployImpact')
+            }
           />
           <SheetActions>
-            <Button label={t.stack.redeploy} onPress={() => close(step)} />
-            <Button label={t.common.back} variant="secondary" onPress={() => setStep('choose')} />
+            <Button label={t('stack.redeploy')} onPress={() => close(step)} />
+            <Button
+              label={t('common.back')}
+              variant="secondary"
+              onPress={() => setStep('choose')}
+            />
           </SheetActions>
         </>
       )}

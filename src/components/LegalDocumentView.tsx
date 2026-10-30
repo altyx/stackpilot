@@ -1,5 +1,5 @@
 import { ScrollView, Text, View } from 'react-native';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { LegalDocument } from '../legal/document';
 import { createStyles } from '../theme';
 import { LegalDocumentBlock } from './LegalDocumentBlock';
@@ -7,15 +7,17 @@ import { LegalDocumentBlock } from './LegalDocumentBlock';
 /** Displays a legal text: title, last-updated date, then numbered sections. */
 export function LegalDocumentView({ document }: { document: LegalDocument }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text accessibilityRole="header" style={styles.title}>
           {document.title}
         </Text>
-        <Text style={styles.updated}>{t.legal.lastUpdated(document.updatedAt)}</Text>
-        {t.legal.englishOnly ? <Text style={styles.updated}>{t.legal.englishOnly}</Text> : null}
+        <Text style={styles.updated}>{t('legal.lastUpdated', { date: document.updatedAt })}</Text>
+        {t('legal.englishOnly') ? (
+          <Text style={styles.updated}>{t('legal.englishOnly')}</Text>
+        ) : null}
       </View>
 
       <Text selectable style={styles.paragraph}>

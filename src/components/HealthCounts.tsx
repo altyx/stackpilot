@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { ContainerCounts } from '../lib/overview';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
@@ -11,20 +11,20 @@ import { Card } from './Card';
 export function HealthCounts({ counts }: { counts: ContainerCounts }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const columns = [
-    { label: t.overview.healthy, value: counts.healthy, color: theme.colors.success },
+    { label: t('overview.healthy'), value: counts.healthy, color: theme.colors.success },
     {
-      label: t.overview.unhealthy,
+      label: t('overview.unhealthy'),
       value: counts.unhealthy,
       color: counts.unhealthy > 0 ? theme.colors.danger : theme.colors.textMuted,
     },
-    { label: t.overview.noHealthcheck, value: counts.unchecked, color: theme.colors.textMuted },
+    { label: t('overview.noHealthcheck'), value: counts.unchecked, color: theme.colors.textMuted },
   ];
   return (
     <Card style={styles.card}>
       <Text accessibilityRole="header" style={styles.title}>
-        {t.overview.healthTitle}
+        {t('overview.healthTitle')}
       </Text>
       <View style={styles.columns}>
         {columns.map((column, index) => (
@@ -41,7 +41,7 @@ export function HealthCounts({ counts }: { counts: ContainerCounts }) {
         ))}
       </View>
       {counts.starting > 0 ? (
-        <Text style={styles.footnote}>{t.overview.starting(counts.starting)}</Text>
+        <Text style={styles.footnote}>{t('overview.starting', { count: counts.starting })}</Text>
       ) : null}
     </Card>
   );

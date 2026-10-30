@@ -1,15 +1,15 @@
 import { useEffect, type ReactNode } from 'react';
-import { setCurrentLanguage, stringsFor, StringsContext } from '../i18n';
+import i18n from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 
 /** Applies the language chosen in the settings. */
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { language } = useSettings().settings;
 
-  // Errors are worded when thrown, after a request: an effect is soon enough.
+  // react-i18next renders the screens again once the language has changed.
   useEffect(() => {
-    setCurrentLanguage(language);
+    void i18n.changeLanguage(language);
   }, [language]);
 
-  return <StringsContext.Provider value={stringsFor(language)}>{children}</StringsContext.Provider>;
+  return children;
 }

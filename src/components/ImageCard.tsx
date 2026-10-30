@@ -1,11 +1,12 @@
 import { Text, View } from 'react-native';
 import type { ImageSummary } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { imageLabel, isDangling, shortImageId, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
+import { useFormat } from '../i18n/format';
 
 export function ImageCard({
   usage,
@@ -19,7 +20,8 @@ export function ImageCard({
   onDelete?: () => void;
 }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { item: image, usedBy } = usage;
   return (
     <Card style={styles.card}>
@@ -32,12 +34,12 @@ export function ImageCard({
         </View>
 
         <Text style={styles.meta}>
-          {t.bytes(image.Size)} · {shortImageId(image.Id)} · {t.date(image.Created)}
+          {f.bytes(image.Size)} · {shortImageId(image.Id)} · {f.date(image.Created)}
         </Text>
 
-        {updateAvailable ? <Text style={styles.update}>{t.images.newVersion}</Text> : null}
+        {updateAvailable ? <Text style={styles.update}>{t('images.newVersion')}</Text> : null}
 
-        {isDangling(image) ? <Text style={styles.dangling}>{t.images.dangling}</Text> : null}
+        {isDangling(image) ? <Text style={styles.dangling}>{t('images.dangling')}</Text> : null}
 
         {usedBy.length > 0 ? (
           <Text style={styles.usedBy} numberOfLines={2}>
@@ -46,7 +48,7 @@ export function ImageCard({
         ) : null}
 
         {(image.RepoTags ?? []).length > 1 ? (
-          <Text style={styles.meta}>{t.images.tags(image.RepoTags!.length)}</Text>
+          <Text style={styles.meta}>{t('images.tags', { count: image.RepoTags!.length })}</Text>
         ) : null}
       </View>
 
@@ -54,7 +56,7 @@ export function ImageCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={t.common.deleteNamed(imageLabel(image))}
+          accessibilityLabel={t('common.deleteNamed', { name: imageLabel(image) })}
           onPress={onDelete}
         />
       ) : null}

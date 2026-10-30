@@ -1,5 +1,5 @@
 import { useState, type ComponentProps } from 'react';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { SecondaryAction } from '../lib/containerActions';
 import { ActionRow } from './ActionRow';
 import { BottomSheet } from './BottomSheet';
@@ -33,7 +33,7 @@ export function ContainerActionsSheet({
   onClose: () => void;
 }) {
   const [outcome, setOutcome] = useState<SecondaryAction | 'cancel' | null>(null);
-  const t = useStrings();
+  const { t } = useTranslation();
   const close = (next: SecondaryAction | 'cancel') => setOutcome((current) => current ?? next);
 
   return (
@@ -51,12 +51,13 @@ export function ContainerActionsSheet({
         <ActionRow
           key={action}
           {...ROWS[action]}
-          {...t.container.menu[action]}
+          label={t(`container.menu.${action}.label`)}
+          hint={t(`container.menu.${action}.hint`)}
           onPress={() => close(action)}
         />
       ))}
       <SheetActions>
-        <Button label={t.common.cancel} variant="secondary" onPress={() => close('cancel')} />
+        <Button label={t('common.cancel')} variant="secondary" onPress={() => close('cancel')} />
       </SheetActions>
     </BottomSheet>
   );

@@ -23,7 +23,8 @@ import {
   countStackStates,
   type StackCounts,
 } from '../../../../src/lib/overview';
-import { useStrings, type Strings } from '../../../../src/i18n';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { groupByStack, mergeStacks } from '../../../../src/lib/stacks';
 import { imagesWithUsage, volumesWithUsage } from '../../../../src/lib/usage';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
@@ -32,7 +33,7 @@ import { createStyles, useTheme } from '../../../../src/theme';
 export default function OverviewScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const id = useEndpointParam();
   const queryClient = useQueryClient();
   const containers = useContainers(id);
@@ -58,7 +59,7 @@ export default function OverviewScreen() {
     [volumes.data, list],
   );
 
-  if (containers.isPending) return <Loader label={t.overview.loading} />;
+  if (containers.isPending) return <Loader label={t('overview.loading')} />;
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
 
   function refresh() {
@@ -85,42 +86,44 @@ export default function OverviewScreen() {
       }>
       <HealthCard endpointId={id} problems={problems} />
 
-      <Section title={t.overview.atAGlance}>
+      <Section title={t('overview.atAGlance')}>
         <View style={styles.tiles}>
           <StatTile
-            label={t.nav.containers}
+            label={t('nav.containers')}
             value={`${counts.running}/${counts.total}`}
-            caption={t.overview.runningCaption}
+            caption={t('overview.runningCaption')}
             href={base}
           />
           <StatTile
-            label={t.nav.stacks}
+            label={t('nav.stacks')}
             value={stacks.isPending ? '—' : `${stackCounts.complete}/${stackCounts.total}`}
-            caption={stacks.isPending ? t.overview.loadingCaption : describeStacks(stackCounts, t)}
+            caption={
+              stacks.isPending ? t('overview.loadingCaption') : describeStacks(stackCounts, t)
+            }
             alert={stackCounts.partial > 0}
             href={`${base}/stacks`}
           />
           <StatTile
-            label={t.nav.images}
+            label={t('nav.images')}
             value={images.data ? String(images.data.length) : '—'}
             caption={
               images.data
                 ? unusedImages === 0
-                  ? t.overview.allImagesInUse
-                  : t.overview.unusedImages(unusedImages)
-                : t.overview.loadingCaption
+                  ? t('overview.allImagesInUse')
+                  : t('overview.unusedImages', { count: unusedImages })
+                : t('overview.loadingCaption')
             }
             href={`${base}/images`}
           />
           <StatTile
-            label={t.nav.volumes}
+            label={t('nav.volumes')}
             value={volumes.data ? String(volumes.data.length) : '—'}
             caption={
               volumes.data
                 ? unusedVolumes === 0
-                  ? t.overview.allVolumesInUse
-                  : t.overview.unusedVolumes(unusedVolumes)
-                : t.overview.loadingCaption
+                  ? t('overview.allVolumesInUse')
+                  : t('overview.unusedVolumes', { count: unusedVolumes })
+                : t('overview.loadingCaption')
             }
             href={`${base}/volumes`}
           />
@@ -128,15 +131,15 @@ export default function OverviewScreen() {
         <HealthCounts counts={counts} />
       </Section>
 
-      <Section title={t.overview.resources}>
+      <Section title={t('overview.resources')}>
         <ResourcesCard endpointId={id} running={running} />
       </Section>
 
-      <Section title={t.overview.diskSpace}>
+      <Section title={t('overview.diskSpace')}>
         <DiskUsageCard endpointId={id} />
       </Section>
 
-      <Section title={t.overview.imageUpdates}>
+      <Section title={t('overview.imageUpdates')}>
         <ImageUpdatesCard endpointId={id} containers={running} />
       </Section>
     </ScrollView>
@@ -144,11 +147,11 @@ export default function OverviewScreen() {
 }
 
 /** Under the complete/total ratio: only what's off, a partial stack first. */
-function describeStacks(counts: StackCounts, t: Strings): string {
-  if (counts.total === 0) return t.overview.noStacks;
-  if (counts.partial > 0) return t.overview.partialStacks(counts.partial);
-  if (counts.stopped > 0) return t.overview.stoppedStacks(counts.stopped);
-  return t.overview.allRunning;
+function describeStacks(counts: StackCounts, t: TFunction): string {
+  if (counts.total === 0) return t('overview.noStacks');
+  if (counts.partial > 0) return t('overview.partialStacks', { count: counts.partial });
+  if (counts.stopped > 0) return t('overview.stoppedStacks', { count: counts.stopped });
+  return t('overview.allRunning');
 }
 
 const useStyles = createStyles((theme) => ({

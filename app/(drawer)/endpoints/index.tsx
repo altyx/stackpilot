@@ -5,19 +5,19 @@ import { EmptyState } from '../../../src/components/EmptyState';
 import { EndpointCard } from '../../../src/components/EndpointCard';
 import { ErrorView } from '../../../src/components/ErrorView';
 import { Loader } from '../../../src/components/Loader';
-import { useStrings } from '../../../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { useCurrentEndpoint } from '../../../src/navigation/CurrentEndpoint';
 import { createStyles, useTheme } from '../../../src/theme';
 
 export default function EndpointsScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const { data, error, isPending, refetch, isRefetching } = useEndpoints();
   const { session } = useAuth();
   const { endpointId } = useCurrentEndpoint();
 
-  if (isPending) return <Loader label={t.endpoints.loading} />;
+  if (isPending) return <Loader label={t('endpoints.loading')} />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   return (
@@ -33,7 +33,9 @@ export default function EndpointsScreen() {
         />
       }
       ListHeaderComponent={session ? <Text style={styles.instance}>{session.baseUrl}</Text> : null}
-      ListEmptyComponent={<EmptyState title={t.endpoints.empty} subtitle={t.endpoints.emptyHint} />}
+      ListEmptyComponent={
+        <EmptyState title={t('endpoints.empty')} subtitle={t('endpoints.emptyHint')} />
+      }
       renderItem={({ item }) => <EndpointCard endpoint={item} current={item.Id === endpointId} />}
     />
   );

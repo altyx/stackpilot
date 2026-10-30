@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { StackSection } from '../lib/stacks';
 import { createStyles, useTheme } from '../theme';
 
@@ -17,23 +17,23 @@ export function StackHeader({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const { title, members, running } = section;
   return (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle} numberOfLines={1}>
         {/* The grouping names the standalone containers in English: the header words it. */}
-        {section.ungrouped ? t.containers.noStack : title}
+        {section.ungrouped ? t('containers.noStack') : title}
       </Text>
       <Text style={[styles.sectionCount, running === members.length && styles.sectionCountFull]}>
-        {t.common.runningRatio(running, members.length)}
+        {t('common.runningRatio', { running, total: members.length })}
       </Text>
       {section.ungrouped ? null : busy ? (
         <ActivityIndicator color={theme.colors.accent} size="small" style={styles.sectionAction} />
       ) : (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t.containers.stackActions(title)}
+          accessibilityLabel={t('containers.stackActions', { title })}
           accessibilityState={{ disabled }}
           disabled={disabled}
           hitSlop={12}

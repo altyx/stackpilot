@@ -1,6 +1,7 @@
 import { Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { render, screen } from '@testing-library/react-native';
-import { setCurrentLanguage, strings, useStrings } from '../i18n';
+import i18n from '../i18n';
 import { SettingsProvider } from '../settings/SettingsContext';
 import { memory } from '../testing/secureStoreMock';
 import { LanguageProvider } from './LanguageProvider';
@@ -13,7 +14,8 @@ jest.mock(
 );
 
 function Probe() {
-  return <Text>{useStrings().nav.settings}</Text>;
+  const { t } = useTranslation();
+  return <Text>{t('nav.settings')}</Text>;
 }
 
 function renderWith(language?: string) {
@@ -28,7 +30,7 @@ function renderWith(language?: string) {
 }
 
 beforeEach(() => memory.clear());
-afterEach(() => setCurrentLanguage('en'));
+afterEach(() => i18n.changeLanguage('en'));
 
 describe('LanguageProvider', () => {
   it('speaks English by default', () => {
@@ -39,6 +41,6 @@ describe('LanguageProvider', () => {
   it('applies the language stored in the settings, outside React too', async () => {
     renderWith('fr');
     expect(await screen.findByText('Réglages')).toBeOnTheScreen();
-    expect(strings().errors.urlRequired).toBe('L’URL de l’instance est obligatoire.');
+    expect(i18n.t('errors.urlRequired')).toBe('L’URL de l’instance est obligatoire.');
   });
 });

@@ -1,7 +1,6 @@
 import { StackType } from '../api/types';
 import { makeContainer, makeStack } from '../testing/fixtures';
-import { en } from '../i18n/en';
-import { fr } from '../i18n/fr';
+import i18n from '../i18n';
 import { countStacks, describeStackResult, groupByStack, mergeStacks, stackOf } from './stacks';
 
 const compose = (project: string) => ({ 'com.docker.compose.project': project });
@@ -103,6 +102,8 @@ describe('mergeStacks', () => {
 });
 
 describe('describeStackResult', () => {
+  const en = i18n.getFixedT('en');
+  const fr = i18n.getFixedT('fr');
   const [blog] = groupByStack([makeContainer({ Labels: compose('blog') })]);
 
   it('counts the successes', () => {

@@ -55,13 +55,3 @@ export function formatPercent(value: number, format: LocaleFormat): string {
   const rounded = value < 10 ? value.toFixed(1) : String(Math.round(value));
   return format.percent(rounded.replace('.', format.decimal));
 }
-
-/** "1 image", "0 images", "3 images": English counts every number but one as plural. */
-export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
-  return `${count} ${count === 1 ? singular : pluralForm}`;
-}
-
-/** "0 image", "1 image", "3 images": French keeps 0 and 1 singular. */
-export function pluralFr(count: number, singular: string, pluralForm = `${singular}s`): string {
-  return `${count} ${count < 2 ? singular : pluralForm}`;
-}

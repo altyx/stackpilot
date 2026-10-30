@@ -1,7 +1,7 @@
 import { Alert, Linking, Pressable, ScrollView, Text } from 'react-native';
 import { CHANGELOG } from '../src/changelog';
 import { ReleaseCard } from '../src/components/ReleaseCard';
-import { useStrings } from '../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { appVersion } from '../src/lib/appInfo';
 import { RELEASES_URL } from '../src/lib/support';
 import { createStyles } from '../src/theme';
@@ -12,7 +12,7 @@ import { createStyles } from '../src/theme';
  */
 export default function ChangelogScreen() {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   return (
     <ScrollView contentContainerStyle={styles.content}>
       {CHANGELOG.map((release) => (
@@ -27,11 +27,11 @@ export default function ChangelogScreen() {
         accessibilityRole="link"
         onPress={() =>
           Linking.openURL(RELEASES_URL).catch(() =>
-            Alert.alert(t.common.cannotOpenLink, t.common.noAppForLink),
+            Alert.alert(t('common.cannotOpenLink'), t('common.noAppForLink')),
           )
         }
         style={({ pressed }) => pressed && styles.pressed}>
-        <Text style={styles.link}>{t.changelog.allReleases}</Text>
+        <Text style={styles.link}>{t('changelog.allReleases')}</Text>
       </Pressable>
     </ScrollView>
   );

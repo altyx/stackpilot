@@ -5,7 +5,7 @@ import {
   type PortainerStack,
   type StackAction,
 } from '../api/types';
-import type { Strings } from '../i18n';
+import type { TFunction } from 'i18next';
 import { containerName } from './format';
 
 /** Label set by Docker Compose; it's the stack name on Portainer's side. */
@@ -153,10 +153,14 @@ export function describeStackResult(
   section: StackSection,
   action: StackAction,
   result: StackActionResult,
-  t: Strings,
+  t: TFunction,
 ): { title: string; message: string } {
-  const summary = t.stacks.result(action, result.succeeded, result.failures.length);
-  if (result.failures.length === 0) return { title: section.title, message: summary };
+  const failed = result.failures.length;
+  const summary =
+    failed === 0
+      ? t(`stacks.result.${action}`, { count: result.succeeded })
+      : t(`stacks.resultWithFailures.${action}`, { count: result.succeeded, failed });
+  if (failed === 0) return { title: section.title, message: summary };
   const detail = result.failures.map((f) => `• ${f.name}: ${f.message}`).join('\n');
   return { title: section.title, message: `${summary}\n\n${detail}` };
 }

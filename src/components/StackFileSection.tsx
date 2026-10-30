@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Platform, ScrollView, Text, View } from 'react-native';
 import { useStackFile } from '../api/hooks';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { maskSensitiveLines } from '../lib/secrets';
 import { createStyles } from '../theme';
 import { Button } from './Button';
@@ -14,7 +14,7 @@ import { Card } from './Card';
  */
 export function StackFileSection({ stackId }: { stackId: number }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const file = useStackFile(visible ? stackId : null);
@@ -26,43 +26,47 @@ export function StackFileSection({ stackId }: { stackId: number }) {
   }
 
   if (!visible) {
-    return <Button label={t.stack.showFile} variant="secondary" onPress={() => setVisible(true)} />;
+    return (
+      <Button label={t('stack.showFile')} variant="secondary" onPress={() => setVisible(true)} />
+    );
   }
 
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.sectionTitle}>{t.stack.fileTitle}</Text>
+        <Text style={styles.sectionTitle}>{t('stack.fileTitle')}</Text>
         <View style={styles.headerActions}>
           {content.masked > 0 ? (
             <Text
               accessibilityRole="button"
               onPress={() => setRevealed((current) => !current)}
               style={styles.link}>
-              {revealed ? t.stack.hideSecrets : t.stack.revealSecrets(content.masked)}
+              {revealed
+                ? t('stack.hideSecrets')
+                : t('stack.revealSecrets', { count: content.masked })}
             </Text>
           ) : null}
           <Text accessibilityRole="button" onPress={close} style={styles.link}>
-            {t.common.close}
+            {t('common.close')}
           </Text>
         </View>
       </View>
       {file.isPending ? (
-        <Text style={styles.muted}>{t.common.loading}</Text>
+        <Text style={styles.muted}>{t('common.loading')}</Text>
       ) : file.error ? (
         <Text style={styles.error}>
-          {file.error instanceof Error ? file.error.message : t.stack.fileUnavailable}
+          {file.error instanceof Error ? file.error.message : t('stack.fileUnavailable')}
         </Text>
       ) : (
         // Horizontal only: the page scrolls vertically, so the whole file is
         // reachable. A bounded box here would clip it with no way to scroll.
         <ScrollView horizontal style={styles.box} contentContainerStyle={styles.boxContent}>
           <Text selectable={revealed || content.masked === 0} style={styles.code}>
-            {(revealed ? file.data.trim() : content.text) || t.stack.emptyFile}
+            {(revealed ? file.data.trim() : content.text) || t('stack.emptyFile')}
           </Text>
         </ScrollView>
       )}
-      <Button label={t.stack.hideFile} variant="secondary" onPress={close} />
+      <Button label={t('stack.hideFile')} variant="secondary" onPress={close} />
     </Card>
   );
 }

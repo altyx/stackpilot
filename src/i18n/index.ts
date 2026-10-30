@@ -1,8 +1,7 @@
-import { createContext, useContext } from 'react';
-import { en, type Strings } from './en';
-import { fr } from './fr';
-
-export type { Strings };
+import { createInstance } from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import en from './locales/en.json';
+import fr from './locales/fr.json';
 
 export type Language = 'en' | 'fr';
 
@@ -12,33 +11,22 @@ export const LANGUAGES: readonly { value: Language; label: string }[] = [
   { value: 'fr', label: 'Français' },
 ];
 
-const CATALOGS: Record<Language, Strings> = { en, fr };
+export const resources = {
+  en: { translation: en },
+  fr: { translation: fr },
+} as const;
 
-export function stringsFor(language: Language): Strings {
-  return CATALOGS[language];
-}
+// English until the settings say otherwise: `LanguageProvider` switches it.
+// Synchronous init: the catalogs are bundled, the first frame has its text.
+const i18n = createInstance();
 
-// English by default: it keeps components rendered outside the provider
-// (tests) on the reference wording.
-export const StringsContext = createContext<Strings>(en);
+void i18n.use(initReactI18next).init({
+  resources,
+  lng: 'en',
+  fallbackLng: 'en',
+  initAsync: false,
+  // React already escapes what it renders.
+  interpolation: { escapeValue: false },
+});
 
-/** The interface text in the language chosen in the settings. */
-export function useStrings(): Strings {
-  return useContext(StringsContext);
-}
-
-let current: Strings = en;
-
-/**
- * Code outside React (API errors, the notification channel) has no context
- * to read: the provider records the language here. Render code must not read
- * it: the React Compiler memoizes on props and context only, and would keep
- * the previous language.
- */
-export function setCurrentLanguage(language: Language): void {
-  current = CATALOGS[language];
-}
-
-export function strings(): Strings {
-  return current;
-}
+export default i18n;

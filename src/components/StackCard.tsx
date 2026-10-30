@@ -1,11 +1,12 @@
 import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import type { StackOverview } from '../lib/stacks';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { StackImageStatus } from './StackImageStatus';
 import { StackKindBadge } from './StackKindBadge';
+import { useFormat } from '../i18n/format';
 
 export function StackCard({
   endpointId,
@@ -15,7 +16,8 @@ export function StackCard({
   overview: StackOverview;
 }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { name, kind, stack, running, total } = overview;
   return (
     <Link href={`/endpoints/${endpointId}/stacks/${encodeURIComponent(name)}`} asChild>
@@ -31,26 +33,36 @@ export function StackCard({
           </View>
 
           <Text style={[styles.count, countStyle(styles, running, total)]}>
-            {total === 0 ? t.common.noContainers : t.common.runningRatio(running, total)}
+            {total === 0 ? t('common.noContainers') : t('common.runningRatio', { running, total })}
           </Text>
 
           {stack ? (
             <Text style={styles.meta} numberOfLines={1}>
-              {t.stacks.origin(
-                stack.CreationDate > 0 ? t.date(stack.CreationDate) : null,
-                stack.CreatedBy,
-              )}
+              {[
+                stack.CreationDate > 0
+                  ? t('stacks.createdOn', { date: f.date(stack.CreationDate) })
+                  : '',
+                stack.CreatedBy ? t('stacks.createdBy', { user: stack.CreatedBy }) : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || t('stacks.managedByPortainer')}
             </Text>
           ) : (
-            <Text style={styles.meta}>{t.stacks.outsidePortainer}</Text>
+            <Text style={styles.meta}>{t('stacks.outsidePortainer')}</Text>
           )}
 
           {stack?.GitConfig ? (
             <Text style={styles.meta} numberOfLines={1}>
-              {t.stacks.git(
-                stack.GitConfig.ReferenceName.replace(/^refs\/heads\//, ''),
-                stack.AutoUpdate?.Interval,
-              )}
+              {[
+                t('stacks.gitReference', {
+                  reference: stack.GitConfig.ReferenceName.replace(/^refs\/heads\//, ''),
+                }),
+                stack.AutoUpdate?.Interval
+                  ? t('stacks.gitAutoUpdate', { interval: stack.AutoUpdate.Interval })
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           ) : null}
         </Card>

@@ -9,12 +9,12 @@ import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { LoginField } from '../src/components/LoginField';
 import { LoginModeTab } from '../src/components/LoginModeTab';
-import { useStrings } from '../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../src/theme';
 
 export default function LoginScreen() {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const { signIn, lastLogin, sessionExpired } = useAuth();
   const router = useRouter();
 
@@ -49,7 +49,7 @@ export default function LoginScreen() {
       router.replace('/');
     } catch (e) {
       setError({
-        message: e instanceof Error ? e.message : t.login.failed,
+        message: e instanceof Error ? e.message : t('login.failed'),
         detail: e instanceof PortainerError ? e.detail : undefined,
         certificate: e instanceof PortainerError && e.reason === 'certificate',
       });
@@ -63,18 +63,18 @@ export default function LoginScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>{t.login.title}</Text>
-        <Text style={styles.subtitle}>{t.login.subtitle}</Text>
+        <Text style={styles.title}>{t('login.title')}</Text>
+        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
         {sessionExpired ? (
           <Text accessibilityRole="alert" style={styles.expired}>
-            {lastLogin?.mode === 'jwt' ? t.login.sessionExpired : t.login.tokenRevoked}
+            {lastLogin?.mode === 'jwt' ? t('login.sessionExpired') : t('login.tokenRevoked')}
           </Text>
         ) : null}
 
         <Card style={styles.card}>
           <LoginField
-            label={t.login.instanceUrl}
+            label={t('login.instanceUrl')}
             placeholder="https://portainer.local:9443"
             value={baseUrl}
             onChangeText={setBaseUrl}
@@ -86,12 +86,12 @@ export default function LoginScreen() {
 
           <View style={styles.segmented}>
             <LoginModeTab
-              label={t.login.accessToken}
+              label={t('login.accessToken')}
               active={mode === 'apiKey'}
               onPress={() => setMode('apiKey')}
             />
             <LoginModeTab
-              label={t.login.credentials}
+              label={t('login.credentials')}
               active={mode === 'jwt'}
               onPress={() => setMode('jwt')}
             />
@@ -99,7 +99,7 @@ export default function LoginScreen() {
 
           {mode === 'apiKey' ? (
             <LoginField
-              label={t.login.accessToken}
+              label={t('login.accessToken')}
               placeholder="ptr_…"
               value={apiKey}
               onChangeText={setApiKey}
@@ -108,7 +108,7 @@ export default function LoginScreen() {
           ) : (
             <>
               <LoginField
-                label={t.login.username}
+                label={t('login.username')}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -116,7 +116,7 @@ export default function LoginScreen() {
                 textContentType="username"
               />
               <LoginField
-                label={t.login.password}
+                label={t('login.password')}
                 value={password}
                 onChangeText={setPassword}
                 secret
@@ -135,14 +135,14 @@ export default function LoginScreen() {
               ) : null}
               {error.certificate ? (
                 <Link href="/certificates" style={styles.errorLink}>
-                  {t.login.fixCertificate}
+                  {t('login.fixCertificate')}
                 </Link>
               ) : null}
             </View>
           ) : null}
 
           <Button
-            label={t.login.submit}
+            label={t('login.submit')}
             onPress={handleSubmit}
             disabled={!canSubmit}
             loading={busy}
@@ -151,18 +151,20 @@ export default function LoginScreen() {
         </Card>
 
         <Text style={styles.legal}>
-          {t.login.legalBefore}
+          {t('login.legalBefore')}
           <Link href="/terms" style={styles.legalLink}>
-            {t.login.legalTerms}
+            {t('login.legalTerms')}
           </Link>
-          {t.login.legalMiddle}
+          {t('login.legalMiddle')}
           <Link href="/privacy" style={styles.legalLink}>
-            {t.login.legalPrivacy}
+            {t('login.legalPrivacy')}
           </Link>
-          {t.login.legalAfter}
+          {t('login.legalAfter')}
         </Text>
 
-        <Text style={styles.hint}>{mode === 'apiKey' ? t.login.apiKeyHint : t.login.jwtHint}</Text>
+        <Text style={styles.hint}>
+          {mode === 'apiKey' ? t('login.apiKeyHint') : t('login.jwtHint')}
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

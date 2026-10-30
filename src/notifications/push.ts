@@ -2,7 +2,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { strings } from '../i18n';
+import i18n from '../i18n';
 
 /** Payload sent by the watcher, to open the right screen on tap. */
 export interface ContainerAlertPayload {
@@ -26,7 +26,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   if (!Device.isDevice) {
     return {
       status: 'unsupported',
-      reason: strings().notifications.needsDevice,
+      reason: i18n.t('notifications.needsDevice'),
     };
   }
 
@@ -35,7 +35,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
     return {
       status: 'unsupported',
-      reason: strings().notifications.expoGo,
+      reason: i18n.t('notifications.expoGo'),
     };
   }
 
@@ -43,7 +43,7 @@ export async function registerForPush(): Promise<PushRegistration> {
     // Without an explicit channel, Android files alerts at default importance,
     // with no sound or banner.
     await Notifications.setNotificationChannelAsync('containers', {
-      name: strings().notifications.channelName,
+      name: i18n.t('notifications.channelName'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
     });
@@ -62,7 +62,7 @@ export async function registerForPush(): Promise<PushRegistration> {
   if (!projectId) {
     return {
       status: 'unsupported',
-      reason: strings().notifications.noProjectId,
+      reason: i18n.t('notifications.noProjectId'),
     };
   }
 
@@ -81,6 +81,6 @@ export function readAlertPayload(data: unknown): ContainerAlertPayload | null {
     endpointId,
     containerId,
     containerName: typeof containerName === 'string' ? containerName : containerId.slice(0, 12),
-    reason: typeof reason === 'string' ? reason : strings().notifications.stateChange,
+    reason: typeof reason === 'string' ? reason : i18n.t('notifications.stateChange'),
   };
 }

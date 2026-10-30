@@ -1,22 +1,24 @@
 import { Text, View } from 'react-native';
 import { useDiskUsage } from '../api/hooks';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { summarizeDiskUsage } from '../lib/disk';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
+import { useFormat } from '../i18n/format';
 
 export function DiskUsageCard({ endpointId }: { endpointId: number }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { data, error, refetch } = useDiskUsage(endpointId);
 
   if (error || !data) {
     return (
       <Card>
         <InlineStatus
-          loading={t.overview.measuringDisk}
+          loading={t('overview.measuringDisk')}
           error={error}
           onRetry={() => void refetch()}
         />
@@ -28,8 +30,8 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.total}>{t.bytes(summary.total)}</Text>
-        <Text style={styles.muted}>{t.overview.usedByDocker}</Text>
+        <Text style={styles.total}>{f.bytes(summary.total)}</Text>
+        <Text style={styles.muted}>{t('overview.usedByDocker')}</Text>
       </View>
 
       {summary.total > 0 ? (
@@ -49,15 +51,15 @@ export function DiskUsageCard({ endpointId }: { endpointId: number }) {
         {summary.categories.map((category, index) => (
           <View key={category.key} style={styles.legendRow}>
             <View style={[styles.swatch, { backgroundColor: theme.colors.series[index] }]} />
-            <Text style={styles.legendLabel}>{t.overview.diskCategories[category.key]}</Text>
-            <Text style={styles.legendValue}>{t.bytes(category.size)}</Text>
+            <Text style={styles.legendLabel}>{t(`overview.diskCategories.${category.key}`)}</Text>
+            <Text style={styles.legendValue}>{f.bytes(category.size)}</Text>
           </View>
         ))}
       </View>
 
       {summary.reclaimable > 0 ? (
         <Text style={styles.reclaimable}>
-          {t.overview.reclaimable(t.bytes(summary.reclaimable))}
+          {t('overview.reclaimable', { size: f.bytes(summary.reclaimable) })}
         </Text>
       ) : null}
     </Card>

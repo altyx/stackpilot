@@ -7,7 +7,9 @@ import { SettingsChoiceRow } from '../../src/components/SettingsChoiceRow';
 import { SettingsNavRow } from '../../src/components/SettingsNavRow';
 import { SettingsSelect } from '../../src/components/SettingsSelect';
 import { Section } from '../../src/components/Section';
-import { LANGUAGES, useStrings, type Strings } from '../../src/i18n';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { LANGUAGES } from '../../src/i18n';
 import { SOURCE_CODE_URL } from '../../src/legal/publisher';
 import { newIssueUrl } from '../../src/lib/support';
 import { useSettings } from '../../src/settings/SettingsContext';
@@ -17,18 +19,18 @@ import { createStyles } from '../../src/theme';
 /** App settings — Portainer's own settings stay in Portainer. */
 export default function SettingsScreen() {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const { settings, update } = useSettings();
   const router = useRouter();
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Section title={t.settings.appearance}>
+      <Section title={t('settings.appearance')}>
         <Card style={styles.card}>
           {APPEARANCES.map((appearance, index) => (
             <SettingsChoiceRow
               key={appearance}
-              label={t.settings.appearances[appearance]}
+              label={t(`settings.appearances.${appearance}`)}
               selected={settings.appearance === appearance}
               first={index === 0}
               onPress={() => update({ appearance })}
@@ -37,10 +39,10 @@ export default function SettingsScreen() {
         </Card>
       </Section>
 
-      <Section title={t.settings.language}>
+      <Section title={t('settings.language')}>
         <Card style={styles.card}>
           <SettingsSelect
-            title={t.settings.language}
+            title={t('settings.language')}
             icon="language-outline"
             options={LANGUAGES}
             value={settings.language}
@@ -49,13 +51,19 @@ export default function SettingsScreen() {
         </Card>
       </Section>
 
-      <Section title={t.settings.refresh}>
-        <Text style={styles.hint}>{t.settings.refreshHint}</Text>
+      <Section title={t('settings.refresh')}>
+        <Text style={styles.hint}>{t('settings.refreshHint')}</Text>
         <Card style={styles.card}>
           {REFRESH_INTERVALS.map((interval, index) => (
             <SettingsChoiceRow
               key={String(interval)}
-              label={t.settings.interval(interval)}
+              label={
+                interval === null
+                  ? t('settings.intervals.manual')
+                  : interval === 60_000
+                    ? t('settings.intervals.minute')
+                    : t('settings.intervals.seconds', { count: interval / 1000 })
+              }
               selected={settings.refreshIntervalMs === interval}
               first={index === 0}
               onPress={() => update({ refreshIntervalMs: interval })}
@@ -64,59 +72,59 @@ export default function SettingsScreen() {
         </Card>
       </Section>
 
-      <Section title={t.settings.notifications}>
+      <Section title={t('settings.notifications')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="notifications-outline"
-            label={t.settings.alerts}
-            hint={t.settings.alertsHint}
+            label={t('settings.alerts')}
+            hint={t('settings.alertsHint')}
             onPress={() => router.push('/notifications')}
           />
         </Card>
       </Section>
 
-      <Section title={t.settings.help}>
+      <Section title={t('settings.help')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="bug-outline"
-            label={t.settings.reportProblem}
-            hint={t.settings.reportProblemHint}
+            label={t('settings.reportProblem')}
+            hint={t('settings.reportProblemHint')}
             external
             first
             onPress={() => openLink(newIssueUrl(), t)}
           />
           <SettingsNavRow
             icon="lock-closed-outline"
-            label={t.settings.certificate}
-            hint={t.settings.certificateHint}
+            label={t('settings.certificate')}
+            hint={t('settings.certificateHint')}
             onPress={() => router.push('/certificates')}
           />
           <SettingsNavRow
             icon="logo-github"
-            label={t.settings.sourceCode}
+            label={t('settings.sourceCode')}
             external
             onPress={() => openLink(SOURCE_CODE_URL, t)}
           />
         </Card>
       </Section>
 
-      <Section title={t.settings.about}>
+      <Section title={t('settings.about')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="sparkles-outline"
-            label={t.settings.whatsNew}
-            hint={t.settings.version(LATEST_RELEASE.version)}
+            label={t('settings.whatsNew')}
+            hint={t('settings.version', { version: LATEST_RELEASE.version })}
             first
             onPress={() => router.push('/changelog')}
           />
           <SettingsNavRow
             icon="document-text-outline"
-            label={t.settings.terms}
+            label={t('settings.terms')}
             onPress={() => router.push('/terms')}
           />
           <SettingsNavRow
             icon="shield-checkmark-outline"
-            label={t.settings.privacy}
+            label={t('settings.privacy')}
             onPress={() => router.push('/privacy')}
           />
         </Card>
@@ -126,8 +134,10 @@ export default function SettingsScreen() {
   );
 }
 
-function openLink(url: string, t: Strings): void {
-  Linking.openURL(url).catch(() => Alert.alert(t.common.cannotOpenLink, t.common.noAppForLink));
+function openLink(url: string, t: TFunction): void {
+  Linking.openURL(url).catch(() =>
+    Alert.alert(t('common.cannotOpenLink'), t('common.noAppForLink')),
+  );
 }
 
 const useStyles = createStyles((theme) => ({

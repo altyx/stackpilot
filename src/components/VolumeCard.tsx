@@ -1,11 +1,12 @@
 import { Text, View } from 'react-native';
 import type { VolumeSummary } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { isAnonymousVolume, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
+import { useFormat } from '../i18n/format';
 
 export function VolumeCard({
   usage,
@@ -19,13 +20,14 @@ export function VolumeCard({
   onDelete?: () => void;
 }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { item: volume, usedBy } = usage;
   const meta = [
     volume.Driver,
-    size !== undefined ? t.bytes(size) : null,
-    volume.CreatedAt ? t.date(volume.CreatedAt) : null,
-    isAnonymousVolume(volume) ? t.volumes.anonymous : null,
+    size !== undefined ? f.bytes(size) : null,
+    volume.CreatedAt ? f.date(volume.CreatedAt) : null,
+    isAnonymousVolume(volume) ? t('volumes.anonymous') : null,
   ].filter(Boolean);
   return (
     <Card style={styles.card}>
@@ -54,7 +56,7 @@ export function VolumeCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={t.common.deleteNamed(volume.Name)}
+          accessibilityLabel={t('common.deleteNamed', { name: volume.Name })}
           onPress={onDelete}
         />
       ) : null}

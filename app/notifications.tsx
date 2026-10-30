@@ -4,13 +4,13 @@ import * as Clipboard from 'expo-clipboard';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { NumberedStep } from '../src/components/NumberedStep';
-import { useStrings } from '../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { registerForPush, type PushRegistration } from '../src/notifications/push';
 import { createStyles } from '../src/theme';
 
 export default function NotificationsScreen() {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [registration, setRegistration] = useState<PushRegistration | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -20,8 +20,8 @@ export default function NotificationsScreen() {
       setRegistration(await registerForPush());
     } catch (error) {
       Alert.alert(
-        t.notifications.registrationFailed,
-        error instanceof Error ? error.message : t.common.unknownError,
+        t('notifications.registrationFailed'),
+        error instanceof Error ? error.message : t('common.unknownError'),
       );
     } finally {
       setBusy(false);
@@ -30,37 +30,37 @@ export default function NotificationsScreen() {
 
   async function handleCopy(token: string) {
     await Clipboard.setStringAsync(token);
-    Alert.alert(t.common.copied, t.notifications.copiedMessage);
+    Alert.alert(t('common.copied'), t('notifications.copiedMessage'));
   }
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.intro}>{t.notifications.intro}</Text>
+      <Text style={styles.intro}>{t('notifications.intro')}</Text>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>{t.notifications.tokenTitle}</Text>
+        <Text style={styles.sectionTitle}>{t('notifications.tokenTitle')}</Text>
 
         {registration === null ? (
-          <Text style={styles.muted}>{t.notifications.allowToGetToken}</Text>
+          <Text style={styles.muted}>{t('notifications.allowToGetToken')}</Text>
         ) : registration.status === 'granted' ? (
           <>
             <Text selectable style={styles.token}>
               {registration.token}
             </Text>
             <Button
-              label={t.notifications.copyToken}
+              label={t('notifications.copyToken')}
               onPress={() => handleCopy(registration.token)}
             />
           </>
         ) : registration.status === 'denied' ? (
-          <Text style={styles.warning}>{t.notifications.denied}</Text>
+          <Text style={styles.warning}>{t('notifications.denied')}</Text>
         ) : (
           <Text style={styles.warning}>{registration.reason}</Text>
         )}
 
         {registration?.status !== 'granted' ? (
           <Button
-            label={t.notifications.allow}
+            label={t('notifications.allow')}
             onPress={handleRegister}
             loading={busy}
             variant={registration === null ? 'primary' : 'secondary'}
@@ -69,13 +69,13 @@ export default function NotificationsScreen() {
       </Card>
 
       <Card style={styles.card}>
-        <Text style={styles.sectionTitle}>{t.notifications.setup}</Text>
-        {t.notifications.steps.map((step, index) => (
+        <Text style={styles.sectionTitle}>{t('notifications.setup')}</Text>
+        {t('notifications.steps', { returnObjects: true }).map((step, index) => (
           <NumberedStep key={step} n={index + 1} text={step} />
         ))}
       </Card>
 
-      <Text style={styles.footnote}>{t.notifications.footnote}</Text>
+      <Text style={styles.footnote}>{t('notifications.footnote')}</Text>
     </ScrollView>
   );
 }

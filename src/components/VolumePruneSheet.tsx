@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Text } from 'react-native';
 import type { VolumePruneScope, VolumeSummary } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { volumePruneCandidates, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { BottomSheet } from './BottomSheet';
@@ -10,6 +10,7 @@ import { SheetActions } from './SheetActions';
 import { SheetHeader } from './SheetHeader';
 import { matchesPhrase, TypedConfirmation } from './TypedConfirmation';
 import { VolumePruneList } from './VolumePruneList';
+import { useFormat } from '../i18n/format';
 
 type Step = 'choose' | VolumePruneScope;
 type Outcome = VolumePruneScope | 'cancel';
@@ -37,8 +38,9 @@ export function VolumePruneSheet({
   onClose: () => void;
 }) {
   const styles = useStyles();
-  const t = useStrings();
-  const confirmWord = t.volumes.confirmWord;
+  const { t } = useTranslation();
+  const f = useFormat();
+  const confirmWord = t('volumes.confirmWord');
   const [step, setStep] = useState<Step>('choose');
   const [typed, setTyped] = useState('');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -61,12 +63,9 @@ export function VolumePruneSheet({
 
   function describeOption(scope: VolumePruneScope, volumes: VolumeSummary[]): string {
     const size = total(volumes);
-    return t.common.pruneOption(
-      t.volumes.scopes[scope],
-      volumes.length,
-      size > 0 ? t.bytes(size) : null,
-      t.volumes.none,
-    );
+    const label = t(`volumes.scopes.${scope}`);
+    if (volumes.length === 0) return `${label} · ${t('volumes.none')}`;
+    return `${label} · ${volumes.length}${size > 0 ? ` · ${f.bytes(size)}` : ''}`;
   }
 
   const candidates = step === 'anonymous' ? anonymous : all;
@@ -83,7 +82,7 @@ export function VolumePruneSheet({
       }}>
       {step === 'choose' ? (
         <>
-          <SheetHeader title={t.volumes.cleanUp} message={t.volumes.pruneMessage} />
+          <SheetHeader title={t('volumes.cleanUp')} message={t('volumes.pruneMessage')} />
           <SheetActions>
             {anonymousScopeAvailable ? (
               <Button
@@ -99,26 +98,36 @@ export function VolumePruneSheet({
               disabled={all.length === 0}
               onPress={() => setStep('all')}
             />
-            <Button label={t.common.cancel} variant="secondary" onPress={() => close('cancel')} />
+            <Button
+              label={t('common.cancel')}
+              variant="secondary"
+              onPress={() => close('cancel')}
+            />
           </SheetActions>
-          {!anonymousScopeAvailable ? <Text style={styles.note}>{t.volumes.oldEngine}</Text> : null}
+          {!anonymousScopeAvailable ? (
+            <Text style={styles.note}>{t('volumes.oldEngine')}</Text>
+          ) : null}
         </>
       ) : (
         <>
           <SheetHeader
-            title={t.volumes.pruneTitle(candidates.length)}
-            message={t.volumes.pruneImpact[step]}
+            title={t('volumes.pruneTitle', { count: candidates.length })}
+            message={t(`volumes.pruneImpact.${step}`)}
           />
           <VolumePruneList volumes={candidates} sizes={sizes} />
           <TypedConfirmation phrase={confirmWord} value={typed} onChange={setTyped} />
           <SheetActions>
             <Button
-              label={t.volumes.deletePermanently}
+              label={t('volumes.deletePermanently')}
               variant="danger"
               disabled={!matchesPhrase(typed, confirmWord)}
               onPress={() => close(step)}
             />
-            <Button label={t.common.back} variant="secondary" onPress={() => setStep('choose')} />
+            <Button
+              label={t('common.back')}
+              variant="secondary"
+              onPress={() => setStep('choose')}
+            />
           </SheetActions>
         </>
       )}

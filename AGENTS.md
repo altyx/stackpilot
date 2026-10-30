@@ -18,17 +18,19 @@ d'écrire du code touchant aux modules Expo.
   fond `*Fill` prend `onFill`, pas `text`.
 - L'accès réseau passe exclusivement par `src/api/client.ts` (timeouts + erreurs typées).
 - Les routes sous `app/` restent minces : la logique vit dans `src/`.
-- L'UI existe en anglais, par défaut, et en français (réglage « Language »).
-  Tout texte affiché vient des catalogues `src/i18n` : `en.ts` fait référence
-  et définit le type `Strings`, que `fr.ts` remplit en entier. Dans un
-  composant, `useStrings()` ; hors React (erreurs de l'API, notifications),
-  `strings()`, jamais pendant le rendu, que le React Compiler mémoïserait
-  dans l'ancienne langue. Une phrase qui dépend d'un nombre ou d'un nom est une
-  fonction du catalogue, pas une concaténation dans l'écran ; `src/lib`
-  renvoie des codes, pas des phrases. Les comptes passent par `plural` (en
-  anglais, 0 prend le pluriel) ou `pluralFr` (0 et 1 au singulier), les dates,
-  tailles et pourcentages par `t.date`, `t.bytes` et `t.percent`. En français,
-  l'espace avant `? ! : ;` et `%` est insécable.
+- L'UI existe en anglais, par défaut, et en français (réglage « Language »),
+  via i18next et react-i18next. Tout texte affiché vient des catalogues
+  `src/i18n/locales/{en,fr}.json` : l'anglais fait référence, les clés de
+  `t()` sont typées sur lui (`src/i18n/i18next.d.ts`) et un test vérifie que le
+  français a exactement les mêmes. Dans un composant, `useTranslation()` ;
+  hors React (erreurs de l'API, notifications), `i18n.t()` depuis `src/i18n`,
+  jamais pendant le rendu, que le React Compiler mémoïserait dans l'ancienne
+  langue. Une phrase qui dépend d'un nombre ou d'un nom s'interpole
+  (`{{name}}`) plutôt que de se concaténer ; `src/lib` renvoie des codes, pas
+  des phrases. Les comptes passent par les pluriels d'i18next (`count`,
+  suffixes `_one`/`_other`, plus `_many` en français), les dates, tailles et
+  pourcentages par `useFormat()` (`src/i18n/format.ts`). En français, l'espace
+  avant `? ! : ;` et `%` est insécable.
 - Les textes légaux, le changelog et les alertes du `watcher/` restent en
   anglais. Ce qui vient de Portainer ou de Docker (noms, statuts, messages
   d'erreur renvoyés par l'API) s'affiche tel quel, sans traduction.

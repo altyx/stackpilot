@@ -1,4 +1,4 @@
-import { strings } from '../i18n';
+import i18n from '../i18n';
 import type { Session } from './types';
 
 /**
@@ -22,7 +22,7 @@ export class PortainerError extends Error {
 /** Strips the trailing `/` and any `/api` suffix the user typed. */
 export function normalizeBaseUrl(raw: string): string {
   let url = raw.trim();
-  if (!url) throw new PortainerError(strings().errors.urlRequired);
+  if (!url) throw new PortainerError(i18n.t('errors.urlRequired'));
   if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
   url = url.replace(/\/+$/, '');
   url = url.replace(/\/api$/i, '');
@@ -103,7 +103,7 @@ async function rawRequest(
   } catch (error) {
     if (error instanceof PortainerError) throw error;
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new PortainerError(strings().errors.timeout, undefined, url);
+      throw new PortainerError(i18n.t('errors.timeout'), undefined, url);
     }
     throw new PortainerError(
       unreachableMessage(url),
@@ -124,8 +124,7 @@ async function rawRequest(
  * by far the most frequent cause: naming it saves chasing the network instead.
  */
 function unreachableMessage(url: string): string {
-  const { errors } = strings();
-  return url.startsWith('https://') ? errors.refusedOverHttps : errors.unreachable;
+  return i18n.t(url.startsWith('https://') ? 'errors.refusedOverHttps' : 'errors.unreachable');
 }
 
 function describeCause(url: string, error: unknown): string {
@@ -142,15 +141,14 @@ async function toError(response: Response): Promise<PortainerError> {
   } catch {
     // non-JSON body: keep the raw text
   }
-  const { errors } = strings();
   const messages: Record<number, string> = {
-    401: errors.unauthorized,
-    403: errors.forbidden,
-    404: errors.notFound,
-    409: errors.conflict,
+    401: i18n.t('errors.unauthorized'),
+    403: i18n.t('errors.forbidden'),
+    404: i18n.t('errors.notFound'),
+    409: i18n.t('errors.conflict'),
   };
   return new PortainerError(
-    messages[response.status] ?? errors.http(response.status),
+    messages[response.status] ?? i18n.t('errors.http', { status: response.status }),
     response.status,
     detail.slice(0, 500),
   );

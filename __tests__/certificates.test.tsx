@@ -1,7 +1,8 @@
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { Platform } from 'react-native';
 import CertificatesScreen from '../app/certificates';
-import { CERTIFICATE_HELP_EN } from '../src/help/certificates';
+import { certificateHelp } from '../src/help/certificates';
+import i18n from '../src/i18n';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn() }));
 
@@ -17,7 +18,7 @@ describe('certificate help screen', () => {
 
   it('presents every solution with its commands', () => {
     renderScreen();
-    for (const solution of CERTIFICATE_HELP_EN.solutions) {
+    for (const solution of certificateHelp(i18n.t, 'ios').solutions) {
       expect(screen.getByText(solution.title)).toBeOnTheScreen();
     }
     expect(

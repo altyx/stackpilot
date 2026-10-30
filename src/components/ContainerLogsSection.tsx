@@ -2,7 +2,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, Share, Text, View } from 'react-native';
 import { useContainerLogs } from '../api/hooks';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { DEFAULT_LOG_RANGE, formatLogText, type LogRange } from '../lib/logs';
 import { createStyles } from '../theme';
 import { Button } from './Button';
@@ -29,7 +29,7 @@ export function ContainerLogsSection({
   containerName: string;
 }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [range, setRange] = useState<LogRange>(DEFAULT_LOG_RANGE);
   const [follow, setFollow] = useState(false);
@@ -48,7 +48,7 @@ export function ContainerLogsSection({
   }, [copied]);
 
   if (!visible) {
-    return <Button label={t.logs.show} variant="secondary" onPress={() => setVisible(true)} />;
+    return <Button label={t('logs.show')} variant="secondary" onPress={() => setVisible(true)} />;
   }
 
   const lines = logs.data ?? [];
@@ -61,9 +61,9 @@ export function ContainerLogsSection({
 
   function share() {
     Share.share({
-      title: t.logs.shareTitle(containerName),
+      title: t('logs.shareTitle', { name: containerName }),
       message: formatLogText(lines, timestamps),
-    }).catch(() => Alert.alert(t.logs.sharingFailed, t.logs.notShared));
+    }).catch(() => Alert.alert(t('logs.sharingFailed'), t('logs.notShared')));
   }
 
   function changeRange(next: LogRange) {
@@ -89,7 +89,11 @@ export function ContainerLogsSection({
   const rangePicker = <LogRangePicker value={range} onChange={changeRange} />;
   const status = (
     <Text style={styles.status}>
-      {logs.isPending ? t.common.loading : t.logs.status(lines.length, follow)}
+      {logs.isPending
+        ? t('common.loading')
+        : [t('counts.line', { count: lines.length }), follow ? t('logs.live') : '']
+            .filter(Boolean)
+            .join(' · ')}
     </Text>
   );
 
@@ -97,7 +101,7 @@ export function ContainerLogsSection({
     <Card style={styles.card}>
       <View style={styles.header}>
         <Text accessibilityRole="header" style={styles.title}>
-          {t.logs.title}
+          {t('logs.title')}
         </Text>
         {status}
       </View>
@@ -106,7 +110,7 @@ export function ContainerLogsSection({
 
       {logs.error ? (
         <Text style={styles.error}>
-          {logs.error instanceof Error ? logs.error.message : t.logs.unavailable}
+          {logs.error instanceof Error ? logs.error.message : t('logs.unavailable')}
         </Text>
       ) : (
         <ScrollView
@@ -120,7 +124,7 @@ export function ContainerLogsSection({
             stick.follow(() => inline.current?.scrollToEnd({ animated: false }))
           }>
           {shown.length === 0 && !logs.isPending ? (
-            <Text style={styles.muted}>{t.logs.empty}</Text>
+            <Text style={styles.muted}>{t('logs.empty')}</Text>
           ) : (
             shown.map((line, index) => (
               <LogLineRow
@@ -133,12 +137,12 @@ export function ContainerLogsSection({
         </ScrollView>
       )}
       {lines.length > shown.length ? (
-        <Text style={styles.muted}>{t.logs.truncated(shown.length)}</Text>
+        <Text style={styles.muted}>{t('logs.truncated', { count: shown.length })}</Text>
       ) : null}
 
       <LogFullscreen
         visible={fullscreen}
-        title={t.logs.fullscreenTitle(containerName)}
+        title={t('logs.fullscreenTitle', { name: containerName })}
         lines={lines}
         showTimestamps={timestamps}
         status={status}

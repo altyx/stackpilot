@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useStrings, type Strings } from '../../../../src/i18n';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
   useContainers,
@@ -28,13 +29,15 @@ import {
   reclaimableBytes,
 } from '../../../../src/lib/usage';
 import { createStyles, useTheme } from '../../../../src/theme';
+import { useFormat, type Formatters } from '../../../../src/i18n/format';
 
 type Filter = 'all' | 'used' | 'unused' | 'outdated';
 
 export default function ImagesScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const id = useEndpointParam();
 
   const images = useImages(id);
@@ -77,7 +80,7 @@ export default function ImagesScreen() {
     [usages, filter, outdatedIds],
   );
 
-  if (images.isPending || containers.isPending) return <Loader label={t.images.loading} />;
+  if (images.isPending || containers.isPending) return <Loader label={t('images.loading')} />;
   const error = images.error ?? containers.error;
   if (error) {
     return (
@@ -109,8 +112,8 @@ export default function ImagesScreen() {
       {
         onError: (e) =>
           Alert.alert(
-            t.common.deleteFailed,
-            e instanceof Error ? e.message : t.images.deleteNotApplied,
+            t('common.deleteFailed'),
+            e instanceof Error ? e.message : t('images.deleteNotApplied'),
           ),
       },
     );
@@ -121,13 +124,13 @@ export default function ImagesScreen() {
     prune.mutate(scope, {
       onSuccess: ({ deleted, spaceReclaimed }) =>
         Alert.alert(
-          t.common.cleanupComplete,
-          describePrune(t, candidates, deleted, spaceReclaimed),
+          t('common.cleanupComplete'),
+          describePrune(t, f, candidates, deleted, spaceReclaimed),
         ),
       onError: (e) =>
         Alert.alert(
-          t.common.cleanupFailed,
-          e instanceof Error ? e.message : t.images.pruneNotApplied,
+          t('common.cleanupFailed'),
+          e instanceof Error ? e.message : t('images.pruneNotApplied'),
         ),
     });
   }
@@ -148,15 +151,17 @@ export default function ImagesScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.summary}>
-              {t.images.summary(
-                usages.length,
-                unusedCount,
-                reclaimable > 0 ? t.bytes(reclaimable) : null,
-              )}
+              {[
+                t('counts.image', { count: usages.length }),
+                t('images.unusedCount', { count: unusedCount }),
+                reclaimable > 0 ? t('images.reclaimable', { size: f.bytes(reclaimable) }) : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
             {unusedCount > 0 ? (
               <Button
-                label={t.images.cleanUp}
+                label={t('images.cleanUp')}
                 variant="secondary"
                 onPress={() => setPruning(true)}
                 loading={prune.isPending}
@@ -167,12 +172,12 @@ export default function ImagesScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: t.images.filters.all },
-                { value: 'used', label: t.images.filters.used },
-                { value: 'unused', label: t.images.filters.unused },
+                { value: 'all', label: t('images.filters.all') },
+                { value: 'used', label: t('images.filters.used') },
+                { value: 'unused', label: t('images.filters.unused') },
                 // Only Portainer Business, indicator on, knows which images are outdated.
                 ...(updates.enabled
-                  ? [{ value: 'outdated' as const, label: t.images.filters.outdated }]
+                  ? [{ value: 'outdated' as const, label: t('images.filters.outdated') }]
                   : []),
               ]}
             />
@@ -180,9 +185,9 @@ export default function ImagesScreen() {
         }
         ListEmptyComponent={
           filter === 'outdated' ? (
-            <EmptyState title={t.images.allUpToDate} />
+            <EmptyState title={t('images.allUpToDate')} />
           ) : (
-            <EmptyState title={t.images.empty} subtitle={t.common.noMatch} />
+            <EmptyState title={t('images.empty')} subtitle={t('common.noMatch')} />
           )
         }
         renderItem={({ item }) => (
@@ -201,17 +206,22 @@ export default function ImagesScreen() {
       />
       <ConfirmSheet
         visible={deleting !== null}
-        title={t.images.deleteTitle}
+        title={t('images.deleteTitle')}
         message={
           shownDeleting
-            ? t.images.removal(
-                imageLabel(shownDeleting),
-                t.bytes(shownDeleting.Size),
-                (shownDeleting.RepoTags ?? []).length,
+            ? t(
+                (shownDeleting.RepoTags ?? []).length > 1
+                  ? 'images.removalWithTags'
+                  : 'images.removal',
+                {
+                  label: imageLabel(shownDeleting),
+                  size: f.bytes(shownDeleting.Size),
+                  tags: (shownDeleting.RepoTags ?? []).length,
+                },
               )
             : undefined
         }
-        confirmLabel={t.images.deleteConfirm}
+        confirmLabel={t('images.deleteConfirm')}
         destructive
         onConfirm={() => {
           const image = deleting;
@@ -225,14 +235,15 @@ export default function ImagesScreen() {
 }
 
 function describePrune(
-  t: Strings,
+  t: TFunction,
+  f: Formatters,
   candidates: ImageSummary[],
   deleted: ImageDeleteItem[],
   reclaimed: number,
 ): string {
   const count = countDeletedImages(candidates, deleted);
-  if (count === 0 && reclaimed === 0) return t.images.noneDeleted;
-  return t.images.deleted(count, t.bytes(reclaimed));
+  if (count === 0 && reclaimed === 0) return t('images.noneDeleted');
+  return t('images.deleted', { count, freed: f.bytes(reclaimed) });
 }
 
 const useStyles = createStyles((theme) => ({

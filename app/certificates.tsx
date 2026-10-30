@@ -1,16 +1,16 @@
 import { Platform, ScrollView, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../src/components/Card';
 import { CertificateSolutionCard } from '../src/components/CertificateSolutionCard';
 import { NumberedStep } from '../src/components/NumberedStep';
-import { useStrings } from '../src/i18n';
+import { certificateHelp } from '../src/help/certificates';
 import { createStyles } from '../src/theme';
 
 /** Reachable from the login screen too, without a session. */
 export default function CertificatesScreen() {
   const styles = useStyles();
-  // Only this device's steps: the other platform's settings paths are noise here.
-  const help = useStrings().certificates;
-  const deviceSteps = help.deviceTrustSteps[Platform.OS === 'android' ? 'android' : 'ios'];
+  const { t } = useTranslation();
+  const help = certificateHelp(t, Platform.OS === 'android' ? 'android' : 'ios');
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -24,7 +24,7 @@ export default function CertificatesScreen() {
         <Text accessibilityRole="header" style={styles.sectionTitle}>
           {help.deviceTrustTitle}
         </Text>
-        {deviceSteps.map((step, index) => (
+        {help.deviceTrustSteps.map((step, index) => (
           <NumberedStep key={step.text} n={index + 1} text={step.text} code={step.code} />
         ))}
       </Card>

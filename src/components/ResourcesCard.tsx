@@ -1,12 +1,13 @@
 import { Text, View } from 'react-native';
 import { useContainerStats, useDockerInfo } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { summarizeResources } from '../lib/resources';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
 import { Meter } from './Meter';
+import { useFormat } from '../i18n/format';
 
 /** The heaviest containers are what to look at when the host struggles. */
 const TOP_COUNT = 5;
@@ -20,14 +21,15 @@ export function ResourcesCard({
   running: ContainerSummary[];
 }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const info = useDockerInfo(endpointId);
   const stats = useContainerStats(endpointId, running);
 
   if (running.length === 0) {
     return (
       <Card>
-        <Text style={styles.muted}>{t.overview.nothingToMeasure}</Text>
+        <Text style={styles.muted}>{t('overview.nothingToMeasure')}</Text>
       </Card>
     );
   }
@@ -36,7 +38,7 @@ export function ResourcesCard({
     return (
       <Card>
         <InlineStatus
-          loading={t.overview.measuringUsage}
+          loading={t('overview.measuringUsage')}
           error={error}
           onRetry={() => {
             void info.refetch();
@@ -54,34 +56,37 @@ export function ResourcesCard({
   return (
     <Card style={styles.card}>
       <Meter
-        label={t.overview.cpu}
-        value={t.overview.cpuValue(t.percent(summary.cpuPercent), info.data.NCPU)}
+        label={t('overview.cpu')}
+        value={t('overview.cpuValue', {
+          percent: f.percent(summary.cpuPercent),
+          cores: t('counts.core', { count: info.data.NCPU }),
+        })}
         ratio={summary.cpuPercent / 100}
       />
       <Meter
-        label={t.overview.memory}
-        value={`${t.bytes(summary.memoryUsed)} / ${t.bytes(summary.memoryTotal)}`}
+        label={t('overview.memory')}
+        value={`${f.bytes(summary.memoryUsed)} / ${f.bytes(summary.memoryTotal)}`}
         ratio={summary.memoryTotal > 0 ? summary.memoryUsed / summary.memoryTotal : 0}
       />
 
       <View style={styles.top}>
-        <Text style={styles.topTitle}>{t.overview.topConsumers}</Text>
+        <Text style={styles.topTitle}>{t('overview.topConsumers')}</Text>
         {top.map((usage) => (
           <View key={usage.id} style={styles.topRow}>
             <Text style={styles.topName} numberOfLines={1}>
               {usage.name}
             </Text>
-            <Text style={styles.topValue}>{usage.cpu === null ? '—' : t.percent(usage.cpu)}</Text>
+            <Text style={styles.topValue}>{usage.cpu === null ? '—' : f.percent(usage.cpu)}</Text>
             <Text style={[styles.topValue, styles.topMemory]}>
-              {usage.memory === null ? '—' : t.bytes(usage.memory)}
+              {usage.memory === null ? '—' : f.bytes(usage.memory)}
             </Text>
           </View>
         ))}
       </View>
 
       <Text style={styles.footnote}>
-        {t.overview.resourcesFootnote}
-        {missing > 0 ? ` ${t.overview.noResponse(missing)}` : ''}
+        {t('overview.resourcesFootnote')}
+        {missing > 0 ? ` ${t('overview.noResponse', { count: missing })}` : ''}
       </Text>
     </Card>
   );

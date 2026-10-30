@@ -1,14 +1,14 @@
 import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
 import type { Endpoint } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { isKubernetes, isOnline } from '../lib/endpoints';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 
 export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; current: boolean }) {
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const snapshot = endpoint.Snapshots?.[0];
   const kubernetes = isKubernetes(endpoint);
   const online = isOnline(endpoint);
@@ -20,23 +20,23 @@ export function EndpointCard({ endpoint, current }: { endpoint: Endpoint; curren
           {endpoint.Name}
         </Text>
         <Text style={[styles.badge, online ? styles.badgeUp : styles.badgeDown]}>
-          {online ? t.endpoints.online : t.endpoints.offline}
+          {online ? t('endpoints.online') : t('endpoints.offline')}
         </Text>
       </View>
       <Text style={styles.url} numberOfLines={1}>
-        {endpoint.URL || t.endpoints.localSocket}
+        {endpoint.URL || t('endpoints.localSocket')}
       </Text>
       {kubernetes ? (
-        <Text style={styles.unsupported}>{t.endpoints.kubernetes}</Text>
+        <Text style={styles.unsupported}>{t('endpoints.kubernetes')}</Text>
       ) : (
         <Text style={styles.stats}>
           {snapshot
-            ? t.endpoints.snapshot(
-                snapshot.RunningContainerCount ?? 0,
-                snapshot.StoppedContainerCount ?? 0,
-                snapshot.ImageCount ?? 0,
-              )
-            : t.endpoints.noSnapshot}
+            ? [
+                t('endpoints.running', { count: snapshot.RunningContainerCount ?? 0 }),
+                t('endpoints.stopped', { count: snapshot.StoppedContainerCount ?? 0 }),
+                t('counts.image', { count: snapshot.ImageCount ?? 0 }),
+              ].join(' · ')
+            : t('endpoints.noSnapshot')}
         </Text>
       )}
     </Card>

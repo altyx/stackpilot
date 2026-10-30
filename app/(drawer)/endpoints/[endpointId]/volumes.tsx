@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
-import { useStrings, type Strings } from '../../../../src/i18n';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import {
   useContainers,
@@ -28,13 +29,15 @@ import {
   volumesWithUsage,
 } from '../../../../src/lib/usage';
 import { createStyles, useTheme } from '../../../../src/theme';
+import { useFormat, type Formatters } from '../../../../src/i18n/format';
 
 type Filter = 'all' | 'used' | 'unused';
 
 export default function VolumesScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
+  const f = useFormat();
   const id = useEndpointParam();
 
   const volumes = useVolumes(id);
@@ -67,7 +70,7 @@ export default function VolumesScreen() {
     [usages, filter],
   );
 
-  if (volumes.isPending || containers.isPending) return <Loader label={t.volumes.loading} />;
+  if (volumes.isPending || containers.isPending) return <Loader label={t('volumes.loading')} />;
   const error = volumes.error ?? containers.error;
   if (error) {
     return (
@@ -89,8 +92,8 @@ export default function VolumesScreen() {
     remove.mutate(volume.Name, {
       onError: (e) =>
         Alert.alert(
-          t.common.deleteFailed,
-          e instanceof Error ? e.message : t.volumes.deleteNotApplied,
+          t('common.deleteFailed'),
+          e instanceof Error ? e.message : t('volumes.deleteNotApplied'),
         ),
     });
   }
@@ -100,17 +103,18 @@ export default function VolumesScreen() {
     prune.mutate(scope, {
       onSuccess: ({ deleted, spaceReclaimed }) =>
         Alert.alert(
-          t.common.cleanupComplete,
-          t.volumes.deleted(
+          t('common.cleanupComplete'),
+          describePrune(
+            t,
             deleted.length,
             expected,
-            spaceReclaimed > 0 ? t.bytes(spaceReclaimed) : null,
+            spaceReclaimed > 0 ? f.bytes(spaceReclaimed) : '',
           ),
         ),
       onError: (e) =>
         Alert.alert(
-          t.common.cleanupFailed,
-          e instanceof Error ? e.message : t.volumes.pruneNotApplied,
+          t('common.cleanupFailed'),
+          e instanceof Error ? e.message : t('volumes.pruneNotApplied'),
         ),
     });
   }
@@ -135,15 +139,17 @@ export default function VolumesScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.summary}>
-              {t.volumes.summary(
-                usages.length,
-                unused.length,
-                reclaimable > 0 ? t.bytes(reclaimable) : null,
-              )}
+              {[
+                t('counts.volume', { count: usages.length }),
+                t('volumes.unusedCount', { count: unused.length }),
+                reclaimable > 0 ? t('volumes.reclaimable', { size: f.bytes(reclaimable) }) : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
             {unused.length > 0 ? (
               <Button
-                label={t.volumes.cleanUp}
+                label={t('volumes.cleanUp')}
                 variant="secondary"
                 onPress={() => setPruning(true)}
                 loading={prune.isPending}
@@ -154,14 +160,16 @@ export default function VolumesScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: t.common.all },
-                { value: 'used', label: t.common.used },
-                { value: 'unused', label: t.common.unused },
+                { value: 'all', label: t('common.all') },
+                { value: 'used', label: t('common.used') },
+                { value: 'unused', label: t('common.unused') },
               ]}
             />
           </View>
         }
-        ListEmptyComponent={<EmptyState title={t.volumes.empty} subtitle={t.common.noMatch} />}
+        ListEmptyComponent={
+          <EmptyState title={t('volumes.empty')} subtitle={t('common.noMatch')} />
+        }
         renderItem={({ item }) => (
           <VolumeCard
             usage={item}
@@ -180,11 +188,11 @@ export default function VolumesScreen() {
       />
       <ConfirmSheet
         visible={deleting !== null}
-        title={t.volumes.deleteTitle}
-        message={shownDeleting ? describeRemoval(t, shownDeleting, sizes) : undefined}
-        confirmLabel={t.volumes.deletePermanently}
+        title={t('volumes.deleteTitle')}
+        message={shownDeleting ? describeRemoval(t, f, shownDeleting, sizes) : undefined}
+        confirmLabel={t('volumes.deletePermanently')}
         confirmPhrase={
-          shownDeleting ? volumeConfirmPhrase(shownDeleting, t.volumes.confirmWord) : undefined
+          shownDeleting ? volumeConfirmPhrase(shownDeleting, t('volumes.confirmWord')) : undefined
         }
         destructive
         onConfirm={() => {
@@ -198,9 +206,26 @@ export default function VolumesScreen() {
   );
 }
 
-function describeRemoval(t: Strings, volume: VolumeSummary, sizes: Map<string, number>): string {
+function describeRemoval(
+  t: TFunction,
+  f: Formatters,
+  volume: VolumeSummary,
+  sizes: Map<string, number>,
+): string {
   const size = sizes.get(volume.Name);
-  return t.volumes.removal(volume.Name, size !== undefined ? t.bytes(size) : null);
+  const name = size !== undefined ? `${volume.Name} (${f.bytes(size)})` : volume.Name;
+  return t('volumes.removal', { name });
+}
+
+/**
+ * Docker decides on its side what is unused: a gap with the preview means the
+ * list was stale, worth saying rather than hiding.
+ */
+function describePrune(t: TFunction, deleted: number, expected: number, freed: string): string {
+  if (deleted === 0) return t('volumes.noneDeleted');
+  const parts = [t('volumes.deleted', { count: deleted }), freed && t('volumes.freed', { freed })];
+  const gap = deleted !== expected ? ` ${t('volumes.expected', { count: expected })}` : '';
+  return `${parts.filter(Boolean).join(' · ')}${gap}.`;
 }
 
 const useStyles = createStyles((theme) => ({

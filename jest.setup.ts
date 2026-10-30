@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react';
 import 'react-native-gesture-handler/jestSetup';
+// Components read their text through react-i18next: the instance must exist
+// before the first render, in English, the reference language.
+import './src/i18n';
 
 // Without a provider, `useSafeAreaInsets` throws: the stand-in below is the
 // one the library documents, with zeroed insets.

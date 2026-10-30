@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, Text, TextInput, View } from 'react-native';
-import { useStrings } from '../../../../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStacks } from '../../../../src/api/hooks';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
@@ -14,7 +14,7 @@ import { createStyles, useTheme } from '../../../../src/theme';
 export default function StacksScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const id = useEndpointParam();
   const containers = useContainers(id);
   const stacks = useStacks(id);
@@ -33,7 +33,7 @@ export default function StacksScreen() {
   }, [overviews, search]);
 
   if (containers.isPending || (stacks.isPending && !stacks.error)) {
-    return <Loader label={t.stacks.loading} />;
+    return <Loader label={t('stacks.loading')} />;
   }
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
 
@@ -63,26 +63,33 @@ export default function StacksScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder={t.stacks.filterPlaceholder}
+            placeholder={t('stacks.filterPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.search}
           />
           <Text style={styles.summary}>
-            {t.stacks.summary(overviews.length, managed, external)}
+            {[
+              t('counts.stack', { count: overviews.length }),
+              t('stacks.managed', { count: managed }),
+              external > 0 ? t('stacks.external', { count: external }) : '',
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           </Text>
           {stacks.error ? (
             <Text style={styles.warning}>
-              {t.stacks.detailsUnavailable(
-                stacks.error instanceof Error ? stacks.error.message : t.stacks.unknownError,
-              )}
+              {t('stacks.detailsUnavailable', {
+                message:
+                  stacks.error instanceof Error ? stacks.error.message : t('stacks.unknownError'),
+              })}
             </Text>
           ) : null}
         </View>
       }
       ListEmptyComponent={
-        <EmptyState title={t.stacks.empty} subtitle={search ? t.common.noMatch : undefined} />
+        <EmptyState title={t('stacks.empty')} subtitle={search ? t('common.noMatch') : undefined} />
       }
       renderItem={({ item }) => <StackCard endpointId={id} overview={item} />}
       ItemSeparatorComponent={ContainerRowSeparator}

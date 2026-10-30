@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, SectionList, Text, TextInput, View } from 'react-native';
-import { useStrings } from '../../../../src/i18n';
+import { useTranslation } from 'react-i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStackAction } from '../../../../src/api/hooks';
 import type { ContainerSummary, StackAction } from '../../../../src/api/types';
@@ -26,7 +26,7 @@ type Filter = 'all' | 'running' | 'stopped';
 export default function ContainersScreen() {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const id = useEndpointParam();
   const { data, error, isPending, refetch, isRefetching } = useContainers(id);
   const [search, setSearch] = useState('');
@@ -70,15 +70,15 @@ export default function ContainersScreen() {
         },
         onError: (e) =>
           Alert.alert(
-            t.common.actionFailed,
-            e instanceof Error ? e.message : t.common.actionNotApplied,
+            t('common.actionFailed'),
+            e instanceof Error ? e.message : t('common.actionNotApplied'),
           ),
         onSettled: () => setPendingStack(null),
       },
     );
   }
 
-  if (isPending) return <Loader label={t.containers.loading} />;
+  if (isPending) return <Loader label={t('containers.loading')} />;
   if (error) return <ErrorView error={error} onRetry={refetch} />;
 
   const shown = sections.reduce((sum, section) => sum + section.data.length, 0);
@@ -104,7 +104,7 @@ export default function ContainersScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder={t.containers.filterPlaceholder}
+              placeholder={t('containers.filterPlaceholder')}
               placeholderTextColor={theme.colors.textMuted}
               autoCapitalize="none"
               autoCorrect={false}
@@ -114,12 +114,19 @@ export default function ContainersScreen() {
               value={filter}
               onChange={setFilter}
               options={[
-                { value: 'all', label: t.common.all },
-                { value: 'running', label: t.common.running },
-                { value: 'stopped', label: t.common.stopped },
+                { value: 'all', label: t('common.all') },
+                { value: 'running', label: t('common.running') },
+                { value: 'stopped', label: t('common.stopped') },
               ]}
             />
-            <Text style={styles.summary}>{t.containers.summary(shown, stackCount)}</Text>
+            <Text style={styles.summary}>
+              {[
+                t('counts.container', { count: shown }),
+                stackCount > 0 ? t('counts.stack', { count: stackCount }) : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
           </View>
         }
         renderSectionHeader={({ section }) => (
@@ -132,8 +139,8 @@ export default function ContainersScreen() {
         )}
         ListEmptyComponent={
           <EmptyState
-            title={t.common.noContainers}
-            subtitle={search || filter !== 'all' ? t.common.noMatch : undefined}
+            title={t('common.noContainers')}
+            subtitle={search || filter !== 'all' ? t('common.noMatch') : undefined}
           />
         }
         renderItem={({ item }) => <ContainerRow endpointId={id} container={item} />}

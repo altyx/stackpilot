@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import SettingsScreen from '../app/(drawer)/settings';
-import { setCurrentLanguage } from '../src/i18n';
+import i18n from '../src/i18n';
 import { memory } from '../src/testing/secureStoreMock';
 import { createTestLayout } from '../src/testing/TestLayout';
 
@@ -14,7 +14,7 @@ jest.mock(
 );
 
 beforeEach(() => memory.clear());
-afterEach(() => setCurrentLanguage('en'));
+afterEach(() => i18n.changeLanguage('en'));
 
 describe('settings screen', () => {
   it('switches the interface to French and keeps the choice', async () => {

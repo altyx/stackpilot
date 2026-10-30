@@ -1,7 +1,7 @@
 import { useState, type ComponentProps } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { createStyles, useTheme } from '../theme';
 
 /**
@@ -18,7 +18,7 @@ export function LoginField({
 >) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [revealed, setRevealed] = useState(false);
   return (
     <View style={styles.field}>
@@ -36,7 +36,7 @@ export function LoginField({
         {secret ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={revealed ? t.login.hideInput : t.login.showInput}
+            accessibilityLabel={revealed ? t('login.hideInput') : t('login.showInput')}
             hitSlop={theme.spacing(2)}
             onPress={() => setRevealed((value) => !value)}
             style={({ pressed }) => [styles.reveal, pressed && styles.revealPressed]}>

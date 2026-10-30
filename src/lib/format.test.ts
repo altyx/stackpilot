@@ -1,8 +1,11 @@
 import type { ContainerInspect } from '../api/types';
 import { makeContainer } from '../testing/fixtures';
-import { en } from '../i18n/en';
-import { fr } from '../i18n/fr';
-import { containerName, inspectName, plural, pluralFr, shortId } from './format';
+import i18n from '../i18n';
+import { formattersFor } from '../i18n/format';
+import { containerName, inspectName, shortId } from './format';
+
+const en = formattersFor('en');
+const fr = formattersFor('fr');
 
 describe('containerName', () => {
   it('strips the leading slash Docker adds', () => {
@@ -51,18 +54,6 @@ describe('formatDate', () => {
   });
 });
 
-describe('containerState', () => {
-  it('translates known Docker states', () => {
-    expect(en.containerState('running')).toBe('Running');
-    expect(en.containerState('exited')).toBe('Stopped');
-    expect(fr.containerState('exited')).toBe('Arrêté');
-  });
-
-  it('passes unknown states through', () => {
-    expect(en.containerState('configured')).toBe('configured');
-  });
-});
-
 describe('formatBytes', () => {
   it('uses base 1000 units with a decimal point', () => {
     expect(en.bytes(512)).toBe('512 B');
@@ -97,12 +88,14 @@ describe('formatPercent', () => {
   });
 });
 
-describe('plural', () => {
+describe('plurals', () => {
   it('counts zero as plural in English and singular in French', () => {
-    expect(plural(0, 'image')).toBe('0 images');
-    expect(plural(1, 'image')).toBe('1 image');
-    expect(pluralFr(0, 'image')).toBe('0 image');
-    expect(pluralFr(1, 'image')).toBe('1 image');
-    expect(pluralFr(2, 'image')).toBe('2 images');
+    const t = (lng: string) => i18n.getFixedT(lng);
+    expect(t('en')('counts.image', { count: 0 })).toBe('0 images');
+    expect(t('en')('counts.image', { count: 1 })).toBe('1 image');
+    expect(t('fr')('counts.image', { count: 0 })).toBe('0 image');
+    expect(t('fr')('counts.image', { count: 2 })).toBe('2 images');
+    // CLDR's French "many", for millions, reads like the plural.
+    expect(t('fr')('counts.image', { count: 1_000_000 })).toBe('1000000 images');
   });
 });

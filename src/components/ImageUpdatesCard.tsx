@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { useImageUpdates } from '../api/hooks';
 import type { ContainerSummary } from '../api/types';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { createStyles, useTheme } from '../theme';
 import { Card } from './Card';
 import { InlineStatus } from './InlineStatus';
@@ -21,21 +21,21 @@ export function ImageUpdatesCard({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const updates = useImageUpdates(endpointId, containers);
   const router = useRouter();
 
   if (!updates.enabled) {
     return (
       <Card>
-        <Text style={styles.muted}>{t.overview.updatesUnsupported}</Text>
+        <Text style={styles.muted}>{t('overview.updatesUnsupported')}</Text>
       </Card>
     );
   }
   if (updates.isPending) {
     return (
       <Card>
-        <InlineStatus loading={t.overview.comparing} />
+        <InlineStatus loading={t('overview.comparing')} />
       </Card>
     );
   }
@@ -45,12 +45,12 @@ export function ImageUpdatesCard({
     return (
       <Card style={styles.row}>
         <Ionicons name="checkmark-circle-outline" size={22} color={theme.colors.success} />
-        <Text style={styles.title}>{t.overview.allUpToDate}</Text>
+        <Text style={styles.title}>{t('overview.allUpToDate')}</Text>
       </Card>
     );
   }
 
-  const label = t.overview.toUpdate(count);
+  const label = t('overview.toUpdate', { count });
   return (
     <Pressable
       accessibilityRole="link"
@@ -61,7 +61,7 @@ export function ImageUpdatesCard({
         <Ionicons name="arrow-up-circle-outline" size={22} color={theme.colors.accent} />
         <View style={styles.text}>
           <Text style={styles.title}>{label}</Text>
-          <Text style={styles.muted}>{t.overview.seeWhich}</Text>
+          <Text style={styles.muted}>{t('overview.seeWhich')}</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </Card>

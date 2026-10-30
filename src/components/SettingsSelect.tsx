@@ -1,7 +1,7 @@
 import { useState, type ComponentProps } from 'react';
 import { Pressable, Text } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useStrings } from '../i18n';
+import { useTranslation } from 'react-i18next';
 import { createStyles, useTheme } from '../theme';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
@@ -32,7 +32,7 @@ export function SettingsSelect<T extends string>({
 }) {
   const theme = useTheme();
   const styles = useStyles();
-  const t = useStrings();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.value === value);
 
@@ -64,7 +64,7 @@ export function SettingsSelect<T extends string>({
           ))}
         </Card>
         <SheetActions>
-          <Button label={t.common.cancel} variant="secondary" onPress={() => setOpen(false)} />
+          <Button label={t('common.cancel')} variant="secondary" onPress={() => setOpen(false)} />
         </SheetActions>
       </BottomSheet>
     </>
