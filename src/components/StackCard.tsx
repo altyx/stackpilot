@@ -1,11 +1,12 @@
 import { Pressable, Text, View } from 'react-native';
 import { Link } from 'expo-router';
-import { formatDate } from '../lib/format';
+import { useTranslation } from 'react-i18next';
 import type { StackOverview } from '../lib/stacks';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { StackImageStatus } from './StackImageStatus';
 import { StackKindBadge } from './StackKindBadge';
+import { useFormat } from '../i18n/format';
 
 export function StackCard({
   endpointId,
@@ -15,6 +16,8 @@ export function StackCard({
   overview: StackOverview;
 }) {
   const styles = useStyles();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { name, kind, stack, running, total } = overview;
   return (
     <Link href={`/endpoints/${endpointId}/stacks/${encodeURIComponent(name)}`} asChild>
@@ -30,23 +33,36 @@ export function StackCard({
           </View>
 
           <Text style={[styles.count, countStyle(styles, running, total)]}>
-            {describeCount(running, total)}
+            {total === 0 ? t('common.noContainers') : t('common.runningRatio', { running, total })}
           </Text>
 
           {stack ? (
             <Text style={styles.meta} numberOfLines={1}>
-              {describeOrigin(stack.CreationDate, stack.CreatedBy)}
+              {[
+                stack.CreationDate > 0
+                  ? t('stacks.createdOn', { date: f.date(stack.CreationDate) })
+                  : '',
+                stack.CreatedBy ? t('stacks.createdBy', { user: stack.CreatedBy }) : '',
+              ]
+                .filter(Boolean)
+                .join(' ') || t('stacks.managedByPortainer')}
             </Text>
           ) : (
-            <Text style={styles.meta}>Deployed outside Portainer</Text>
+            <Text style={styles.meta}>{t('stacks.outsidePortainer')}</Text>
           )}
 
           {stack?.GitConfig ? (
             <Text style={styles.meta} numberOfLines={1}>
-              Git · {stack.GitConfig.ReferenceName.replace(/^refs\/heads\//, '')}
-              {stack.AutoUpdate?.Interval
-                ? ` · auto update every ${stack.AutoUpdate.Interval}`
-                : ''}
+              {[
+                t('stacks.gitReference', {
+                  reference: stack.GitConfig.ReferenceName.replace(/^refs\/heads\//, ''),
+                }),
+                stack.AutoUpdate?.Interval
+                  ? t('stacks.gitAutoUpdate', { interval: stack.AutoUpdate.Interval })
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </Text>
           ) : null}
         </Card>
@@ -55,22 +71,10 @@ export function StackCard({
   );
 }
 
-export function describeCount(running: number, total: number): string {
-  if (total === 0) return 'No containers';
-  return `${running}/${total} running`;
-}
-
 function countStyle(styles: ReturnType<typeof useStyles>, running: number, total: number) {
   if (total === 0) return styles.countNone;
   if (running === total) return styles.countFull;
   return running === 0 ? styles.countNone : styles.countPartial;
-}
-
-function describeOrigin(creationDate: number, createdBy: string): string {
-  const parts = [];
-  if (creationDate > 0) parts.push(`Created ${formatDate(creationDate)}`);
-  if (createdBy) parts.push(`by ${createdBy}`);
-  return parts.join(' ') || 'Managed by Portainer';
 }
 
 const useStyles = createStyles((theme) => ({

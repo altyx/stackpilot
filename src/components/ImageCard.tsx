@@ -1,11 +1,12 @@
 import { Text, View } from 'react-native';
 import type { ImageSummary } from '../api/types';
-import { formatBytes, formatDate } from '../lib/format';
+import { useTranslation } from 'react-i18next';
 import { imageLabel, isDangling, shortImageId, type Usage } from '../lib/usage';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 import { IconButton } from './IconButton';
 import { UsageBadge } from './UsageBadge';
+import { useFormat } from '../i18n/format';
 
 export function ImageCard({
   usage,
@@ -19,6 +20,8 @@ export function ImageCard({
   onDelete?: () => void;
 }) {
   const styles = useStyles();
+  const { t } = useTranslation();
+  const f = useFormat();
   const { item: image, usedBy } = usage;
   return (
     <Card style={styles.card}>
@@ -27,16 +30,16 @@ export function ImageCard({
           <Text style={styles.name} numberOfLines={2}>
             {imageLabel(image)}
           </Text>
-          <UsageBadge usedBy={usedBy} />
+          <UsageBadge usedBy={usedBy} kind="image" />
         </View>
 
         <Text style={styles.meta}>
-          {formatBytes(image.Size)} · {shortImageId(image.Id)} · {formatDate(image.Created)}
+          {f.bytes(image.Size)} · {shortImageId(image.Id)} · {f.date(image.Created)}
         </Text>
 
-        {updateAvailable ? <Text style={styles.update}>New version available</Text> : null}
+        {updateAvailable ? <Text style={styles.update}>{t('images.newVersion')}</Text> : null}
 
-        {isDangling(image) ? <Text style={styles.dangling}>Untagged image (dangling)</Text> : null}
+        {isDangling(image) ? <Text style={styles.dangling}>{t('images.dangling')}</Text> : null}
 
         {usedBy.length > 0 ? (
           <Text style={styles.usedBy} numberOfLines={2}>
@@ -45,7 +48,7 @@ export function ImageCard({
         ) : null}
 
         {(image.RepoTags ?? []).length > 1 ? (
-          <Text style={styles.meta}>{image.RepoTags!.length} tags</Text>
+          <Text style={styles.meta}>{t('images.tags', { count: image.RepoTags!.length })}</Text>
         ) : null}
       </View>
 
@@ -53,7 +56,7 @@ export function ImageCard({
         <IconButton
           icon="trash-outline"
           variant="danger"
-          accessibilityLabel={`Delete ${imageLabel(image)}`}
+          accessibilityLabel={t('common.deleteNamed', { name: imageLabel(image) })}
           onPress={onDelete}
         />
       ) : null}

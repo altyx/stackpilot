@@ -1,0 +1,620 @@
+{
+  "certificates": {
+    "intro": "iOS and Android reject self-signed certificates, like the one Portainer generates by default on port 9443. The app can't override this: the fix is to present the device with a certificate it trusts. Here are three ways to get there, from the simplest to the most hands-on.",
+    "solutions": {
+      "tailscale": {
+        "title": "Tailscale",
+        "bestFor": "Best for reaching your server from anywhere, without opening a port.",
+        "summary": "Tailscale provides a valid Let's Encrypt certificate for your server's address on your Tailscale network.",
+        "steps": [
+          "Install Tailscale on the server and on this phone, on the same network.",
+          "In the Tailscale admin console, enable MagicDNS and HTTPS certificates (DNS tab).",
+          "On the server, serve Portainer over HTTPS:",
+          "Sign in with the machine's address on your Tailscale network:"
+        ],
+        "note": "\"https+insecure\" only covers the local hop between Tailscale and Portainer, on the server itself: this phone still gets a valid certificate."
+      },
+      "reverse-proxy": {
+        "title": "Reverse proxy and Let's Encrypt",
+        "bestFor": "Best if you already own a domain name.",
+        "summary": "A reverse proxy obtains a Let's Encrypt certificate and presents it in place of Portainer's.",
+        "steps": [
+          "Point a name, for example portainer.example.com, at your reverse proxy.",
+          "Put Portainer behind the proxy. With Caddy, on the same Docker network as the portainer container:",
+          "For a name only reachable on your local network, use Let's Encrypt's DNS challenge: Caddy, Traefik and Nginx Proxy Manager support it with most DNS providers.",
+          "Sign in with the proxy's address:"
+        ]
+      },
+      "own-ca": {
+        "title": "Your own authority with mkcert",
+        "bestFor": "Best for a local network, without a domain name.",
+        "summary": "You create your own certificate authority, sign Portainer's certificate with it, then install that authority on this phone.",
+        "steps": [
+          "On a computer, install mkcert, then create a certificate for the addresses you type in the app (name, IP, or both):",
+          "Start Portainer with this certificate, placed in a certs folder mounted on /certs:",
+          "Get the authority: it's the rootCA.pem file in the folder this command prints.",
+          "Send rootCA.pem to this phone (AirDrop, email, file), then install it as shown below."
+        ],
+        "note": "Never share rootCA-key.pem: anyone holding this key can create certificates this phone will accept, for any website."
+      }
+    },
+    "deviceTrustTitle": "Install the authority on this phone",
+    "deviceTrust": {
+      "ios": [
+        "Open rootCA.pem on the iPhone: iOS offers to download a profile.",
+        "Settings › General › VPN & Device Management: install the profile.",
+        "Settings › General › About › Certificate Trust Settings: turn on full trust for this certificate. Without this step, iOS installs the profile but still refuses the connection."
+      ],
+      "android": [
+        "Copy rootCA.pem to the phone. Rename it to rootCA.crt if the system doesn't offer to install it.",
+        "Settings › Security › Encryption & credentials › Install a certificate › CA certificate. The path varies by manufacturer: search the settings for \"certificate\".",
+        "Many apps ignore authorities installed this way. StackPilot does not: it accepts them just like the system ones."
+      ]
+    },
+    "footnote": "Why not just accept Portainer's default certificate? The app would have to bypass the system's verification, which it doesn't do: the solutions above genuinely protect the connection, with no exception to manage."
+  },
+  "changelog": {
+    "allReleases": "All releases on GitHub",
+    "installed": "Installed",
+    "version": "Version {{version}}"
+  },
+  "common": {
+    "actionFailed": "Action failed",
+    "actionNotApplied": "The action could not be applied.",
+    "all": "All",
+    "andMore": "and {{count}} more",
+    "back": "Back",
+    "cancel": "Cancel",
+    "cannotOpenLink": "Cannot open link",
+    "cleanupComplete": "Cleanup complete",
+    "cleanupFailed": "Cleanup failed",
+    "close": "Close",
+    "copied": "Copied",
+    "copy": "Copy",
+    "delete": "Delete",
+    "deleteFailed": "Delete failed",
+    "deleteNamed": "Delete {{name}}",
+    "edit": "Edit",
+    "hide": "Hide {{name}}",
+    "loading": "Loading…",
+    "noAppForLink": "No app can open this address.",
+    "noContainers": "No containers",
+    "noMatch": "Nothing matches this filter.",
+    "retry": "Retry",
+    "running": "Running",
+    "runningRatio": "{{running}}/{{total}} running",
+    "save": "Save",
+    "show": "Show {{name}}",
+    "signInAgain": "Sign in again",
+    "stopped": "Stopped",
+    "typeToConfirm": "To confirm, type ",
+    "typeToConfirmLabel": "Type {{phrase}} to confirm",
+    "unexpectedError": "An unexpected error occurred.",
+    "unknownError": "Unknown error.",
+    "unused": "Unused",
+    "usage": {
+      "image": {
+        "unused": "unused",
+        "used": "used · {{count}}"
+      },
+      "volume": {
+        "unused": "unused",
+        "used": "used · {{count}}"
+      }
+    },
+    "used": "Used"
+  },
+  "container": {
+    "actions": {
+      "kill": "Kill",
+      "pause": "Pause",
+      "restart": "Restart",
+      "start": "Start",
+      "stop": "Stop",
+      "unpause": "Resume"
+    },
+    "alsoVolumes": "Also delete its anonymous volumes",
+    "blockers": {
+      "autoRemove": "This container removes itself when it stops (--rm): it cannot be recreated.",
+      "portainer": "Portainer cannot recreate its own container: update it from the host.",
+      "swarm": "This container belongs to a Swarm service: update the service instead.",
+      "untagged": "The image has no tag: there is nothing to pull from a registry."
+    },
+    "confirmTitles": {
+      "kill": "Kill container?",
+      "pause": "Pause container?",
+      "restart": "Restart container?",
+      "start": "Start container?",
+      "stop": "Stop container?",
+      "unpause": "Resume container?"
+    },
+    "created": "Created",
+    "deleteNotApplied": "The container could not be deleted.",
+    "deleteTitle": "Delete container?",
+    "envVariables": "Env. variables",
+    "exitCode": "Exit code",
+    "health": "health: {{status}}",
+    "id": "ID",
+    "imageStatus": {
+      "outdated": "Image update available",
+      "processing": "Checking image…",
+      "unknown": "Image status unknown",
+      "updated": "Image up to date"
+    },
+    "imageUpdated": "Image updated",
+    "imageUpdatedMessage": "{{name}} was recreated with the latest image.",
+    "impacts": {
+      "kill": "{{name}} will be stopped immediately, with no chance to shut down cleanly: writes in progress may be lost.",
+      "pause": "{{name}} will not respond until it is resumed.",
+      "restart": "{{name}} will restart and be briefly unavailable.",
+      "stop": "{{name}} will stay stopped until it is started again."
+    },
+    "loading": "Loading container…",
+    "menu": {
+      "kill": {
+        "hint": "Stops it at once, without letting the application shut down cleanly.",
+        "label": "Kill"
+      },
+      "pause": {
+        "hint": "Freezes its processes without stopping them: it stops responding until resumed.",
+        "label": "Pause"
+      },
+      "remove": {
+        "hint": "Its named volumes are kept.",
+        "label": "Delete container"
+      },
+      "unpause": {
+        "hint": "Restarts its processes where they were frozen.",
+        "label": "Resume"
+      }
+    },
+    "moreActions": "More actions",
+    "namedVolumesKept": "Named volumes are always kept.",
+    "network": "Network",
+    "pulling": "Pulling the image and recreating the container… This can take several minutes.",
+    "recreateNotApplied": "The container could not be recreated.",
+    "removalRunning": "{{name}} will be stopped, then deleted. Anything not in a volume is lost; it will have to be recreated to run again.",
+    "removalStopped": "{{name}} will be deleted. Anything not in a volume is lost; it will have to be recreated to run again.",
+    "restartPolicy": "Restart policy",
+    "started": "Started",
+    "update": "Update",
+    "updateFailed": "Update failed",
+    "updateImage": "Update image",
+    "updateMessage": "Portainer will pull the latest version of {{image}}, then delete {{name}} and recreate it with the same configuration. Any data not kept in a volume will be lost.",
+    "updateTitle": "Update image?",
+    "volumes": "Volumes"
+  },
+  "containerStates": {
+    "created": "Created",
+    "dead": "Dead",
+    "exited": "Stopped",
+    "paused": "Paused",
+    "removing": "Removing",
+    "restarting": "Restarting",
+    "running": "Running"
+  },
+  "containers": {
+    "filterPlaceholder": "Filter by name or image",
+    "loading": "Loading containers…",
+    "noStack": "No stack",
+    "stackActions": "Actions for the {{title}} stack"
+  },
+  "counts": {
+    "container_one": "{{count}} container",
+    "container_other": "{{count}} containers",
+    "core_one": "{{count}} core",
+    "core_other": "{{count}} cores",
+    "image_one": "{{count}} image",
+    "image_other": "{{count}} images",
+    "line_one": "{{count}} line",
+    "line_other": "{{count}} lines",
+    "stack_one": "{{count}} stack",
+    "stack_other": "{{count}} stacks",
+    "volume_one": "{{count}} volume",
+    "volume_other": "{{count}} volumes"
+  },
+  "endpoints": {
+    "empty": "No environments",
+    "emptyHint": "This account cannot access any environment on this instance.",
+    "kubernetes": "Kubernetes environment — not supported by the app.",
+    "loading": "Loading environments…",
+    "localSocket": "local socket",
+    "noSnapshot": "No snapshot available",
+    "offline": "Offline",
+    "online": "Online",
+    "running": "{{count}} running",
+    "stopped": "{{count}} stopped"
+  },
+  "errors": {
+    "conflict": "Conflict: the resource is already in that state.",
+    "emptyStackFile": "The stack file is empty: Portainer would refuse the redeploy.",
+    "forbidden": "Access denied: this account has no rights on this resource.",
+    "http": "Portainer error (HTTP {{status}}).",
+    "imageInUse": "Image in use: a container, maybe a stopped one, still depends on it. Delete it first.",
+    "invalidEndpoint": "Invalid environment id ({{id}}).",
+    "noSessionToken": "Portainer replied without a session token.",
+    "notFound": "Resource not found on this instance.",
+    "refusedOverHttps": "Connection refused. If the instance responds in a browser, the cause is almost always its TLS certificate: the system rejects a self-signed certificate, and the app has no way to accept it.",
+    "sessionExpired": "Session expired. Sign in again.",
+    "timeout": "The Portainer instance did not respond in time.",
+    "unauthorized": "Authentication refused: invalid or expired token.",
+    "unreachable": "Cannot reach the Portainer instance. Check the URL and the network.",
+    "urlRequired": "The instance URL is required.",
+    "volumeInUse": "Volume in use: a container, maybe a stopped one, still uses it. Delete it first."
+  },
+  "images": {
+    "allUpToDate": "All images are up to date",
+    "cleanUp": "Clean up images",
+    "dangling": "Untagged image (dangling)",
+    "deleteConfirm": "Delete image",
+    "deleteNotApplied": "The image could not be deleted.",
+    "deleteTitle": "Delete image?",
+    "deleted_one": "{{count}} image deleted · {{freed}} freed.",
+    "deleted_other": "{{count}} images deleted · {{freed}} freed.",
+    "empty": "No images",
+    "filters": {
+      "all": "All",
+      "outdated": "Outdated",
+      "unused": "Unused",
+      "used": "Used"
+    },
+    "loading": "Loading images…",
+    "newVersion": "New version available",
+    "none": "none",
+    "noneDeleted": "No image was deleted.",
+    "pruneConfirm": "Clean up",
+    "pruneImpacts": {
+      "dangling": "Untagged images, left over from builds or updates, will be deleted.",
+      "unused": "All unused images will be deleted, tagged ones included. They will have to be pulled again to create a container from them."
+    },
+    "pruneMessage": "Only images that no container uses, even a stopped one, are deleted.",
+    "pruneNotApplied": "The images could not be deleted.",
+    "pruneTitle_one": "Delete image?",
+    "pruneTitle_other": "Delete {{count}} images?",
+    "reclaimable": "{{size}} reclaimable",
+    "removal": "{{label}} ({{size}}) will be removed from the environment. It will have to be pulled again to be reused.",
+    "removalWithTags": "{{label}} ({{size}}) will be removed from the environment, along with its {{tags}} tags. It will have to be pulled again to be reused.",
+    "scopes": {
+      "dangling": "Untagged images",
+      "unused": "All unused images"
+    },
+    "tags": "{{count}} tags",
+    "unusedCount": "{{count}} unused"
+  },
+  "legal": {
+    "englishOnly": "",
+    "lastUpdated": "Last updated: {{date}}"
+  },
+  "login": {
+    "accessToken": "Access token",
+    "apiKeyHint": "Create an access token in Portainer › My account › Access tokens. It never expires and can be revoked on the server.",
+    "credentials": "Credentials",
+    "failed": "Unable to sign in.",
+    "fixCertificate": "Fix a certificate problem",
+    "hideInput": "Hide input",
+    "instanceUrl": "Instance URL",
+    "jwtHint": "Signing in with credentials opens a temporary JWT session; Portainer ends it after a few hours.",
+    "legalAfter": ".",
+    "legalBefore": "By signing in, you accept the ",
+    "legalMiddle": ". See also the ",
+    "legalPrivacy": "privacy policy",
+    "legalTerms": "terms of use",
+    "password": "Password",
+    "sessionExpired": "Your session has expired. Sign in again to continue.",
+    "showInput": "Show input",
+    "submit": "Sign in",
+    "subtitle": "Credentials are stored in the device's secure keychain.",
+    "title": "Sign in to Portainer",
+    "tokenRevoked": "Portainer rejected the access token: it has probably been revoked.",
+    "username": "Username"
+  },
+  "logs": {
+    "copied": "Logs copied",
+    "copy": "Copy logs",
+    "empty": "No output in this range.",
+    "exitFullscreen": "Exit full screen",
+    "follow": "Follow live",
+    "fullscreen": "Full screen",
+    "fullscreenTitle": "Logs · {{name}}",
+    "live": "live",
+    "notShared": "The logs could not be shared.",
+    "ranges": {
+      "since-15m": "15 min",
+      "since-1h": "1 h",
+      "since-24h": "24 h",
+      "tail-100": "100 lines",
+      "tail-2000": "2,000 lines",
+      "tail-500": "500 lines"
+    },
+    "share": "Share logs",
+    "shareTitle": "Logs for {{name}}",
+    "sharingFailed": "Sharing failed",
+    "show": "Show logs",
+    "timestamps": "Show timestamps",
+    "title": "Logs",
+    "truncated": "Showing the last {{count}} lines: switch to full screen to read them all.",
+    "unavailable": "Logs unavailable."
+  },
+  "nav": {
+    "certificates": "HTTPS certificate",
+    "changelog": "What's new",
+    "containers": "Containers",
+    "environment": "Environment",
+    "environments": "Environments",
+    "images": "Images",
+    "noEnvironmentOpen": "No environment open",
+    "notifications": "Notifications",
+    "openMenu": "Open menu",
+    "overview": "Overview",
+    "restoringSession": "Restoring session…",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "stacks": "Stacks",
+    "volumes": "Volumes"
+  },
+  "notifications": {
+    "allow": "Allow notifications",
+    "allowToGetToken": "Allow notifications to get this device's token.",
+    "channelName": "Container alerts",
+    "copiedMessage": "The token is on the clipboard.",
+    "copyToken": "Copy token",
+    "denied": "Notifications are turned off. Turn them back on in the system settings, then register again.",
+    "expoGo": "Expo Go does not receive remote notifications. Install a compiled build of the app (dev build) to turn them on.",
+    "footnote": "Remote notifications need a physical device and a compiled build of the app: they work neither in a simulator nor in Expo Go.",
+    "intro": "Alerts are pushed by a service that watches the Docker event stream on your server. This screen provides the token that service needs to reach this device.",
+    "needsDevice": "Remote notifications need a physical device: APNs does not issue a token to a simulator.",
+    "noProjectId": "No EAS projectId in the configuration: run `eas init`, then rebuild the app.",
+    "registrationFailed": "Registration failed",
+    "setup": "Setup",
+    "stateChange": "State change",
+    "steps": [
+      "Deploy the watcher/ service on your server (see its README).",
+      "Paste this token into its EXPO_PUSH_TOKENS variable.",
+      "The service alerts you when a container crashes, turns unhealthy, restarts or runs out of memory."
+    ],
+    "tokenTitle": "This device's token"
+  },
+  "overview": {
+    "allGood": "All good",
+    "allGoodHint": "No container is unhealthy, stuck restarting or exited abnormally.",
+    "allImagesInUse": "all in use",
+    "allRunning": "all running",
+    "allUpToDate": "All images are up to date",
+    "allVolumesInUse": "all in use",
+    "atAGlance": "At a glance",
+    "comparing": "Comparing with registries…",
+    "cpu": "CPU",
+    "cpuValue": "{{percent}} of {{cores}}",
+    "dataUnavailable": "Data unavailable.",
+    "diskCategories": {
+      "buildCache": "Build cache",
+      "containers": "Containers",
+      "images": "Images",
+      "volumes": "Volumes"
+    },
+    "diskSpace": "Disk space",
+    "healthTitle": "Container health",
+    "healthy": "Healthy",
+    "imageUpdates": "Image updates",
+    "loading": "Loading environment…",
+    "loadingCaption": "loading…",
+    "measuringDisk": "Measuring disk usage…",
+    "measuringUsage": "Measuring usage…",
+    "memory": "Memory",
+    "noHealthcheck": "No healthcheck",
+    "noResponse_one": "{{count}} container did not respond.",
+    "noResponse_other": "{{count}} containers did not respond.",
+    "noStacks": "no stacks",
+    "nothingToMeasure": "No running containers: nothing to measure.",
+    "partialStacks": "{{count}} partial",
+    "problems": {
+      "crashed": "Exited abnormally",
+      "dead": "Dead",
+      "restarting": "Restart loop",
+      "unhealthy": "Failing healthcheck"
+    },
+    "reclaimable": "{{size}} reclaimable by removing what is no longer used.",
+    "resources": "Resources",
+    "resourcesFootnote": "A snapshot of the running containers. 100% for a container means one full core.",
+    "runningCaption": "running",
+    "seeWhich": "See which images",
+    "starting": "{{count}} starting, not checked yet.",
+    "stoppedStacks": "{{count}} stopped",
+    "toCheckHint": "Tap a container to see its logs and act on it.",
+    "toCheck_one": "{{count}} container to check",
+    "toCheck_other": "{{count}} containers to check",
+    "toUpdate_one": "{{count}} image to update",
+    "toUpdate_other": "{{count}} images to update",
+    "topConsumers": "Top consumers",
+    "unhealthy": "Unhealthy",
+    "unusedImages": "{{count}} unused",
+    "unusedVolumes": "{{count}} unused",
+    "updatesUnsupported": "Portainer does not compare this environment's images with their registry. This check is part of Portainer Business, once the update indicator is turned on for the environment.",
+    "usedByDocker": "used by Docker"
+  },
+  "settings": {
+    "about": "About",
+    "alerts": "Alerts for your containers",
+    "alertsHint": "The token your monitoring service needs",
+    "appearance": "Appearance",
+    "appearances": {
+      "dark": "Dark",
+      "light": "Light",
+      "system": "Same as device"
+    },
+    "certificate": "HTTPS certificate",
+    "certificateHint": "Get this phone to trust a self-signed or private certificate",
+    "help": "Help",
+    "intervals": {
+      "manual": "Manual",
+      "minute": "Every minute",
+      "seconds": "Every {{count}} seconds"
+    },
+    "language": "Language",
+    "notifications": "Notifications",
+    "privacy": "Privacy policy",
+    "refresh": "Refresh",
+    "refreshHint": "The container list updates on its own. A longer interval saves battery and mobile data; in manual mode, pull the list down to refresh it.",
+    "reportProblem": "Report a problem",
+    "reportProblemHint": "Opens GitHub with the version and device pre-filled — nothing about your instance",
+    "sourceCode": "Source code",
+    "terms": "Terms of use",
+    "version": "Version {{version}}",
+    "whatsNew": "What's new"
+  },
+  "stack": {
+    "active": "Active",
+    "addVariable": "+ Add a variable",
+    "autoUpdate": "Auto update",
+    "autoUpdateByWebhook": "By webhook",
+    "autoUpdateEvery": "Every {{interval}}",
+    "by": "By",
+    "containers": "Containers",
+    "created": "Created",
+    "emptyFile": "Empty file.",
+    "envAdded": "Added: {{names}}.",
+    "envChanged": "Changed: {{names}}.",
+    "envErrors": {
+      "duplicate": "{{name}} is already defined above.",
+      "invalid": "Letters, digits and _ only, not starting with a digit.",
+      "required": "Name required."
+    },
+    "envRedeploy": "The stack will be redeployed to apply them: the affected containers will be recreated.",
+    "envRemoved": "Removed: {{names}}.",
+    "envTitle": "Environment variables",
+    "envUnchanged": "No variable changed.",
+    "externalNote": "Stack deployed outside Portainer: only its containers are known.",
+    "file": "File",
+    "fileTitle": "Compose file",
+    "fileUnavailable": "File unavailable.",
+    "gitRepository": "Git repository",
+    "gitWithImages": "From Git, with the latest images",
+    "hideFile": "Hide Compose file",
+    "hideSecrets": "Hide secrets",
+    "inactive": "Inactive",
+    "loading": "Loading stack…",
+    "nameLabel": "Variable name",
+    "namePlaceholder": "NAME",
+    "no": "No",
+    "noVariables": "No variables defined in Portainer.",
+    "notFound": "Stack not found",
+    "notFoundHint": "It may have been deleted, or its containers are gone.",
+    "portainerStatus": "Portainer status",
+    "pullAndRedeploy": "Pull images and redeploy",
+    "redeploy": "Redeploy",
+    "redeployConfirmTitle": "Redeploy {{name}}?",
+    "redeployFailed": "Redeploy failed",
+    "redeployFile": "Recreates the services from the compose file stored in Portainer.",
+    "redeployGit": "Fetches the latest version of {{branch}}, then recreates the services that changed.",
+    "redeployImpact": "The affected containers will be recreated: the service is briefly interrupted, and anything not in a volume is lost.",
+    "redeployNotApplied": "The stack could not be redeployed.",
+    "redeployPullNote": "Pulling images can take several minutes.",
+    "redeployTitle": "Redeploy {{name}}",
+    "redeployed": "Stack redeployed",
+    "redeployedMessage": "{{name}} was redeployed.",
+    "redeploying": "Redeploying… Pulling images can take several minutes.",
+    "reference": "Reference",
+    "removeUnnamed": "Remove the variable",
+    "removeVariable": "Remove {{name}}",
+    "revealSecrets": "Reveal secrets ({{count}})",
+    "saveConfirm": "Save and redeploy",
+    "saveTitle": "Save and redeploy?",
+    "showFile": "Show Compose file",
+    "startStop": "Start / stop",
+    "trackedBranch": "the tracked branch",
+    "type": "Type",
+    "updateFromGit": "Update from Git",
+    "updated": "Updated",
+    "valueOf": "Value of {{name}}",
+    "valueOfUnnamed": "Value of the variable",
+    "valuePlaceholder": "value",
+    "webhook": "Webhook",
+    "yes": "Yes"
+  },
+  "stacks": {
+    "actions": {
+      "start": "Start",
+      "stop": "Stop"
+    },
+    "confirmTitles": {
+      "start": "Start stack?",
+      "stop": "Stop stack?"
+    },
+    "createdBy": "by {{user}}",
+    "createdOn": "Created {{date}}",
+    "detailsUnavailable": "Portainer details unavailable: {{message}}",
+    "empty": "No stacks",
+    "external": "{{count}} external",
+    "filterPlaceholder": "Filter by name",
+    "gitAutoUpdate": "auto update every {{interval}}",
+    "gitReference": "Git · {{reference}}",
+    "imageStatus": {
+      "outdated": "Image update available",
+      "processing": "Checking images…",
+      "unknown": "Image status unknown",
+      "updated": "Images up to date"
+    },
+    "impacts": {
+      "start_one": "The container of the {{title}} stack will be started.",
+      "start_other": "All {{count}} containers of the {{title}} stack will be started, including those hidden by a filter.",
+      "stop_one": "The container of the {{title}} stack will be stopped.",
+      "stop_other": "All {{count}} containers of the {{title}} stack will be stopped, including those hidden by a filter."
+    },
+    "kinds": {
+      "compose": "Compose",
+      "external": "External",
+      "swarm": "Swarm"
+    },
+    "loading": "Loading stacks…",
+    "managed": "{{count}} managed by Portainer",
+    "managedByPortainer": "Managed by Portainer",
+    "outsidePortainer": "Deployed outside Portainer",
+    "result": {
+      "start_one": "{{count}} container started.",
+      "start_other": "{{count}} containers started.",
+      "stop_one": "{{count}} container stopped.",
+      "stop_other": "{{count}} containers stopped."
+    },
+    "resultWithFailures": {
+      "start_one": "{{count}} container started, {{failed}} failed.",
+      "start_other": "{{count}} containers started, {{failed}} failed.",
+      "stop_one": "{{count}} container stopped, {{failed}} failed.",
+      "stop_other": "{{count}} containers stopped, {{failed}} failed."
+    },
+    "startStack": "Start stack",
+    "stopStack": "Stop stack",
+    "unknownError": "unknown error"
+  },
+  "volumes": {
+    "anonymous": "anonymous",
+    "cleanUp": "Clean up volumes",
+    "confirmWord": "delete",
+    "deleteNotApplied": "The volume could not be deleted.",
+    "deletePermanently": "Delete permanently",
+    "deleteTitle": "Delete volume?",
+    "deleted_one": "{{count}} volume deleted",
+    "deleted_other": "{{count}} volumes deleted",
+    "empty": "No volumes",
+    "expected": "({{count}} expected)",
+    "freed": "{{freed}} freed",
+    "loading": "Loading volumes…",
+    "none": "none",
+    "noneDeleted": "No volume was deleted.",
+    "oldEngine": "This Docker engine, older than version 23, cannot limit the cleanup to anonymous volumes: only the full cleanup is offered.",
+    "pruneImpact": {
+      "all": "All unused volumes, named ones included, will be deleted along with their data. There is no way to recover it.",
+      "anonymous": "Unused anonymous volumes and their data will be permanently deleted."
+    },
+    "pruneMessage": "Only volumes that no container uses, even a stopped one, are deleted. Their data is lost for good.",
+    "pruneNotApplied": "The volumes could not be deleted.",
+    "pruneTitle_one": "Delete volume?",
+    "pruneTitle_other": "Delete {{count}} volumes?",
+    "reclaimable": "{{size}} reclaimable",
+    "removal": "{{name}} and all its data will be permanently deleted. There is no way to recover it.",
+    "scopes": {
+      "all": "All unused volumes",
+      "anonymous": "Anonymous volumes"
+    },
+    "unusedCount": "{{count}} unused"
+  }
+}

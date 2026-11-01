@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useEndpointParam } from '../../../../src/navigation/CurrentEndpoint';
 import { useContainers, useStacks } from '../../../../src/api/hooks';
 import { ContainerRowSeparator } from '../../../../src/components/ContainerRowSeparator';
@@ -7,13 +8,13 @@ import { EmptyState } from '../../../../src/components/EmptyState';
 import { ErrorView } from '../../../../src/components/ErrorView';
 import { Loader } from '../../../../src/components/Loader';
 import { StackCard } from '../../../../src/components/StackCard';
-import { plural } from '../../../../src/lib/format';
 import { groupByStack, mergeStacks } from '../../../../src/lib/stacks';
 import { createStyles, useTheme } from '../../../../src/theme';
 
 export default function StacksScreen() {
   const theme = useTheme();
   const styles = useStyles();
+  const { t } = useTranslation();
   const id = useEndpointParam();
   const containers = useContainers(id);
   const stacks = useStacks(id);
@@ -32,7 +33,7 @@ export default function StacksScreen() {
   }, [overviews, search]);
 
   if (containers.isPending || (stacks.isPending && !stacks.error)) {
-    return <Loader label="Loading stacks…" />;
+    return <Loader label={t('stacks.loading')} />;
   }
   if (containers.error) return <ErrorView error={containers.error} onRetry={containers.refetch} />;
 
@@ -62,29 +63,33 @@ export default function StacksScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Filter by name"
+            placeholder={t('stacks.filterPlaceholder')}
             placeholderTextColor={theme.colors.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.search}
           />
           <Text style={styles.summary}>
-            {plural(overviews.length, 'stack')} · {managed} managed by Portainer
-            {external > 0 ? ` · ${external} external` : ''}
+            {[
+              t('counts.stack', { count: overviews.length }),
+              t('stacks.managed', { count: managed }),
+              external > 0 ? t('stacks.external', { count: external }) : '',
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           </Text>
           {stacks.error ? (
             <Text style={styles.warning}>
-              Portainer details unavailable:{' '}
-              {stacks.error instanceof Error ? stacks.error.message : 'unknown error'}
+              {t('stacks.detailsUnavailable', {
+                message:
+                  stacks.error instanceof Error ? stacks.error.message : t('stacks.unknownError'),
+              })}
             </Text>
           ) : null}
         </View>
       }
       ListEmptyComponent={
-        <EmptyState
-          title="No stacks"
-          subtitle={search ? 'Nothing matches this filter.' : undefined}
-        />
+        <EmptyState title={t('stacks.empty')} subtitle={search ? t('common.noMatch') : undefined} />
       }
       renderItem={({ item }) => <StackCard endpointId={id} overview={item} />}
       ItemSeparatorComponent={ContainerRowSeparator}

@@ -20,7 +20,7 @@ To sign you in, the App stores in the device's secure keychain (Keychain on iOS,
 - your Portainer username, if you sign in with your credentials;
 - your access token, or the session token obtained with your password. The password itself is never stored.
 
-It also stores there the identifier of the last environment viewed on that instance, to reopen the App on its containers, as well as your settings, such as the chosen refresh interval and appearance.
+It also stores there the identifier of the last environment viewed on that instance, to reopen the App on its containers, as well as your settings, such as the chosen refresh interval, appearance and language.
 
 The information read from your instance (environments, containers, stacks and their Compose files, images, volumes, logs) is displayed without being stored: it stays in memory while you use the App, and is cleared when you sign out or close the App.
 

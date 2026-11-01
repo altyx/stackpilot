@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEndpoints } from '../api/hooks';
 import { useAuth } from '../auth/AuthContext';
 import { BuildInfo } from '../components/BuildInfo';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 import { useCurrentEndpoint } from './CurrentEndpoint';
 import { DrawerLink, type IconName } from './DrawerLink';
@@ -12,6 +13,7 @@ import { DrawerLink, type IconName } from './DrawerLink';
 /** Side drawer: the app's main navigation. */
 export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { session, signOut } = useAuth();
   const { endpointId } = useCurrentEndpoint();
   const { data: endpoints } = useEndpoints();
@@ -50,24 +52,26 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
       </View>
 
       <ScrollView contentContainerStyle={styles.items} alwaysBounceVertical={false}>
-        {item('Environments', 'server-outline', '/endpoints')}
+        {item(t('nav.environments'), 'server-outline', '/endpoints')}
 
         <Text style={styles.caption} numberOfLines={1}>
-          {endpointBase === null ? 'No environment open' : (endpointName ?? 'Environment')}
+          {endpointBase === null
+            ? t('nav.noEnvironmentOpen')
+            : (endpointName ?? t('nav.environment'))}
         </Text>
-        {item('Overview', 'speedometer-outline', endpointBase && `${endpointBase}/overview`)}
-        {item('Containers', 'cube-outline', endpointBase)}
-        {item('Stacks', 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
-        {item('Images', 'layers-outline', endpointBase && `${endpointBase}/images`)}
-        {item('Volumes', 'save-outline', endpointBase && `${endpointBase}/volumes`)}
+        {item(t('nav.overview'), 'speedometer-outline', endpointBase && `${endpointBase}/overview`)}
+        {item(t('nav.containers'), 'cube-outline', endpointBase)}
+        {item(t('nav.stacks'), 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
+        {item(t('nav.images'), 'layers-outline', endpointBase && `${endpointBase}/images`)}
+        {item(t('nav.volumes'), 'save-outline', endpointBase && `${endpointBase}/volumes`)}
 
         <View style={styles.separator} />
-        {item('Settings', 'settings-outline', '/settings')}
+        {item(t('nav.settings'), 'settings-outline', '/settings')}
       </ScrollView>
 
       <View style={styles.footer}>
         <DrawerLink
-          label="Sign out"
+          label={t('nav.signOut')}
           icon="log-out-outline"
           tone="danger"
           onPress={() => {

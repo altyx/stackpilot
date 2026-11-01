@@ -9,10 +9,12 @@ import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
 import { LoginField } from '../src/components/LoginField';
 import { LoginModeTab } from '../src/components/LoginModeTab';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../src/theme';
 
 export default function LoginScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { signIn, lastLogin, sessionExpired } = useAuth();
   const router = useRouter();
 
@@ -47,7 +49,7 @@ export default function LoginScreen() {
       router.replace('/');
     } catch (e) {
       setError({
-        message: e instanceof Error ? e.message : 'Unable to sign in.',
+        message: e instanceof Error ? e.message : t('login.failed'),
         detail: e instanceof PortainerError ? e.detail : undefined,
         certificate: e instanceof PortainerError && e.reason === 'certificate',
       });
@@ -61,22 +63,18 @@ export default function LoginScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Sign in to Portainer</Text>
-        <Text style={styles.subtitle}>
-          Credentials are stored in the device&apos;s secure keychain.
-        </Text>
+        <Text style={styles.title}>{t('login.title')}</Text>
+        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
         {sessionExpired ? (
           <Text accessibilityRole="alert" style={styles.expired}>
-            {lastLogin?.mode === 'jwt'
-              ? 'Your session has expired. Sign in again to continue.'
-              : 'Portainer rejected the access token: it has probably been revoked.'}
+            {lastLogin?.mode === 'jwt' ? t('login.sessionExpired') : t('login.tokenRevoked')}
           </Text>
         ) : null}
 
         <Card style={styles.card}>
           <LoginField
-            label="Instance URL"
+            label={t('login.instanceUrl')}
             placeholder="https://portainer.local:9443"
             value={baseUrl}
             onChangeText={setBaseUrl}
@@ -88,12 +86,12 @@ export default function LoginScreen() {
 
           <View style={styles.segmented}>
             <LoginModeTab
-              label="Access token"
+              label={t('login.accessToken')}
               active={mode === 'apiKey'}
               onPress={() => setMode('apiKey')}
             />
             <LoginModeTab
-              label="Credentials"
+              label={t('login.credentials')}
               active={mode === 'jwt'}
               onPress={() => setMode('jwt')}
             />
@@ -101,7 +99,7 @@ export default function LoginScreen() {
 
           {mode === 'apiKey' ? (
             <LoginField
-              label="Access token"
+              label={t('login.accessToken')}
               placeholder="ptr_…"
               value={apiKey}
               onChangeText={setApiKey}
@@ -110,7 +108,7 @@ export default function LoginScreen() {
           ) : (
             <>
               <LoginField
-                label="Username"
+                label={t('login.username')}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -118,7 +116,7 @@ export default function LoginScreen() {
                 textContentType="username"
               />
               <LoginField
-                label="Password"
+                label={t('login.password')}
                 value={password}
                 onChangeText={setPassword}
                 secret
@@ -137,14 +135,14 @@ export default function LoginScreen() {
               ) : null}
               {error.certificate ? (
                 <Link href="/certificates" style={styles.errorLink}>
-                  Fix a certificate problem
+                  {t('login.fixCertificate')}
                 </Link>
               ) : null}
             </View>
           ) : null}
 
           <Button
-            label="Sign in"
+            label={t('login.submit')}
             onPress={handleSubmit}
             disabled={!canSubmit}
             loading={busy}
@@ -153,21 +151,19 @@ export default function LoginScreen() {
         </Card>
 
         <Text style={styles.legal}>
-          By signing in, you accept the{' '}
+          {t('login.legalBefore')}
           <Link href="/terms" style={styles.legalLink}>
-            terms of use
+            {t('login.legalTerms')}
           </Link>
-          . See also the{' '}
+          {t('login.legalMiddle')}
           <Link href="/privacy" style={styles.legalLink}>
-            privacy policy
+            {t('login.legalPrivacy')}
           </Link>
-          .
+          {t('login.legalAfter')}
         </Text>
 
         <Text style={styles.hint}>
-          {mode === 'apiKey'
-            ? 'Create an access token in Portainer › My account › Access tokens. It never expires and can be revoked on the server.'
-            : 'Signing in with credentials opens a temporary JWT session; Portainer ends it after a few hours.'}
+          {mode === 'apiKey' ? t('login.apiKeyHint') : t('login.jwtHint')}
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

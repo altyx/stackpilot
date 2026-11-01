@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { containerName } from '../lib/format';
 import type { StackSection } from '../lib/stacks';
 import { createStyles } from '../theme';
@@ -9,6 +10,7 @@ const MAX_LISTED = 6;
 
 export function StackMemberList({ section }: { section: StackSection }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const listed = section.members.slice(0, MAX_LISTED);
   const hidden = section.members.length - listed.length;
   return (
@@ -21,7 +23,9 @@ export function StackMemberList({ section }: { section: StackSection }) {
           </Text>
         </View>
       ))}
-      {hidden > 0 ? <Text style={styles.more}>and {hidden} more</Text> : null}
+      {hidden > 0 ? (
+        <Text style={styles.more}>{t('common.andMore', { count: hidden })}</Text>
+      ) : null}
     </View>
   );
 }

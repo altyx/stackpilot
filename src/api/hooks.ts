@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
+import i18n from '../i18n';
 import { useSettings } from '../settings/SettingsContext';
 import {
   fetchContainerLogs,
@@ -50,7 +51,7 @@ import type {
  * only serves to type that case.
  */
 function requireSession(session: Session | null): Session {
-  if (!session) throw new PortainerError('Session expired. Sign in again.');
+  if (!session) throw new PortainerError(i18n.t('errors.sessionExpired'));
   return session;
 }
 
@@ -504,7 +505,7 @@ export function useStackAction(endpointId: number) {
         } catch (error) {
           failures.push({
             name: containerName(container),
-            message: error instanceof Error ? error.message : 'Unknown error.',
+            message: error instanceof Error ? error.message : i18n.t('common.unknownError'),
           });
         }
       }

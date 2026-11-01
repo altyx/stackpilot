@@ -5,7 +5,11 @@ import { BuildInfo } from '../../src/components/BuildInfo';
 import { Card } from '../../src/components/Card';
 import { SettingsChoiceRow } from '../../src/components/SettingsChoiceRow';
 import { SettingsNavRow } from '../../src/components/SettingsNavRow';
+import { SettingsSelect } from '../../src/components/SettingsSelect';
 import { Section } from '../../src/components/Section';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
+import { LANGUAGES } from '../../src/i18n';
 import { SOURCE_CODE_URL } from '../../src/legal/publisher';
 import { newIssueUrl } from '../../src/lib/support';
 import { useSettings } from '../../src/settings/SettingsContext';
@@ -15,96 +19,112 @@ import { createStyles } from '../../src/theme';
 /** App settings — Portainer's own settings stay in Portainer. */
 export default function SettingsScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { settings, update } = useSettings();
   const router = useRouter();
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Section title="Appearance">
+      <Section title={t('settings.appearance')}>
         <Card style={styles.card}>
-          {APPEARANCES.map((option, index) => (
+          {APPEARANCES.map((appearance, index) => (
             <SettingsChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={settings.appearance === option.value}
+              key={appearance}
+              label={t(`settings.appearances.${appearance}`)}
+              selected={settings.appearance === appearance}
               first={index === 0}
-              onPress={() => update({ appearance: option.value })}
+              onPress={() => update({ appearance })}
             />
           ))}
         </Card>
       </Section>
 
-      <Section title="Refresh">
-        <Text style={styles.hint}>
-          The container list updates on its own. A longer interval saves battery and mobile data; in
-          manual mode, pull the list down to refresh it.
-        </Text>
+      <Section title={t('settings.language')}>
         <Card style={styles.card}>
-          {REFRESH_INTERVALS.map((option, index) => (
+          <SettingsSelect
+            title={t('settings.language')}
+            icon="language-outline"
+            options={LANGUAGES}
+            value={settings.language}
+            onChange={(language) => update({ language })}
+          />
+        </Card>
+      </Section>
+
+      <Section title={t('settings.refresh')}>
+        <Text style={styles.hint}>{t('settings.refreshHint')}</Text>
+        <Card style={styles.card}>
+          {REFRESH_INTERVALS.map((interval, index) => (
             <SettingsChoiceRow
-              key={option.label}
-              label={option.label}
-              selected={settings.refreshIntervalMs === option.value}
+              key={String(interval)}
+              label={
+                interval === null
+                  ? t('settings.intervals.manual')
+                  : interval === 60_000
+                    ? t('settings.intervals.minute')
+                    : t('settings.intervals.seconds', { count: interval / 1000 })
+              }
+              selected={settings.refreshIntervalMs === interval}
               first={index === 0}
-              onPress={() => update({ refreshIntervalMs: option.value })}
+              onPress={() => update({ refreshIntervalMs: interval })}
             />
           ))}
         </Card>
       </Section>
 
-      <Section title="Notifications">
+      <Section title={t('settings.notifications')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="notifications-outline"
-            label="Alerts for your containers"
-            hint="The token your monitoring service needs"
+            label={t('settings.alerts')}
+            hint={t('settings.alertsHint')}
             onPress={() => router.push('/notifications')}
           />
         </Card>
       </Section>
 
-      <Section title="Help">
+      <Section title={t('settings.help')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="bug-outline"
-            label="Report a problem"
-            hint="Opens GitHub with the version and device pre-filled — nothing about your instance"
+            label={t('settings.reportProblem')}
+            hint={t('settings.reportProblemHint')}
             external
             first
-            onPress={() => openLink(newIssueUrl())}
+            onPress={() => openLink(newIssueUrl(), t)}
           />
           <SettingsNavRow
             icon="lock-closed-outline"
-            label="HTTPS certificate"
-            hint="Get this phone to trust a self-signed or private certificate"
+            label={t('settings.certificate')}
+            hint={t('settings.certificateHint')}
             onPress={() => router.push('/certificates')}
           />
           <SettingsNavRow
             icon="logo-github"
-            label="Source code"
+            label={t('settings.sourceCode')}
             external
-            onPress={() => openLink(SOURCE_CODE_URL)}
+            onPress={() => openLink(SOURCE_CODE_URL, t)}
           />
         </Card>
       </Section>
 
-      <Section title="About">
+      <Section title={t('settings.about')}>
         <Card style={styles.card}>
           <SettingsNavRow
             icon="sparkles-outline"
-            label="What's new"
-            hint={`Version ${LATEST_RELEASE.version}`}
+            label={t('settings.whatsNew')}
+            hint={t('settings.version', { version: LATEST_RELEASE.version })}
             first
             onPress={() => router.push('/changelog')}
           />
           <SettingsNavRow
             icon="document-text-outline"
-            label="Terms of use"
+            label={t('settings.terms')}
             onPress={() => router.push('/terms')}
           />
           <SettingsNavRow
             icon="shield-checkmark-outline"
-            label="Privacy policy"
+            label={t('settings.privacy')}
             onPress={() => router.push('/privacy')}
           />
         </Card>
@@ -114,9 +134,9 @@ export default function SettingsScreen() {
   );
 }
 
-function openLink(url: string): void {
+function openLink(url: string, t: TFunction): void {
   Linking.openURL(url).catch(() =>
-    Alert.alert('Cannot open link', 'No app can open this address.'),
+    Alert.alert(t('common.cannotOpenLink'), t('common.noAppForLink')),
   );
 }
 

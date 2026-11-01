@@ -10,12 +10,12 @@ import { UsageBadge } from './UsageBadge';
 
 describe('UsageBadge', () => {
   it('counts the containers using the resource', () => {
-    render(<UsageBadge usedBy={['web', 'worker']} />);
+    render(<UsageBadge usedBy={['web', 'worker']} kind="image" />);
     expect(screen.getByText('used · 2')).toBeOnTheScreen();
   });
 
   it('flags unused resources', () => {
-    render(<UsageBadge usedBy={[]} />);
+    render(<UsageBadge usedBy={[]} kind="volume" />);
     expect(screen.getByText('unused')).toBeOnTheScreen();
   });
 });

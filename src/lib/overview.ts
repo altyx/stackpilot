@@ -44,13 +44,6 @@ const PROBLEM_ORDER: Record<ProblemKind, number> = {
   dead: 3,
 };
 
-export const PROBLEM_LABELS: Record<ProblemKind, string> = {
-  unhealthy: 'Failing healthcheck',
-  restarting: 'Restart loop',
-  crashed: 'Exited abnormally',
-  dead: 'Dead',
-};
-
 /** Containers worth a look, most urgent first. */
 export function containerProblems(containers: ContainerSummary[]): ContainerProblem[] {
   const problems: ContainerProblem[] = [];

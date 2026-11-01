@@ -4,21 +4,24 @@ export interface LogLine {
   text: string;
 }
 
+export type LogRangeKey =
+  'tail-100' | 'tail-500' | 'tail-2000' | 'since-15m' | 'since-1h' | 'since-24h';
+
+/** Labelled by the catalog, under its key. */
 export interface LogRange {
-  key: string;
-  label: string;
+  key: LogRangeKey;
   /** Last N lines, or every line since `sinceSeconds` ago. */
   tail?: number;
   sinceSeconds?: number;
 }
 
 export const LOG_RANGES: readonly LogRange[] = [
-  { key: 'tail-100', label: '100 lines', tail: 100 },
-  { key: 'tail-500', label: '500 lines', tail: 500 },
-  { key: 'tail-2000', label: '2,000 lines', tail: 2000 },
-  { key: 'since-15m', label: '15 min', sinceSeconds: 15 * 60 },
-  { key: 'since-1h', label: '1 h', sinceSeconds: 60 * 60 },
-  { key: 'since-24h', label: '24 h', sinceSeconds: 24 * 60 * 60 },
+  { key: 'tail-100', tail: 100 },
+  { key: 'tail-500', tail: 500 },
+  { key: 'tail-2000', tail: 2000 },
+  { key: 'since-15m', sinceSeconds: 15 * 60 },
+  { key: 'since-1h', sinceSeconds: 60 * 60 },
+  { key: 'since-24h', sinceSeconds: 24 * 60 * 60 },
 ];
 
 export const DEFAULT_LOG_RANGE = LOG_RANGES[1];

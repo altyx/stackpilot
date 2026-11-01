@@ -1,13 +1,17 @@
 import { Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 
 /** "used by N" / "unused" badge. */
-export function UsageBadge({ usedBy }: { usedBy: string[] }) {
+export function UsageBadge({ usedBy, kind }: { usedBy: string[]; kind: 'image' | 'volume' }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const used = usedBy.length > 0;
   return (
     <Text style={[styles.usageBadge, used ? styles.usageUsed : styles.usageUnused]}>
-      {used ? `used · ${usedBy.length}` : 'unused'}
+      {used
+        ? t(`common.usage.${kind}.used`, { count: usedBy.length })
+        : t(`common.usage.${kind}.unused`)}
     </Text>
   );
 }

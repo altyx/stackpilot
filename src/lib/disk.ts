@@ -4,7 +4,6 @@ export type DiskCategoryKey = 'images' | 'containers' | 'volumes' | 'buildCache'
 
 export interface DiskCategory {
   key: DiskCategoryKey;
-  label: string;
   size: number;
   /** What a cleanup of unused items would free, as `docker system df` estimates it. */
   reclaimable: number;
@@ -32,7 +31,6 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
   const categories: DiskCategory[] = [
     {
       key: 'images',
-      label: 'Images',
       size: known(df.LayersSize ?? sum(images.map((image) => image.Size))),
       reclaimable: sum(
         images
@@ -42,7 +40,6 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
     },
     {
       key: 'containers',
-      label: 'Containers',
       size: sum(containers.map((container) => known(container.SizeRw))),
       reclaimable: sum(
         containers
@@ -52,7 +49,6 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
     },
     {
       key: 'volumes',
-      label: 'Volumes',
       size: sum(volumes.map((volume) => known(volume.UsageData?.Size))),
       reclaimable: sum(
         volumes
@@ -62,7 +58,6 @@ export function summarizeDiskUsage(df: DiskUsageResponse): DiskSummary {
     },
     {
       key: 'buildCache',
-      label: 'Build cache',
       size: sum(cache.map((entry) => known(entry.Size))),
       reclaimable: sum(cache.filter((entry) => !entry.InUse).map((entry) => known(entry.Size))),
     },

@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '../src/auth/AuthContext';
 import { CurrentEndpointProvider } from '../src/navigation/CurrentEndpoint';
+import { LanguageProvider } from '../src/components/LanguageProvider';
 import { ThemeProvider } from '../src/components/ThemeProvider';
 import { RootNavigator } from '../src/navigation/RootNavigator';
 import { SettingsProvider } from '../src/settings/SettingsContext';
@@ -38,13 +39,15 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <SettingsProvider>
-            <ThemeProvider>
-              <AuthProvider>
-                <CurrentEndpointProvider>
-                  <RootNavigator />
-                </CurrentEndpointProvider>
-              </AuthProvider>
-            </ThemeProvider>
+            <LanguageProvider>
+              <ThemeProvider>
+                <AuthProvider>
+                  <CurrentEndpointProvider>
+                    <RootNavigator />
+                  </CurrentEndpointProvider>
+                </AuthProvider>
+              </ThemeProvider>
+            </LanguageProvider>
           </SettingsProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

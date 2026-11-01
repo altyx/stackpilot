@@ -20,20 +20,22 @@ export function emptyDraft(): EnvDraft {
 /** What Compose accepts as a variable name in `${…}` substitution. */
 const VALID_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+export type EnvError =
+  { kind: 'required' } | { kind: 'invalid' } | { kind: 'duplicate'; name: string };
+
 /**
  * Problems per row key, empty when the drafts can be saved. A row left
  * entirely blank is ignored rather than reported: it's an unfinished "add".
  */
-export function validateEnv(drafts: EnvDraft[]): Map<string, string> {
-  const errors = new Map<string, string>();
+export function validateEnv(drafts: EnvDraft[]): Map<string, EnvError> {
+  const errors = new Map<string, EnvError>();
   const seen = new Map<string, string>();
   for (const draft of drafts) {
     const name = draft.name.trim();
     if (name === '' && draft.value === '') continue;
-    if (name === '') errors.set(draft.key, 'Name required.');
-    else if (!VALID_NAME.test(name)) {
-      errors.set(draft.key, 'Letters, digits and _ only, not starting with a digit.');
-    } else if (seen.has(name)) errors.set(draft.key, `${name} is already defined above.`);
+    if (name === '') errors.set(draft.key, { kind: 'required' });
+    else if (!VALID_NAME.test(name)) errors.set(draft.key, { kind: 'invalid' });
+    else if (seen.has(name)) errors.set(draft.key, { kind: 'duplicate', name });
     else seen.set(name, draft.key);
   }
   return errors;

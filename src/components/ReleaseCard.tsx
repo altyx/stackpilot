@@ -1,17 +1,19 @@
 import { Text, View } from 'react-native';
 import type { Release } from '../changelog';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 import { Card } from './Card';
 
 export function ReleaseCard({ release, installed }: { release: Release; installed: boolean }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   return (
     <Card style={styles.card}>
       <View style={styles.header}>
         <Text accessibilityRole="header" style={styles.version}>
-          Version {release.version}
+          {t('changelog.version', { version: release.version })}
         </Text>
-        {installed ? <Text style={styles.badge}>Installed</Text> : null}
+        {installed ? <Text style={styles.badge}>{t('changelog.installed')}</Text> : null}
       </View>
       <Text style={styles.date}>{release.date}</Text>
       {release.changes.map((change) => (

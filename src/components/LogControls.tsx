@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 import { IconButton } from './IconButton';
 
@@ -28,36 +29,37 @@ export function LogControls({
   disabled: boolean;
 }) {
   const styles = useStyles();
+  const { t } = useTranslation();
   return (
     <View style={styles.row}>
       <IconButton
         icon={follow ? 'pause' : 'play'}
-        accessibilityLabel="Follow live"
+        accessibilityLabel={t('logs.follow')}
         active={follow}
         onPress={onToggleFollow}
       />
       <IconButton
         icon="time-outline"
-        accessibilityLabel="Show timestamps"
+        accessibilityLabel={t('logs.timestamps')}
         active={timestamps}
         onPress={onToggleTimestamps}
       />
       <View style={styles.spacer} />
       <IconButton
         icon={copied ? 'checkmark' : 'copy-outline'}
-        accessibilityLabel={copied ? 'Logs copied' : 'Copy logs'}
+        accessibilityLabel={copied ? t('logs.copied') : t('logs.copy')}
         disabled={disabled}
         onPress={onCopy}
       />
       <IconButton
         icon="share-outline"
-        accessibilityLabel="Share logs"
+        accessibilityLabel={t('logs.share')}
         disabled={disabled}
         onPress={onShare}
       />
       <IconButton
         icon={fullscreen ? 'contract-outline' : 'expand-outline'}
-        accessibilityLabel={fullscreen ? 'Exit full screen' : 'Full screen'}
+        accessibilityLabel={fullscreen ? t('logs.exitFullscreen') : t('logs.fullscreen')}
         onPress={onToggleFullscreen}
       />
     </View>
