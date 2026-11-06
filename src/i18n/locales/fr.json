@@ -97,6 +97,10 @@
         "unused": "inutilisée",
         "used": "utilisée · {{count}}"
       },
+      "network": {
+        "unused": "inutilisé",
+        "used": "utilisé · {{count}}"
+      },
       "volume": {
         "unused": "inutilisé",
         "used": "utilisé · {{count}}"
@@ -212,6 +216,9 @@
     "line_many": "{{count}} lignes",
     "line_one": "{{count}} ligne",
     "line_other": "{{count}} lignes",
+    "network_many": "{{count}} réseaux",
+    "network_one": "{{count}} réseau",
+    "network_other": "{{count}} réseaux",
     "stack_many": "{{count}} stacks",
     "stack_one": "{{count}} stack",
     "stack_other": "{{count}} stacks",
@@ -354,6 +361,7 @@
     "environment": "Environnement",
     "environments": "Environnements",
     "images": "Images",
+    "networks": "Réseaux",
     "noEnvironmentOpen": "Aucun environnement ouvert",
     "notifications": "Notifications",
     "openMenu": "Ouvrir le menu",
@@ -363,6 +371,17 @@
     "signOut": "Se déconnecter",
     "stacks": "Stacks",
     "volumes": "Volumes"
+  },
+  "networks": {
+    "attachable": "attachable",
+    "empty": "Aucun réseau",
+    "filterPlaceholder": "Filtrer par nom, pilote ou sous-réseau",
+    "internal": "interne",
+    "loading": "Chargement des réseaux…",
+    "predefined": "intégré",
+    "unusedCount_many": "{{count}} inutilisés",
+    "unusedCount_one": "{{count}} inutilisé",
+    "unusedCount_other": "{{count}} inutilisés"
   },
   "notifications": {
     "allow": "Autoriser les notifications",

@@ -16,6 +16,7 @@ import type {
   ImageStatus,
   ImageStatusResponse,
   ImageSummary,
+  NetworkSummary,
   PortainerStack,
   StackEnv,
   PortainerStatus,
@@ -188,6 +189,17 @@ export async function pruneImages(
     deleted: response?.ImagesDeleted ?? [],
     spaceReclaimed: response?.SpaceReclaimed ?? 0,
   };
+}
+
+export async function listNetworks(
+  session: Session,
+  endpointId: number,
+): Promise<NetworkSummary[]> {
+  // Some engines answer `null` instead of an empty list.
+  const response = await request<NetworkSummary[] | null>(session, {
+    path: docker(endpointId, '/networks'),
+  });
+  return response ?? [];
 }
 
 export async function listVolumes(session: Session, endpointId: number): Promise<VolumeSummary[]> {

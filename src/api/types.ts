@@ -88,6 +88,13 @@ export interface ContainerSummary {
   Ports: ContainerPort[];
   Labels: Record<string, string>;
   Mounts?: ContainerMount[];
+  /** Networks the container is attached to, keyed by network name. */
+  NetworkSettings?: { Networks?: Record<string, ContainerNetwork> | null } | null;
+}
+
+export interface ContainerNetwork {
+  NetworkID: string;
+  IPAddress?: string;
 }
 
 /** Subset of `GET /info` the overview reads. */
@@ -190,6 +197,21 @@ export interface VolumePruneResult {
  * Engine 23), or every unused volume, named ones included (`--all`).
  */
 export type VolumePruneScope = 'anonymous' | 'all';
+
+/** Item from `GET /networks`. */
+export interface NetworkSummary {
+  Id: string;
+  Name: string;
+  Driver: string;
+  Scope: string;
+  Created?: string;
+  Internal?: boolean;
+  Attachable?: boolean;
+  Ingress?: boolean;
+  EnableIPv6?: boolean;
+  IPAM?: { Driver?: string; Config?: { Subnet?: string; Gateway?: string }[] | null } | null;
+  Labels?: Record<string, string> | null;
+}
 
 export interface VolumeListResponse {
   Volumes: VolumeSummary[] | null;
