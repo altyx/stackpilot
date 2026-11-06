@@ -16,6 +16,7 @@ import {
   listEndpoints,
   listImages,
   listStacks,
+  listNetworks,
   listVolumes,
   pruneImages,
   pruneVolumes,
@@ -68,6 +69,7 @@ export const queryKeys = {
     ['imageStatus', endpointId, containerId] as const,
   images: (endpointId: number) => ['images', endpointId] as const,
   volumes: (endpointId: number) => ['volumes', endpointId] as const,
+  networks: (endpointId: number) => ['networks', endpointId] as const,
   stacks: (endpointId: number) => ['stacks', endpointId] as const,
   stackFile: (stackId: number) => ['stackFile', stackId] as const,
   stackImageStatus: (stackId: number) => ['stackImageStatus', stackId] as const,
@@ -131,6 +133,15 @@ export function useVolumes(endpointId: number) {
   return useQuery({
     queryKey: queryKeys.volumes(endpointId),
     queryFn: () => listVolumes(requireSession(session), endpointId),
+    enabled: !!session,
+  });
+}
+
+export function useNetworks(endpointId: number) {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: queryKeys.networks(endpointId),
+    queryFn: () => listNetworks(requireSession(session), endpointId),
     enabled: !!session,
   });
 }

@@ -2,7 +2,7 @@
 
 # Terms of Use
 
-_Last updated: October 9, 2026_
+_Last updated: November 6, 2026_
 
 These terms of use (the "Terms") govern the use of the StackPilot mobile application (the "App"). By using the App, you accept these Terms in full; if you do not accept them, do not use the App.
 
@@ -18,7 +18,7 @@ The App is distributed through Apple's App Store and Google Play. It does not re
 
 ## 2. Purpose of the App
 
-StackPilot is a mobile client for Portainer, the container management tool. It lets you view the Docker environments of a Portainer instance you have access to (containers, stacks, images, volumes, logs, resource usage and disk space) and act on them, in particular by starting, stopping, restarting, pausing, killing or deleting containers, starting or stopping stacks, redeploying a stack or editing its environment variables, recreating a container to update its image, or deleting images and volumes that no container uses.
+StackPilot is a mobile client for Portainer, the container management tool. It lets you view the Docker environments of a Portainer instance you have access to (containers, stacks, images, volumes, networks, logs, resource usage and disk space) and act on them, in particular by starting, stopping, restarting, pausing, killing or deleting containers, starting or stopping stacks, redeploying a stack or editing its environment variables, recreating a container to update its image, or deleting images and volumes that no container uses.
 
 The App is an independent project: it is not published by, affiliated with or endorsed by Portainer.io or Docker, Inc. "Portainer" and "Docker" are trademarks of their respective owners.
 

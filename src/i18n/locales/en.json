@@ -97,6 +97,10 @@
         "unused": "unused",
         "used": "used · {{count}}"
       },
+      "network": {
+        "unused": "unused",
+        "used": "used · {{count}}"
+      },
       "volume": {
         "unused": "unused",
         "used": "used · {{count}}"
@@ -208,6 +212,8 @@
     "image_other": "{{count}} images",
     "line_one": "{{count}} line",
     "line_other": "{{count}} lines",
+    "network_one": "{{count}} network",
+    "network_other": "{{count}} networks",
     "stack_one": "{{count}} stack",
     "stack_other": "{{count}} stacks",
     "volume_one": "{{count}} volume",
@@ -342,6 +348,7 @@
     "environment": "Environment",
     "environments": "Environments",
     "images": "Images",
+    "networks": "Networks",
     "noEnvironmentOpen": "No environment open",
     "notifications": "Notifications",
     "openMenu": "Open menu",
@@ -351,6 +358,15 @@
     "signOut": "Sign out",
     "stacks": "Stacks",
     "volumes": "Volumes"
+  },
+  "networks": {
+    "attachable": "attachable",
+    "empty": "No networks",
+    "filterPlaceholder": "Filter by name, driver or subnet",
+    "internal": "internal",
+    "loading": "Loading networks…",
+    "predefined": "built-in",
+    "unusedCount": "{{count}} unused"
   },
   "notifications": {
     "allow": "Allow notifications",

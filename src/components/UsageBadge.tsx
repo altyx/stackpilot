@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { createStyles } from '../theme';
 
 /** "used by N" / "unused" badge. */
-export function UsageBadge({ usedBy, kind }: { usedBy: string[]; kind: 'image' | 'volume' }) {
+export function UsageBadge({
+  usedBy,
+  kind,
+}: {
+  usedBy: string[];
+  kind: 'image' | 'volume' | 'network';
+}) {
   const styles = useStyles();
   const { t } = useTranslation();
   const used = usedBy.length > 0;

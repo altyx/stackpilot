@@ -2,7 +2,7 @@
 
 # Privacy Policy
 
-_Last updated: October 30, 2026_
+_Last updated: November 6, 2026_
 
 This policy explains what data the StackPilot mobile application (the "App") uses, where it is kept and which third parties may access it. In short: the publisher collects no data through the App, which communicates directly with your Portainer instance.
 
@@ -22,7 +22,7 @@ To sign you in, the App stores in the device's secure keychain (Keychain on iOS,
 
 It also stores there the identifier of the last environment viewed on that instance, to reopen the App on its containers, as well as your settings, such as the chosen refresh interval, appearance and language.
 
-The information read from your instance (environments, containers, stacks and their Compose files, images, volumes, logs) is displayed without being stored: it stays in memory while you use the App, and is cleared when you sign out or close the App.
+The information read from your instance (environments, containers, stacks and their Compose files, images, volumes, networks, logs) is displayed without being stored: it stays in memory while you use the App, and is cleared when you sign out or close the App.
 
 This data only leaves the device to be sent directly to your Portainer instance.
 

@@ -41,6 +41,9 @@ much space they take and how much you can reclaim. Delete what is unused, or
 clean up untagged images and orphaned volumes in one go, with a preview of what
 goes.
 
+**Networks.** Browse an environment's networks, with their driver, scope,
+subnets and attached containers, and search them by name, driver or subnet.
+
 **Alerts.** Get a push notification when a container crashes, turns unhealthy,
 restarts or runs out of memory, through a small service you run next to
 Portainer (see [Notifications](#notifications)).

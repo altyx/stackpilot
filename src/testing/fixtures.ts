@@ -5,6 +5,7 @@ import {
   type Endpoint,
   type ImageSummary,
   type PortainerStack,
+  type NetworkSummary,
   type VolumeSummary,
   StackStatus,
   StackType,
@@ -72,6 +73,19 @@ export function makeVolume(overrides: Partial<VolumeSummary> = {}): VolumeSummar
     Scope: 'local',
     Labels: null,
     Options: null,
+    ...overrides,
+  };
+}
+
+export function makeNetwork(overrides: Partial<NetworkSummary> = {}): NetworkSummary {
+  return {
+    Id: 'net0123456789abcdef',
+    Name: 'app_default',
+    Driver: 'bridge',
+    Scope: 'local',
+    Internal: false,
+    IPAM: { Driver: 'default', Config: [{ Subnet: '172.18.0.0/16', Gateway: '172.18.0.1' }] },
+    Labels: null,
     ...overrides,
   };
 }
