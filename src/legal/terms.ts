@@ -10,7 +10,7 @@ import { PRIVACY_POLICY_URL, PUBLISHER, SOURCE_CODE_URL } from './publisher';
  */
 export const TERMS: LegalDocument = {
   title: 'Terms of Use',
-  updatedAt: 'October 9, 2026',
+  updatedAt: 'November 6, 2026',
   intro:
     'These terms of use (the "Terms") govern the use of the StackPilot mobile application (the "App"). By using the App, you accept these Terms in full; if you do not accept them, do not use the App.',
   sections: [
@@ -26,7 +26,7 @@ export const TERMS: LegalDocument = {
     {
       title: 'Purpose of the App',
       body: [
-        'StackPilot is a mobile client for Portainer, the container management tool. It lets you view the Docker environments of a Portainer instance you have access to (containers, stacks, images, volumes, logs, resource usage and disk space) and act on them, in particular by starting, stopping, restarting, pausing, killing or deleting containers, starting or stopping stacks, redeploying a stack or editing its environment variables, recreating a container to update its image, or deleting images and volumes that no container uses.',
+        'StackPilot is a mobile client for Portainer, the container management tool. It lets you view the Docker environments of a Portainer instance you have access to (containers, stacks, images, volumes, networks, logs, resource usage and disk space) and act on them, in particular by starting, stopping, restarting, pausing, killing or deleting containers, starting or stopping stacks, redeploying a stack or editing its environment variables, recreating a container to update its image, or deleting images and volumes that no container uses.',
         'The App is an independent project: it is not published by, affiliated with or endorsed by Portainer.io or Docker, Inc. "Portainer" and "Docker" are trademarks of their respective owners.',
       ],
     },

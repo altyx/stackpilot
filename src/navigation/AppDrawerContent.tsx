@@ -64,6 +64,7 @@ export function AppDrawerContent({ navigation }: DrawerContentComponentProps) {
         {item(t('nav.stacks'), 'apps-outline', endpointBase && `${endpointBase}/stacks`)}
         {item(t('nav.images'), 'layers-outline', endpointBase && `${endpointBase}/images`)}
         {item(t('nav.volumes'), 'save-outline', endpointBase && `${endpointBase}/volumes`)}
+        {item(t('nav.networks'), 'git-network-outline', endpointBase && `${endpointBase}/networks`)}
 
         <View style={styles.separator} />
         {item(t('nav.settings'), 'settings-outline', '/settings')}

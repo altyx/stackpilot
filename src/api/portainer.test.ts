@@ -10,6 +10,7 @@ import {
   fetchStatus,
   listContainers,
   listStacks,
+  listNetworks,
   listVolumes,
   loginWithApiKey,
   loginWithPassword,
@@ -94,6 +95,12 @@ describe('Docker proxy routes', () => {
   it('reads an empty volume list as an empty array', async () => {
     requestMock.mockResolvedValue({ Volumes: null, Warnings: null });
     await expect(listVolumes(session, 3)).resolves.toEqual([]);
+  });
+
+  it('reads a null network list as an empty array', async () => {
+    requestMock.mockResolvedValue(null);
+    await expect(listNetworks(session, 3)).resolves.toEqual([]);
+    expect(requestMock).toHaveBeenCalledWith(session, { path: '/endpoints/3/docker/networks' });
   });
 
   it('accepts 304 for container actions, with a longer timeout', async () => {

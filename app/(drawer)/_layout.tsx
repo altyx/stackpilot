@@ -34,6 +34,10 @@ export default function DrawerLayout() {
       <Drawer.Screen name="endpoints/[endpointId]/stacks" options={{ title: t('nav.stacks') }} />
       <Drawer.Screen name="endpoints/[endpointId]/images" options={{ title: t('nav.images') }} />
       <Drawer.Screen name="endpoints/[endpointId]/volumes" options={{ title: t('nav.volumes') }} />
+      <Drawer.Screen
+        name="endpoints/[endpointId]/networks"
+        options={{ title: t('nav.networks') }}
+      />
       <Drawer.Screen name="endpoints/index" options={{ title: t('nav.environments') }} />
       <Drawer.Screen name="settings" options={{ title: t('nav.settings') }} />
     </Drawer>
